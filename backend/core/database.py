@@ -2,7 +2,9 @@
 
 import logging
 import time
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 

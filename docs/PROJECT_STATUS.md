@@ -5,8 +5,8 @@
 | Phase | Phase Name | Status | Prerequisites | Key Deliverables | Verification Evidence | Approval Status |
 | :---: | :--- | :---: | :--- | :--- | :--- | :---: |
 | **1** | Discovery, Requirements & Architecture | **Verified** | Empty workspace | 15 docs in `docs/`, architecture diagrams, data models | Phase 1 document review completed | Approved |
-| **2** | **Development Foundation & Tooling Setup** | **Completed** | Phase 1 | Docker compose, FastAPI skeleton, React/Vite, health probes | Pytest 5/5 passed, Ruff clean, Mypy clean, Vite built | Pending Approval |
-| **3** | Authentication, Authorization & RBAC | Planned | Phase 2 | JWT auth, Argon2, RBAC guards, user tables | Pending Phase 3 | Planned |
+| **2** | Development Foundation & Tooling Setup | **Verified** | Phase 1 | Docker compose, FastAPI skeleton, React/Vite, health probes | Pytest 5/5 passed, Ruff clean, Mypy clean, Vite built | Approved |
+| **3** | **Authentication, Authorization & RBAC** | **Completed** | Phase 2 | JWT auth, Argon2, RBAC guards, user tables, audit logger | 20/20 Pytest passed, Ruff clean, Mypy clean, Vite built | Pending Approval |
 | **4** | Patient & Document Management | Planned | Phase 3 | Patient CRUD, PDF upload, storage adapter, isolation | Pending Phase 4 | Planned |
 | **5** | Document Ingestion, Parsing & Chunking | Planned | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | Pending Phase 5 | Planned |
 | **6** | Embeddings & Vector Indexing | Planned | Phase 5 | FastEmbed CPU adapter, Qdrant collection, payload filters | Pending Phase 6 | Planned |
@@ -28,27 +28,32 @@
 ---
 
 ## 3. Phase 2 Verification Checklist (Definition of Done)
-
-- [x] **1. Requirements & Scope Documented:** Foundation setup aligned with Phase 2 specification.
-- [x] **2. Modular Architecture Enforced:** FastAPI backend (`backend/`), Vite React frontend (`frontend/`), Docker infrastructure (`deployment/`).
-- [x] **3. No Secrets / Real PHI Committed:** All credentials parameterized via `.env.example` and template `.env`.
-- [x] **4. Dependencies Documented:** Declared in `requirements.txt`, `pyproject.toml`, and `frontend/package.json`.
-- [x] **5. Automated Tests Passing:** Pytest test suite (5/5 tests passing: unit tests for config, integration tests for `/health` and `/api/v1/health`).
-- [x] **6. Static Checks Passing:**
-  - Python: `ruff check backend tests` passed with 0 errors.
-  - Python: `mypy backend` passed with 0 errors (strict mode).
-  - Frontend: `tsc --noEmit` passed with 0 errors.
-  - Frontend: `vite build` produced optimized production bundle in 3.5s.
-- [x] **7. Security & Privacy Implemented:** Structured logging with PHI sanitization filters; generic error response masks.
-- [x] **8. Error Handling & Edge Cases:** Custom domain exceptions (`EntityNotFoundError`, `AuthorizationError`, `DatabaseConnectionError`) and global exception handlers.
-- [x] **9. Health & Diagnostics Implemented:** Detailed `/api/v1/health` checking database, Qdrant vector store, and local storage writeability.
-- [x] **10. Local Development Verified:** Clean installation in `.venv` (Python 3.11) and `frontend/node_modules/` (Node v22).
-- [x] **11. Known Limitations Recorded:** Docker Desktop daemon inactive on host; health probe gracefully reports `DEGRADED` status without crashing.
-- [x] **12. Phase Tracker Updated:** Phase 2 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 3.
+*Status: Verified and Approved*
 
 ---
 
-## 4. Active Risks & Outstanding Issues
-* **Host Observation:** Docker Desktop daemon was not running during Phase 2. Handled via graceful degradation in `/api/v1/health` and SQLite in-memory fallback for offline test suites.
-* **Next Action:** Phase 3 will introduce User Models, JWT Authentication, Argon2 hashing, and RBAC endpoint guards.
+## 4. Phase 3 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** RBAC, JWT, and password hashing aligned with FR-AUTH requirements.
+- [x] **2. Modular Architecture Enforced:** Models (`backend/models/user.py`, `backend/models/audit.py`), Schemas (`backend/schemas/auth.py`), Security (`backend/core/security.py`), Services (`backend/auth/`, `backend/audit/`), Dependencies (`backend/api/deps.py`), and Routes (`backend/api/v1/auth.py`).
+- [x] **3. No Secrets / Real PHI Committed:** Passwords hashed with bcrypt; JWT signed via parameterized secret; zero PHI logged in audit trails.
+- [x] **4. Dependencies Documented:** `email-validator>=2.1.0` added to `requirements.txt`.
+- [x] **5. Automated Tests Passing:** 20/20 pytest tests pass (unit tests for security/tokens, integration tests for login, /me, token refresh, audit logging, and RBAC 401/403 rejection).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend` passed with 0 errors (strict mode across 23 source files).
+  - Frontend: `tsc --noEmit` passed with 0 errors.
+  - Frontend: `vite build` produced optimized bundle in 2.95s.
+- [x] **7. Security & Isolation Enforced:** Server-side RBAC dependencies (`require_role`, `require_roles`) reject unauthorized roles with 403 Forbidden; missing/invalid tokens reject with 401 Unauthorized.
+- [x] **8. Error Handling & Edge Cases:** Expired tokens, tampered signatures, and inactive users handled with standard JSON error structures.
+- [x] **9. Audit Trail Active:** Append-only database audit logs record `LOGIN_SUCCESS`, `LOGIN_ATTEMPT`, and `USER_PROVISIONED` events.
+- [x] **10. Frontend Auth UI Integrated:** Interactive `LoginModal` with 1-click persona switching (Clinical Reviewer, Medical Researcher, Admin, Demo User) and live authenticated session banner.
+- [x] **11. Known Limitations Recorded:** Refresh token rotation uses standard JWT claims; production SSO/OIDC integration deferred to Phase 14.
+- [x] **12. Phase Tracker Updated:** Phase 3 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 4.
+
+---
+
+## 5. Active Risks & Outstanding Issues
+* **Demonstration Setup:** 4 synthetic persona accounts seeded automatically with password `Patient360Secure!`.
+* **Next Action:** Phase 4 will introduce Patient Dossier CRUD, PDF file validation, encrypted storage adapter, and server-side patient-level access isolation.

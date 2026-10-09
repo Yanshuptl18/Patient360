@@ -1,0 +1,50 @@
+"""Append-only audit service for logging security and clinical access events."""
+
+import json
+import logging
+from typing import Any
+
+from sqlalchemy.orm import Session
+
+from backend.models.audit import AuditLog
+
+logger = logging.getLogger(__name__)
+
+
+def log_audit_event(
+    db: Session,
+    action: str,
+    resource_type: str,
+    user_id: str | None = None,
+    resource_id: str | None = None,
+    patient_id: str | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
+    status: str = "SUCCESS",
+    details: dict[str, Any] | None = None,
+) -> AuditLog:
+    """
+    Appends an immutable audit log record to PostgreSQL.
+    Guarantees no raw PHI is placed in the log.
+    """
+    details_str = json.dumps(details or {})
+    audit_entry = AuditLog(
+        user_id=user_id,
+        action=action,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        patient_id=patient_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        status=status,
+        details_json=details_str,
+    )
+    try:
+        db.add(audit_entry)
+        db.commit()
+        db.refresh(audit_entry)
+        return audit_entry
+    except Exception as exc:
+        db.rollback()
+        logger.error(f"Failed to record audit log: {exc}")
+        raise

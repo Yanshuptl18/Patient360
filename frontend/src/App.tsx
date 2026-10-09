@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { HealthStatus } from './components/HealthStatus';
 import { RoadmapCard } from './components/RoadmapCard';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import { LoginModal } from './features/auth/LoginModal';
 import { PhaseInfo } from './types';
-import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound } from 'lucide-react';
 
 const PHASES_DATA: PhaseInfo[] = [
   { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
-  { number: 2, name: 'Development Foundation', status: 'In Progress', description: 'Docker Compose, FastAPI, React/Vite, health probes, and pytest.', tag: 'Foundation' },
-  { number: 3, name: 'Auth, Authorization & RBAC', status: 'Planned', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
+  { number: 2, name: 'Development Foundation', status: 'Verified', description: 'Docker Compose, FastAPI, React/Vite, health probes, and pytest.', tag: 'Foundation' },
+  { number: 3, name: 'Auth, Authorization & RBAC', status: 'In Progress', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
   { number: 4, name: 'Patient & Doc Management', status: 'Planned', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
   { number: 5, name: 'Ingestion & Chunking', status: 'Planned', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
   { number: 6, name: 'Embeddings & Qdrant', status: 'Planned', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
@@ -23,12 +25,66 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 15, name: 'Portfolio & Demo Release', status: 'Planned', description: 'Pre-seeded synthetic cohorts, case studies, and documentation.', tag: 'Release' },
 ];
 
-export const App: React.FC = () => {
+const MainContent: React.FC = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <Header />
+      <Header onOpenLogin={() => setIsLoginOpen(true)} />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {/* User Session Status Banner */}
+        {isAuthenticated && user ? (
+          <div className="mb-6 p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-xl bg-teal-500/20 text-teal-300">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-teal-300">
+                  Authenticated as {user.full_name} ({user.email})
+                </div>
+                <div className="text-[11px] text-slate-400 mt-0.5">
+                  Role: <span className="font-semibold text-slate-200 uppercase">{user.role}</span> • Permissions:{' '}
+                  {user.role === 'admin'
+                    ? 'Full Administrative & RBAC Configuration'
+                    : user.role === 'reviewer'
+                    ? 'Permitted Patient Records & Longitudinal Timelines'
+                    : user.role === 'researcher'
+                    ? 'Biomedical Literature & Comparative Study Matrices'
+                    : 'Synthetic Demonstration Datasets Only'}
+                </div>
+              </div>
+            </div>
+
+            <div className="text-[11px] font-mono text-teal-400/80 shrink-0">
+              Session Active
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-xl bg-slate-800 text-slate-400">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-slate-200">Unauthenticated Session</div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Sign in with a demo persona to test server-side role-based access control and patient isolation.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 shrink-0"
+            >
+              Sign In as Demo Persona
+            </button>
+          </div>
+        )}
+
         {/* Hero Section */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-900/60 border border-slate-800 p-8 sm:p-10 mb-8 shadow-2xl">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -59,7 +115,7 @@ export const App: React.FC = () => {
               </div>
               <div className="flex items-center space-x-1.5">
                 <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                <span>100% CPU-Friendly Local Stack</span>
+                <span>Server-Side RBAC Enforcement</span>
               </div>
             </div>
           </div>
@@ -115,6 +171,9 @@ export const App: React.FC = () => {
         <RoadmapCard phases={PHASES_DATA} />
       </main>
 
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-900/40 py-6 mt-12 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -131,5 +190,13 @@ export const App: React.FC = () => {
         </div>
       </footer>
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <MainContent />
+    </AuthProvider>
   );
 };

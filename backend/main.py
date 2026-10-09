@@ -7,8 +7,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import backend.models  # noqa: F401 (register models with Base)
 from backend.api.v1 import api_router
 from backend.core.config import settings
+from backend.core.database import Base, engine
 from backend.core.exceptions import register_exception_handlers
 from backend.core.logging import setup_logging
 
@@ -20,6 +22,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for startup and shutdown hooks."""
     setup_logging(debug=settings.DEBUG)
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.VERSION} [{settings.ENVIRONMENT}]")
+
+    # Initialize tables if database is available
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables initialized successfully.")
+    except Exception as exc:
+        logger.warning(f"Could not automatically initialize database tables: {exc}")
+
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}")
 
