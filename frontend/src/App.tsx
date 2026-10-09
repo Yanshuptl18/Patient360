@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { HealthStatus } from './components/HealthStatus';
 import { RoadmapCard } from './components/RoadmapCard';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginModal } from './features/auth/LoginModal';
-import { PhaseInfo } from './types';
-import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound } from 'lucide-react';
+import { PatientList } from './features/patients/PatientList';
+import { DocumentList } from './features/documents/DocumentList';
+import { PhaseInfo, Patient, Document } from './types';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2 } from 'lucide-react';
 
 const PHASES_DATA: PhaseInfo[] = [
   { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
   { number: 2, name: 'Development Foundation', status: 'Verified', description: 'Docker Compose, FastAPI, React/Vite, health probes, and pytest.', tag: 'Foundation' },
-  { number: 3, name: 'Auth, Authorization & RBAC', status: 'In Progress', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
-  { number: 4, name: 'Patient & Doc Management', status: 'Planned', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
+  { number: 3, name: 'Auth, Authorization & RBAC', status: 'Verified', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
+  { number: 4, name: 'Patient & Doc Management', status: 'Verified', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
   { number: 5, name: 'Ingestion & Chunking', status: 'Planned', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
   { number: 6, name: 'Embeddings & Qdrant', status: 'Planned', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
   { number: 7, name: 'Baseline Grounded RAG', status: 'Planned', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
@@ -27,7 +29,37 @@ const PHASES_DATA: PhaseInfo[] = [
 
 const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const { user, isAuthenticated, token } = useAuth();
+
+  const fetchDocuments = useCallback(
+    async (patientId: string) => {
+      if (!token) return;
+      try {
+        const response = await fetch(`/api/v1/documents?patient_id=${patientId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data: Document[] = await response.json();
+          setDocuments(data);
+        }
+      } catch (err) {
+        console.error('Failed to load documents:', err);
+      }
+    },
+    [token]
+  );
+
+  useEffect(() => {
+    if (selectedPatient) {
+      fetchDocuments(selectedPatient.id);
+    } else {
+      setDocuments([]);
+    }
+  }, [selectedPatient, fetchDocuments]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
@@ -163,6 +195,51 @@ const MainContent: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Patient & Document Management Workspace (Authenticated) */}
+        {isAuthenticated && (
+          <section className="mb-8">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400">
+                <FolderGit2 className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-white">Patient Dossiers & Document Registry</h2>
+                <p className="text-xs text-slate-400">
+                  Phase 4 — Isolated clinical records, PDF validation, and cryptographic SHA-256 storage
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              <div className="lg:col-span-1 h-[620px]">
+                <PatientList
+                  selectedPatientId={selectedPatient?.id || null}
+                  onSelectPatient={(p) => setSelectedPatient(p)}
+                />
+              </div>
+
+              <div className="lg:col-span-2 h-[620px]">
+                {selectedPatient ? (
+                  <DocumentList
+                    patientId={selectedPatient.id}
+                    patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
+                    documents={documents}
+                    onRefresh={() => fetchDocuments(selectedPatient.id)}
+                  />
+                ) : (
+                  <div className="h-full rounded-3xl bg-slate-900/60 border border-slate-800 p-8 flex flex-col items-center justify-center text-center">
+                    <Database className="w-12 h-12 text-slate-600 mb-3" />
+                    <h3 className="text-sm font-semibold text-white">No Patient Selected</h3>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                      Select an authorized patient dossier from the left panel to inspect attached clinical documents, or register a new synthetic cohort member.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Live Infrastructure Health Monitor */}
         <HealthStatus />

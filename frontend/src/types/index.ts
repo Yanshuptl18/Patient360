@@ -43,3 +43,43 @@ export interface PhaseInfo {
   description: string;
   tag: string;
 }
+
+export type DocType = 'patient_record' | 'lab_report' | 'discharge_summary' | 'research_paper' | 'clinical_guideline';
+
+export interface Patient {
+  id: string;
+  mrn_synthetic: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  gender: string;
+  primary_condition: string | null;
+  created_at: string;
+  updated_at: string;
+  document_count?: number;
+}
+
+export interface PatientCreate {
+  mrn_synthetic: string;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  gender: string;
+  primary_condition?: string;
+}
+
+export interface Document {
+  id: string;
+  patient_id: string | null;
+  title: string;
+  file_hash_sha256: string;
+  file_size_bytes: number;
+  mime_type: string;
+  doc_type: DocType;
+  doc_date: string | null;
+  ingestion_status: 'pending' | 'processing' | 'completed' | 'failed';
+  error_message?: string | null;
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
