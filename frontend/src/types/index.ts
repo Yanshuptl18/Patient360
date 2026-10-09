@@ -83,3 +83,24 @@ export interface Document {
   created_at: string;
   updated_at: string;
 }
+
+export interface DocumentChunk {
+  id: string;
+  document_id: string;
+  chunk_index: number;
+  page_number: number;
+  content: string;
+  raw_content: string;
+  token_count: number;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface IngestionResponse {
+  document_id: string;
+  status: string;
+  chunk_count: number;
+  total_tokens: number;
+  pages_processed: number;
+  message: string;
+}

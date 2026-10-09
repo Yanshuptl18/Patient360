@@ -7,8 +7,8 @@
 | **1** | Discovery, Requirements & Architecture | **Verified** | Empty workspace | 15 docs in `docs/`, architecture diagrams, data models | Phase 1 document review completed | Approved |
 | **2** | Development Foundation & Tooling Setup | **Verified** | Phase 1 | Docker compose, FastAPI skeleton, React/Vite, health probes | Pytest 5/5 passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **3** | Authentication, Authorization & RBAC | **Verified** | Phase 2 | JWT auth, Argon2, RBAC guards, user tables, audit logger | 20/20 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
-| **4** | **Patient & Document Management** | **Completed** | Phase 3 | Patient CRUD, PDF upload, storage adapter, cohort isolation | 33/33 Pytest passed, Ruff clean, Mypy clean, Vite built in 3.06s | Pending Approval |
-| **5** | Document Ingestion, Parsing & Chunking | Planned | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | Pending Phase 5 | Planned |
+| **4** | Patient & Document Management | **Verified** | Phase 3 | Patient CRUD, PDF upload, storage adapter, cohort isolation | 33/33 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
+| **5** | **Document Ingestion, Parsing & Chunking** | **Completed** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built in 2.99s | Pending Approval |
 | **6** | Embeddings & Vector Indexing | Planned | Phase 5 | FastEmbed CPU adapter, Qdrant collection, payload filters | Pending Phase 6 | Planned |
 | **7** | Baseline Grounded RAG | Planned | Phase 6 | LLM adapter, grounded prompt builder, citation parser | Pending Phase 7 | Planned |
 | **8** | Advanced Hybrid RAG & Retrieval Opt. | Planned | Phase 7 | In-memory BM25, RRF merger, citation verifier | Pending Phase 8 | Planned |
@@ -81,10 +81,42 @@
   - Attached Document list with document type badges, file size format, ingestion status badge, download streaming action, and upload dropzone modal.
 - [x] **11. Known Limitations Recorded:** Document parsing and vector embedding are deferred to Phase 5 and Phase 6; uploaded PDFs are registered with status `pending`.
 - [x] **12. Phase Tracker Updated:** Phase 4 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 5.
+- [x] **13. Explicit User Approval Requested:** Phase 4 approved by user.
 
 ---
 
-## 6. Active Risks & Outstanding Issues
-* **Storage Location:** Document files stored in `data/documents/` partitioned by SHA-256 prefix `{hash[:2]}/{hash}.pdf`.
-* **Next Action:** Phase 5 will introduce PyMuPDF page-aware PDF text extraction, clinical text normalization, section detection, and sliding-window chunking.
+## 6. Phase 5 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Page-aware text extraction, clinical normalization, sliding-window chunking, context header injection, and physical page provenance aligned with FR-DOC-01..07 and RAG_DESIGN requirements.
+- [x] **2. Modular Architecture Enforced:**
+  - Models: `backend/models/chunk.py` (`DocumentChunk`), updated `backend/models/document.py` (`chunks` cascade relationship).
+  - Schemas: `backend/schemas/chunk.py` (`ChunkResponse`, `IngestionResponse`).
+  - Ingestion Modules: `backend/ingestion/extractor.py` (`extract_pages_from_pdf`), `backend/ingestion/normalizer.py` (`normalize_clinical_text`), `backend/ingestion/chunker.py` (`SemanticChunker`, `split_into_clinical_sentences`), `backend/ingestion/service.py` (`ingest_document`).
+  - API Routes: `POST /api/v1/documents/{id}/ingest`, `GET /api/v1/documents/{id}/chunks`.
+- [x] **3. No Secrets / Real PHI Committed:** All test payloads and documents use synthetic patients (`SYN-INGEST-01`, `Eleanor Vance`); zero real PHI stored.
+- [x] **4. Dependencies Documented:** `PyMuPDF>=1.24.0` verified in virtual environment.
+- [x] **5. Automated Tests Passing:** **48/48 pytest tests pass** (15 new tests in Phase 5):
+  - `tests/unit/test_extractor.py` (4 tests): Multi-page PDF page numbers, blank page handling, block bounding boxes, corrupt payload handling.
+  - `tests/unit/test_normalizer.py` (6 tests): Decimal dosage preservation (`0.5 mg`, `.25 mcg`, `12.5 mg/dL`), medical units (`mL/min/1.73m²`, `mmHg`), Latin abbreviations (`b.i.d.`, `p.r.n.`, `q.h.s.`), de-hyphenation across line breaks, clinical hyphen preservation (`EGFR-mutated`, `COVID-19`), Unicode whitespace cleanup.
+  - `tests/unit/test_chunker.py` (3 tests): 100% page-number retention across multi-page document, context header injection format, sentence boundary preservation for decimals and abbreviations.
+  - `tests/integration/test_ingestion.py` (2 tests): End-to-end ingestion pipeline (upload PDF -> trigger ingest -> retrieve chunks with exact page provenance -> idempotent re-ingestion), cross-patient RBAC isolation enforcement (403 Forbidden).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend` passed with 0 errors across 42 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 2.99s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** Document ingestion and chunk retrieval strictly enforce patient-level authorization (`get_document`). Unauthorized users receive `403 Forbidden`.
+- [x] **8. Error Handling & Edge Cases:** Empty or corrupted PDFs handled gracefully; re-ingestion cleanly purges previous chunks idempotently; failure states set `ingestion_status = "failed"` with captured `error_message`.
+- [x] **9. Audit Trail Active:** Append-only audit logger writes `DOCUMENT_INGESTED` events with chunk counts, total tokens, and page counts.
+- [x] **10. Frontend Workspace Integrated:**
+  - `DocumentList.tsx`: Added "Parse PDF" button for pending/failed documents with interactive loading state.
+  - Added "Chunks" provenance button for completed documents.
+  - Built interactive `ChunkInspectorModal.tsx` showing chunk cards, physical page filters, token counts, and highlighted context headers.
+- [x] **11. Known Limitations Recorded:** Vector embedding and Qdrant indexing are deferred to Phase 6; chunks are currently persisted in SQLite/PostgreSQL `document_chunks` table with provenance metadata.
+- [x] **12. Phase Tracker Updated:** Phase 5 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 6.
+
+---
+
+## 7. Active Risks & Outstanding Issues
+* **Chunk Storage:** Relational chunks stored in `document_chunks` with `metadata_json` containing document title, type, date, patient ID, and page number.
+* **Next Action:** Phase 6 will integrate FastEmbed (`BAAI/bge-small-en-v1.5`, 384 dimensions, CPU ONNX) and Qdrant collection indexing with payload isolation filtering.

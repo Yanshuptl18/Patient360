@@ -17,8 +17,11 @@ from backend.documents.service import (
     upload_document,
 )
 from backend.documents.storage import get_storage
+from backend.ingestion.service import ingest_document
+from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
 from backend.models.user import User
+from backend.schemas.chunk import ChunkResponse, IngestionResponse
 from backend.schemas.document import DocumentResponse, DocumentUploadResponse
 
 router = APIRouter()
@@ -146,3 +149,39 @@ def remove_document(
     storage = get_storage()
     delete_document(db, storage=storage, document_id=id, current_user=current_user)
     return {"status": "DOCUMENT_DELETED"}
+
+
+@router.post("/{id}/ingest", response_model=IngestionResponse, status_code=status.HTTP_200_OK)
+def trigger_document_ingestion(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> IngestionResponse:
+    """
+    Triggers PyMuPDF extraction, clinical normalization, and semantic chunking.
+    Transitions status: pending -> processing -> completed.
+    """
+    storage = get_storage()
+    return ingest_document(db=db, storage=storage, document_id=id, current_user=current_user)
+
+
+@router.get("/{id}/chunks", response_model=list[ChunkResponse])
+def get_document_chunks(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[ChunkResponse]:
+    """
+    Retrieves all extracted chunks with exact page-level provenance.
+    Verifies user authorization for the underlying patient dossier.
+    """
+    # Verify authorization
+    get_document(db, document_id=id, current_user=current_user)
+
+    chunks = (
+        db.query(DocumentChunk)
+        .filter(DocumentChunk.document_id == id)
+        .order_by(DocumentChunk.chunk_index.asc())
+        .all()
+    )
+    return [ChunkResponse.model_validate(c) for c in chunks]

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.core.database import Base
 
 if TYPE_CHECKING:
+    from backend.models.chunk import DocumentChunk
     from backend.models.patient import Patient
 
 
@@ -53,6 +54,9 @@ class Document(Base):
 
     # Relationships
     patient: Mapped["Patient | None"] = relationship("Patient", back_populates="documents")
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
+        "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Document {self.title} (Status: {self.ingestion_status})>"

@@ -11,6 +11,7 @@ from backend.schemas.auth import (
     UserCreate,
     UserResponse,
 )
+from backend.schemas.chunk import ChunkResponse, IngestionResponse
 from backend.schemas.document import (
     DocTypeEnum,
     DocumentResponse,
@@ -43,4 +44,6 @@ __all__ = [
     "IngestionStatusEnum",
     "DocumentResponse",
     "DocumentUploadResponse",
+    "ChunkResponse",
+    "IngestionResponse",
 ]

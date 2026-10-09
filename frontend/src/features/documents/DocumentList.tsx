@@ -8,10 +8,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Filter,
+  Layers,
+  Play,
+  Loader2,
 } from 'lucide-react';
 import { Document, DocType } from '../../types';
 import { useAuth } from '../auth/AuthContext';
 import { DocumentUploadModal } from './DocumentUploadModal';
+import { ChunkInspectorModal } from './ChunkInspectorModal';
 
 interface DocumentListProps {
   patientId: string;
@@ -38,6 +42,28 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [inspectingDocument, setInspectingDocument] = useState<Document | null>(null);
+  const [isIngestingId, setIsIngestingId] = useState<string | null>(null);
+
+  const handleIngest = async (doc: Document) => {
+    setIsIngestingId(doc.id);
+    try {
+      const response = await fetch(`/api/v1/documents/${doc.id}/ingest`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Ingestion pipeline failed.');
+      }
+      onRefresh();
+    } catch (err) {
+      console.error('Ingestion error:', err);
+    } finally {
+      setIsIngestingId(null);
+    }
+  };
 
   const filteredDocs = documents.filter((doc) => {
     if (filterType !== 'all' && doc.doc_type !== filterType) return false;
@@ -226,6 +252,40 @@ export const DocumentList: React.FC<DocumentListProps> = ({
 
                   {/* Actions */}
                   <div className="flex items-center space-x-1">
+                    {/* Parse & Ingest button if pending or failed */}
+                    {doc.ingestion_status !== 'completed' && user?.role !== 'demo' && (
+                      <button
+                        onClick={() => handleIngest(doc)}
+                        disabled={isIngestingId === doc.id}
+                        title="Parse & Chunk Document with PyMuPDF"
+                        className="p-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 transition-all text-[11px] font-medium flex items-center space-x-1 disabled:opacity-50"
+                      >
+                        {isIngestingId === doc.id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span className="hidden sm:inline">Parsing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Parse PDF</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {/* View Chunks button if completed */}
+                    {doc.ingestion_status === 'completed' && (
+                      <button
+                        onClick={() => setInspectingDocument(doc)}
+                        title="Inspect Extracted Chunks & Provenance"
+                        className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all text-[11px] font-medium flex items-center space-x-1"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Chunks</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => handleDownload(doc)}
                       title="Download Original PDF"
@@ -260,6 +320,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         onDocumentUploaded={() => {
           onRefresh();
         }}
+      />
+
+      {/* Chunk Inspector Modal */}
+      <ChunkInspectorModal
+        isOpen={!!inspectingDocument}
+        onClose={() => setInspectingDocument(null)}
+        document={inspectingDocument}
       />
     </div>
   );
