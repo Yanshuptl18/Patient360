@@ -1,0 +1,135 @@
+import React from 'react';
+import { Header } from './components/Header';
+import { HealthStatus } from './components/HealthStatus';
+import { RoadmapCard } from './components/RoadmapCard';
+import { PhaseInfo } from './types';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck } from 'lucide-react';
+
+const PHASES_DATA: PhaseInfo[] = [
+  { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
+  { number: 2, name: 'Development Foundation', status: 'In Progress', description: 'Docker Compose, FastAPI, React/Vite, health probes, and pytest.', tag: 'Foundation' },
+  { number: 3, name: 'Auth, Authorization & RBAC', status: 'Planned', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
+  { number: 4, name: 'Patient & Doc Management', status: 'Planned', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
+  { number: 5, name: 'Ingestion & Chunking', status: 'Planned', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
+  { number: 6, name: 'Embeddings & Qdrant', status: 'Planned', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
+  { number: 7, name: 'Baseline Grounded RAG', status: 'Planned', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
+  { number: 8, name: 'Advanced Hybrid RAG', status: 'Planned', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
+  { number: 9, name: 'Timeline & Event Synthesis', status: 'Planned', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
+  { number: 10, name: 'Bounded Agentic Workflows', status: 'Planned', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
+  { number: 11, name: 'Research Intelligence', status: 'Planned', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
+  { number: 12, name: 'Evaluation Laboratory', status: 'Planned', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
+  { number: 13, name: 'Security & Responsible AI', status: 'Planned', description: 'Prompt-injection pen tests, audit logs, and data erasure.', tag: 'Hardening' },
+  { number: 14, name: 'Production Hardening', status: 'Planned', description: 'Multi-stage Docker, Prometheus metrics, and CI/CD pipelines.', tag: 'DevOps' },
+  { number: 15, name: 'Portfolio & Demo Release', status: 'Planned', description: 'Pre-seeded synthetic cohorts, case studies, and documentation.', tag: 'Release' },
+];
+
+export const App: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      <Header />
+
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-900/60 border border-slate-800 p-8 sm:p-10 mb-8 shadow-2xl">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-3xl">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium mb-4">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Evidence-Grounded Healthcare Intelligence</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+              Evidence-Based Clinical Intelligence, <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">Strictly Provenanced</span>
+            </h1>
+
+            <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed">
+              Patient360 synthesizes fragmented medical records and biomedical research into structured, verifiable knowledge with page-level citations, longitudinal timeline reconstruction, and bounded agentic verification.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-4 text-xs text-slate-400">
+              <div className="flex items-center space-x-1.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                <span>Zero Autonomous Diagnostic Claims</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                <span>Page-Anchored Provenance</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                <span>100% CPU-Friendly Local Stack</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Core Pillars Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center mb-3">
+              <FileText className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Document Intelligence</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              Hybrid retrieval (Dense + BM25) with exact claim-to-passage citation tracking.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center mb-3">
+              <Clock className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Longitudinal Timeline</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              Chronological clinical events surfacing conflicting dates, allergies, and dosages.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center mb-3">
+              <FileSearch className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Research Intelligence</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              Cross-study evidence comparison matrices across clinical trials and guidelines.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-all">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-3">
+              <Bot className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-semibold text-white">Bounded Agents</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              LangGraph state machine with 5-iteration ceiling, timeouts, and human approval gates.
+            </p>
+          </div>
+        </div>
+
+        {/* Live Infrastructure Health Monitor */}
+        <HealthStatus />
+
+        {/* Phase Progression Tracker */}
+        <RoadmapCard phases={PHASES_DATA} />
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-800/80 bg-slate-900/40 py-6 mt-12 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 Patient360 Platform. Developed under strict modular architecture and healthcare safety standards.</p>
+          <div className="flex items-center space-x-4">
+            <a href="http://127.0.0.1:8000/api/v1/health" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
+              Health Probe API
+            </a>
+            <span className="text-slate-700">•</span>
+            <a href="http://127.0.0.1:8000/api/v1/docs" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
+              OpenAPI Spec
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
