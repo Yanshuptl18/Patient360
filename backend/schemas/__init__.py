@@ -24,6 +24,11 @@ from backend.schemas.patient import (
     PatientResponse,
     PermissionGrantRequest,
 )
+from backend.schemas.vector import (
+    VectorSearchRequest,
+    VectorSearchResultItem,
+    VectorStatsResponse,
+)
 
 __all__ = [
     "RoleEnum",
@@ -46,4 +51,7 @@ __all__ = [
     "DocumentUploadResponse",
     "ChunkResponse",
     "IngestionResponse",
+    "VectorSearchRequest",
+    "VectorSearchResultItem",
+    "VectorStatsResponse",
 ]

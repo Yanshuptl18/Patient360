@@ -104,3 +104,26 @@ export interface IngestionResponse {
   pages_processed: number;
   message: string;
 }
+
+export interface VectorSearchResultItem {
+  chunk_id: string;
+  document_id: string;
+  patient_id: string | null;
+  page_number: number;
+  chunk_index: number;
+  content: string;
+  raw_content: string;
+  score: number;
+  doc_title: string;
+  doc_type: string;
+  doc_date: string | null;
+}
+
+export interface VectorStatsResponse {
+  collection_name: string;
+  status: string;
+  vectors_count: number;
+  indexed_vectors_count: number;
+  dimensions: number;
+  is_embedded: boolean;
+}

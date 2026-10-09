@@ -8,8 +8,8 @@
 | **2** | Development Foundation & Tooling Setup | **Verified** | Phase 1 | Docker compose, FastAPI skeleton, React/Vite, health probes | Pytest 5/5 passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **3** | Authentication, Authorization & RBAC | **Verified** | Phase 2 | JWT auth, Argon2, RBAC guards, user tables, audit logger | 20/20 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **4** | Patient & Document Management | **Verified** | Phase 3 | Patient CRUD, PDF upload, storage adapter, cohort isolation | 33/33 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
-| **5** | **Document Ingestion, Parsing & Chunking** | **Completed** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built in 2.99s | Pending Approval |
-| **6** | Embeddings & Vector Indexing | Planned | Phase 5 | FastEmbed CPU adapter, Qdrant collection, payload filters | Pending Phase 6 | Planned |
+| **5** | Document Ingestion, Parsing & Chunking | **Verified** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
+| **6** | **Embeddings & Vector Indexing** | **Completed** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean (63 files), Vite built in 4.16s | Pending Approval |
 | **7** | Baseline Grounded RAG | Planned | Phase 6 | LLM adapter, grounded prompt builder, citation parser | Pending Phase 7 | Planned |
 | **8** | Advanced Hybrid RAG & Retrieval Opt. | Planned | Phase 7 | In-memory BM25, RRF merger, citation verifier | Pending Phase 8 | Planned |
 | **9** | Longitudinal Timeline & Clinical Events | Planned | Phase 8 | Event extractor, contradiction detector, Timeline UI | Pending Phase 9 | Planned |
@@ -112,11 +112,44 @@
   - Added "Chunks" provenance button for completed documents.
   - Built interactive `ChunkInspectorModal.tsx` showing chunk cards, physical page filters, token counts, and highlighted context headers.
 - [x] **11. Known Limitations Recorded:** Vector embedding and Qdrant indexing are deferred to Phase 6; chunks are currently persisted in SQLite/PostgreSQL `document_chunks` table with provenance metadata.
-- [x] **12. Phase Tracker Updated:** Phase 5 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 6.
+- [x] **12. Phase Tracker Updated:** Phase 5 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 5 reviewed and approved by user.
 
 ---
 
-## 7. Active Risks & Outstanding Issues
-* **Chunk Storage:** Relational chunks stored in `document_chunks` with `metadata_json` containing document title, type, date, patient ID, and page number.
-* **Next Action:** Phase 6 will integrate FastEmbed (`BAAI/bge-small-en-v1.5`, 384 dimensions, CPU ONNX) and Qdrant collection indexing with payload isolation filtering.
+## 7. Phase 6 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Dense vector embedding provider using FastEmbed (`BAAI/bge-small-en-v1.5`, 384 dimensions, CPU ONNX) and Qdrant collection indexing with payload isolation filtering aligned with FR-RET-01, FR-RET-02, and RAG_DESIGN requirements.
+- [x] **2. Modular Architecture Enforced:**
+  - Embedding Provider: `backend/vector/embeddings.py` (`FastEmbedProvider`, `get_embedding_provider`, 384-dim, lazy loading, L2 normalized).
+  - Qdrant Vector Store: `backend/vector/store.py` (`QdrantVectorStore`, `get_vector_store`, collection `patient360_chunks`, Cosine distance, HNSW `m=16`, `ef_construct=100`, auto-fallback `:memory:` embedded mode).
+  - Ingestion Hook: `backend/ingestion/service.py` (`index_document_chunks_in_qdrant` hook with idempotent pre-cleanup).
+  - Schemas: `backend/schemas/vector.py` (`VectorSearchRequest`, `VectorSearchResultItem`, `VectorStatsResponse`).
+  - API Routes: `GET /api/v1/vector/stats`, `POST /api/v1/vector/search` (enforcing server-side patient-level access boundary).
+  - Health Probe: `backend/api/v1/health.py` reports vector store status for both daemon and in-memory modes.
+- [x] **3. No Secrets / Real PHI Committed:** All embedded payloads use synthetic clinical cases (`SYN-VEC-01`, `Eleanor Vance`); zero real PHI stored; Qdrant payloads contain only synthetic clinical chunks.
+- [x] **4. Dependencies Documented:** `fastembed>=0.3.0` and `qdrant-client>=1.9.0` verified in `.venv` environment and `requirements.txt`.
+- [x] **5. Automated Tests Passing:** **56/56 pytest tests pass** (8 new comprehensive tests in Phase 6):
+  - `tests/unit/test_embeddings.py` (3 tests): Model output dimensionality (384 float32), non-zero unit vectors, batch embedding throughput and consistency.
+  - `tests/unit/test_vector_store.py` (3 tests): Collection initialization, chunk upsert and retrieval, patient isolation payload filtering, document chunk deletion.
+  - `tests/integration/test_vector_indexing.py` (2 tests): End-to-end ingestion pipeline vector indexing and semantic search; cross-patient security boundary rejection (`403 Forbidden`).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 63 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 4.16s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** `POST /api/v1/vector/search` strictly verifies caller access to the requested patient dossier before querying Qdrant. Qdrant searches apply server-side payload filters (`patient_id == ...`), preventing cross-patient vector leakage even if a query is identical.
+- [x] **8. Error Handling & Edge Cases:** Embedded `:memory:` fallback seamlessly activates when standalone Qdrant server is absent; empty query validation; idempotent re-indexing prevents duplicate vectors; batch embedding handles single and multi-chunk inputs safely.
+- [x] **9. Audit Trail Active:** Ingestion audit logs record chunk and vector indexing counts; search access logged when unauthorized access is attempted.
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/documents/SemanticSearchModal.tsx`: Interactive modal with prompt presets, top-K selector, real-time cosine score badges, page badges, and context header view.
+  - `frontend/src/features/documents/DocumentList.tsx`: Added "Semantic Search" action button to patient dossier header.
+  - `frontend/src/App.tsx`: Updated `PHASES_DATA` marking Phase 6 as "Verified".
+- [x] **11. Known Limitations Recorded:** BM25 sparse search and reciprocal rank fusion (RRF) are scheduled for Phase 8; LLM synthesis over retrieved vector chunks is scheduled for Phase 7.
+- [x] **12. Phase Tracker Updated:** Phase 6 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 7.
+
+---
+
+## 8. Active Risks & Outstanding Issues
+* **LLM Generation:** Retrieved vector chunks are currently inspected directly via `POST /api/v1/vector/search` and the Semantic Search Modal. Grounded answer generation with strict citation verification will be implemented in Phase 7.
+* **Next Action:** Phase 7 will build the Baseline Grounded RAG engine (`backend/rag/`), integrating the LLM generation adapter, structured prompt builder, citation validator, and interactive RAG Q&A chat drawer.

@@ -25,7 +25,7 @@ def create_multipage_pdf_bytes() -> bytes:
         "Plan: Targeted tyrosine kinase inhibitor therapy recommended.",
         fontsize=11,
     )
-    pdf_bytes = doc.tobytes()
+    pdf_bytes = bytes(doc.tobytes())
     doc.close()
     return pdf_bytes
 

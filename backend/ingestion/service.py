@@ -14,6 +14,7 @@ from backend.ingestion.normalizer import normalize_clinical_text
 from backend.models.chunk import DocumentChunk
 from backend.models.user import User
 from backend.schemas.chunk import IngestionResponse
+from backend.vector.store import get_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -64,11 +65,14 @@ def ingest_document(
             patient_id=doc.patient_id,
         )
 
-        # 6. Idempotently clear existing chunks for this document
+        # 6. Idempotently clear existing chunks for this document in SQL and Vector Store
         db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
+        vector_store = get_vector_store()
+        vector_store.delete_document_chunks(doc.id)
 
-        # 7. Insert new chunks
+        # 7. Insert new chunks in SQL
         total_tokens = 0
+        inserted_chunks: list[DocumentChunk] = []
         for gen in generated_chunks:
             chunk_rec = DocumentChunk(
                 document_id=doc.id,
@@ -80,9 +84,17 @@ def ingest_document(
                 metadata_json=gen.metadata,
             )
             db.add(chunk_rec)
+            inserted_chunks.append(chunk_rec)
             total_tokens += gen.token_count
 
-        # 8. Mark document completed
+        db.commit()
+        for c in inserted_chunks:
+            db.refresh(c)
+
+        # 8. Index into Qdrant Vector Store
+        vector_store.upsert_chunks(inserted_chunks)
+
+        # 9. Mark document completed
         doc.ingestion_status = "completed"
         doc.error_message = None
         db.commit()

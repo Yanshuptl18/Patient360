@@ -11,11 +11,13 @@ import {
   Layers,
   Play,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { Document, DocType } from '../../types';
 import { useAuth } from '../auth/AuthContext';
 import { DocumentUploadModal } from './DocumentUploadModal';
 import { ChunkInspectorModal } from './ChunkInspectorModal';
+import { SemanticSearchModal } from './SemanticSearchModal';
 
 interface DocumentListProps {
   patientId: string;
@@ -44,6 +46,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const [inspectingDocument, setInspectingDocument] = useState<Document | null>(null);
   const [isIngestingId, setIsIngestingId] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleIngest = async (doc: Document) => {
     setIsIngestingId(doc.id);
@@ -159,11 +162,20 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             <Filter className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
 
+          {/* Semantic Search Button */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-400 border border-teal-500/20 text-xs font-semibold transition-all flex items-center space-x-1.5 cursor-pointer"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Semantic Search</span>
+          </button>
+
           {/* Upload Button */}
           {user?.role !== 'demo' && (
             <button
               onClick={() => setIsUploadOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center space-x-1.5"
+              className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center space-x-1.5 cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Upload PDF</span>
@@ -327,6 +339,14 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         isOpen={!!inspectingDocument}
         onClose={() => setInspectingDocument(null)}
         document={inspectingDocument}
+      />
+
+      {/* Dense Vector Semantic Search Modal */}
+      <SemanticSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        patientId={patientId}
+        patientName={patientName}
       />
     </div>
   );

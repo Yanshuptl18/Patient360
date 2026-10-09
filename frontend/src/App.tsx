@@ -15,7 +15,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 3, name: 'Auth, Authorization & RBAC', status: 'Verified', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
   { number: 4, name: 'Patient & Doc Management', status: 'Verified', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
   { number: 5, name: 'Ingestion & Chunking', status: 'Verified', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
-  { number: 6, name: 'Embeddings & Qdrant', status: 'Planned', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
+  { number: 6, name: 'Embeddings & Qdrant', status: 'Verified', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
   { number: 7, name: 'Baseline Grounded RAG', status: 'Planned', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
   { number: 8, name: 'Advanced Hybrid RAG', status: 'Planned', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Planned', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },

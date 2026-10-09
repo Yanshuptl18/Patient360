@@ -14,7 +14,7 @@ def create_test_pdf_bytes(page_texts: list[str]) -> bytes:
         page = doc.new_page(width=595, height=842)  # Standard A4
         if text.strip():
             page.insert_text((50, 72), text, fontsize=11)
-    pdf_bytes = doc.tobytes()
+    pdf_bytes = bytes(doc.tobytes())
     doc.close()
     return pdf_bytes
 

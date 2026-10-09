@@ -31,19 +31,34 @@ class HealthResponse(BaseModel):
 
 
 def check_qdrant_health() -> tuple[bool, int, str]:
-    """Checks Qdrant REST API liveness."""
+    """Checks Qdrant REST API liveness or active vector store instance."""
     start = time.perf_counter()
     url = f"http://{settings.QDRANT_HOST}:{settings.QDRANT_PORT}/readyz"
     try:
-        with httpx.Client(timeout=2.0) as client:
+        with httpx.Client(timeout=1.0) as client:
             resp = client.get(url)
             latency_ms = int((time.perf_counter() - start) * 1000)
             if resp.status_code == 200:
-                return True, latency_ms, "Qdrant vector engine ready"
-            return False, latency_ms, f"Qdrant returned HTTP {resp.status_code}"
+                return True, latency_ms, "Qdrant vector engine ready (Standalone daemon)"
+    except Exception:
+        pass
+
+    # Check active vector store status
+    try:
+        from backend.vector.store import get_vector_store
+
+        store = get_vector_store()
+        stats = store.get_collection_stats()
+        latency_ms = int((time.perf_counter() - start) * 1000)
+        if stats.get("status") == "UP":
+            mode = "Embedded" if stats.get("is_embedded") else "Standalone"
+            return True, latency_ms, f"Qdrant vector engine ready ({mode}, {stats.get('vectors_count', 0)} vectors)"
     except Exception as exc:
         latency_ms = int((time.perf_counter() - start) * 1000)
-        return False, latency_ms, f"Qdrant unreachable: {str(exc)[:80]}"
+        return False, latency_ms, f"Qdrant vector engine error: {str(exc)[:80]}"
+
+    latency_ms = int((time.perf_counter() - start) * 1000)
+    return False, latency_ms, "Qdrant unreachable"
 
 
 def check_storage_health() -> tuple[bool, int, str]:
