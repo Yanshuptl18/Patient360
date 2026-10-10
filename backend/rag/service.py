@@ -5,6 +5,7 @@ import time
 
 from sqlalchemy.orm import Session
 
+from backend.core.metrics import record_rag_metrics
 from backend.rag.citations import ABSTENTION_PHRASES, CitationVerifier
 from backend.rag.llm import BaseLLMProvider, get_llm_provider
 from backend.rag.prompt import GroundedPromptBuilder
@@ -82,6 +83,12 @@ class RAGService:
             if is_injection:
                 limitations.append("Adversarial prompt injection pattern detected and neutralized.")
 
+            record_rag_metrics(
+                is_abstention=True,
+                is_emergency=is_emergency,
+                latency_seconds=total_latency_ms / 1000.0,
+            )
+
             return RAGQueryResponse(
                 query=query,
                 patient_id=patient_id,
@@ -156,6 +163,14 @@ class RAGService:
         )
 
         total_latency_ms = max(1, int((time.perf_counter() - start_total) * 1000))
+
+        record_rag_metrics(
+            is_abstention=is_abstention,
+            is_emergency=is_emergency,
+            latency_seconds=total_latency_ms / 1000.0,
+            supported_citations=sum(1 for c in citations if c.verification_status == "supported"),
+            unsupported_citations=sum(1 for c in citations if c.verification_status == "unsupported"),
+        )
 
         return RAGQueryResponse(
             query=query,

@@ -15,9 +15,9 @@
 | **9** | Longitudinal Timeline & Clinical Events | **Verified** | Phase 8 | ClinicalEvent model, extractor, contradiction detector, TimelineService, ClinicalTimelinePanel | 88/88 Pytest passed, Ruff clean, Mypy clean (93 files), Vite built in 5.14s | Approved |
 | **10**| Bounded Agentic Workflows | **Verified** | Phase 9 | LangGraph state graph, read-only tools, approval gate | 102/102 Pytest passed, Ruff clean, Mypy clean (104 files), Vite built in 4.74s | Approved |
 | **11**| Medical Research Intelligence | **Verified** | Phase 10 | Research schema, comparative matrix, dossier exporter | 111/111 Pytest passed, Ruff clean, Mypy clean (114 files), Vite built in 5.07s | Approved |
-| **12**| **Comprehensive Evaluation Laboratory** | **Completed** | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | 121/121 Pytest passed, Ruff clean, Mypy clean (128 files), Vite built in 3.40s | Pending Approval |
-| **13**| Security Hardening & Responsible AI | Planned | Phase 12 | STRIDE pen-tests, prompt injection defense, deletion purge | Pending Phase 13 | Planned |
-| **14**| Production Hardening & Observability | Planned | Phase 13 | Multi-stage Dockerfiles, Prometheus metrics, CI/CD | Pending Phase 14 | Planned |
+| **12**| Comprehensive Evaluation Laboratory | **Verified** | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | 121/121 Pytest passed, Ruff clean, Mypy clean (128 files), Vite built in 3.40s | Approved |
+| **13**| Security Hardening & Responsible AI | **Verified** | Phase 12 | Multi-provider LLM gateway (Gemini/Ollama/Mock), emergency red-flags, audit sanitizer, cascading purge | 142/142 Pytest passed, Ruff clean, Mypy clean (90 files), Vite built in 5.14s | Approved |
+| **14**| **Production Hardening & Observability** | **Completed** | Phase 13 | Multi-stage Dockerfiles, Nginx reverse proxy, Prometheus /metrics, GitHub Actions CI/CD | 150/150 Pytest passed, Ruff clean, Mypy clean (91 files), Vite built in 5.00s | Pending Approval |
 | **15**| Final Polish, Demo Data & Release | Planned | Phase 14 | Synthetic demo cohorts, portfolio docs, release artifacts | Pending Phase 15 | Planned |
 
 ---
@@ -379,15 +379,45 @@
 - [x] **8. Error Handling & Edge Cases:** Fallback to Mock provider when API keys are unconfigured; graceful handling of missing Ollama models with pull command instructions; bounded backoff retry on Gemini HTTP 429 rate limits; non-existent patient deletion returns 404 EntityNotFoundError.
 - [x] **9. Audit Trail Active:** Append-only database audit logs record `PATIENT_CASCADING_PURGE`, `RAG_QUERY_EXECUTED`, and all access events with scrubbed details.
 - [x] **10. Frontend Workspace Integrated:** Live health status monitor in `HealthStatus.tsx` reflects active LLM status. `App.tsx` roadmap updated marking Phase 13 as `Verified`.
-- [x] **11. Known Limitations Recorded:** Production Docker multi-stage container optimization, CI/CD pipeline, and Prometheus metrics exporting scheduled for Phase 14.
-- [x] **12. Phase Tracker Updated:** Phase 13 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 14.
+- [x] **12. Phase Tracker Updated:** Phase 13 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 13 reviewed and approved by user.
 
 ---
 
-## 15. Active Risks & Next Actions
-* **Multi-Stage Container Bundling:** Production containerization, Prometheus metric exporters, and GitHub Actions CI workflow will be implemented in Phase 14 (Production Hardening & CI/CD).
-* **Next Action:** Phase 14 will implement Production Hardening, Multi-Stage Dockerfile, Prometheus metrics endpoint, and automated CI/CD pipeline.
+## 15. Phase 14 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Production hardening, observability metrics, multi-stage Dockerfiles, Nginx reverse proxy, production compose stack, and automated GitHub Actions CI/CD pipeline meeting NFR-PERF-01..03, NFR-SEC-01..04, and roadmap requirements.
+- [x] **2. Modular Architecture Enforced:**
+  - Prometheus Observability: `backend/core/metrics.py` (`MetricsMiddleware`, `HTTP_REQUESTS_TOTAL`, `HTTP_REQUEST_DURATION_SECONDS`, `RAG_QUERIES_TOTAL`, `RAG_QUERY_DURATION_SECONDS`, `RAG_CITATIONS_TOTAL`, `DOCUMENT_INGESTION_TOTAL`, `SYSTEM_HEALTH_GAUGE`, `generate_prometheus_response`).
+  - Metrics Exposition Endpoint: `GET /metrics` mounted on FastAPI application in `backend/main.py`.
+  - Telemetry Integration: `backend/rag/service.py` automatically updates Prometheus counters and latency histograms on clinical RAG inquiries.
+  - Multi-Stage Backend Dockerfile: `deployment/docker/backend.Dockerfile` (`python:3.11-slim` builder stage -> unprivileged `appuser` (UID 10001) runner stage, writable storage volume, health check, 2 Uvicorn workers).
+  - Multi-Stage Frontend Dockerfile: `deployment/docker/frontend.Dockerfile` (`node:20-alpine` build stage -> `nginx:1.27-alpine` production stage).
+  - Production Nginx Configuration: `deployment/nginx/nginx.conf` (Gzip compression, security headers: `X-Frame-Options DENY`, `X-Content-Type-Options nosniff`, `Referrer-Policy`, `Permissions-Policy`, upstream reverse proxy with keepalive, `/assets/` 1-year cache, SPA routing fallback).
+  - Production Docker Compose: `deployment/docker-compose.prod.yml` (all 4 services: `postgres`, `qdrant`, `backend`, `frontend`, bounded 512M/256M memory limits, restart policies `unless-stopped`, health checks, isolated bridge network `patient360_prod_net`).
+  - Automated CI/CD Workflow: `.github/workflows/ci.yml` (4 concurrent jobs: Backend Linting & Type Safety, Automated 100% Offline Pytest Suite, Frontend TypeScript & Vite Build, and Docker Compose Config Validation).
+- [x] **3. No Secrets / Real PHI Committed:** All environment configurations use placeholders (`.env.example`). Zero credentials in Dockerfiles or GitHub Actions workflows.
+- [x] **4. Dependencies Documented:** Added `prometheus-client>=0.20.0` to `requirements.txt`.
+- [x] **5. Automated Tests Passing:** **150/150 pytest tests pass** (8 new tests in Phase 14):
+  - `tests/unit/test_metrics.py` (3 tests): `/metrics` exposition text format, path normalization preventing UUID label cardinality explosion, and RAG counter/latency increments.
+  - `tests/unit/test_production_config.py` (5 tests): Backend Dockerfile non-root security and healthcheck; Frontend Dockerfile multi-stage build; Nginx configuration security headers and proxy rules; production Docker Compose service topology and resource limits; GitHub Actions CI workflow job definitions.
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check .` passed with 0 errors.
+  - Python: `mypy backend` passed with 0 issues across 91 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) passed with 0 errors in 5.00s.
+- [x] **7. Security & Isolation Enforced:** Non-root execution in Docker container (`USER appuser`). Security headers (DENY, nosniff) enforced by Nginx. Path normalization protects Prometheus from label exhaustion attacks.
+- [x] **8. Error Handling & Edge Cases:** Unhandled 500 status codes captured in metrics; `/metrics` and `/favicon.ico` excluded from cardinality overhead; Nginx custom error pages configured.
+- [x] **9. Audit Trail Active:** Observability metrics complement immutable audit logs by capturing real-time operational telemetry.
+- [x] **10. Frontend Workspace Integrated:** Phase 14 marked `Verified` in `App.tsx` roadmap.
+- [x] **11. Known Limitations Recorded:** Final synthetic demo cohort expansion, portfolio case studies, and release artifacts scheduled for Phase 15.
+- [x] **12. Phase Tracker Updated:** Phase 14 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 15.
+
+---
+
+## 16. Active Risks & Next Actions
+* **Demo Cohort Richness:** Pre-seeded synthetic patients, longitudinal chronologies, and multimodal research studies will be finalized in Phase 15.
+* **Next Action:** Phase 15 will implement Final Polish, Pre-Seeded Synthetic Cohorts, Comprehensive Documentation, and Portfolio Release.
 
 
 

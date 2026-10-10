@@ -34,6 +34,9 @@ slowapi>=0.1.9
 # HTTP Client & External Adapters
 httpx>=0.27.0
 
+# Observability & Metrics
+prometheus-client>=0.20.0
+
 # Bounded Agentic Workflows (LangGraph)
 langgraph>=1.2.0
 langchain-core>=1.4.0

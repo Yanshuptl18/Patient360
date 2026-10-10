@@ -1,0 +1,104 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: patient360-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-patient360_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-patient360_production_password}
+      POSTGRES_DB: ${POSTGRES_DB:-patient360_db}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-patient360_user} -d ${POSTGRES_DB:-patient360_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - patient360_network
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: patient360-prod-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant_prod_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333 && echo -e \"GET /readyz HTTP/1.1\\r\\nHost: 127.0.0.1\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep -q \"200 OK\"' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - patient360_network
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deployment/docker/backend.Dockerfile
+    container_name: patient360-prod-backend
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-patient360_user}:${POSTGRES_PASSWORD:-patient360_production_password}@postgres:5432/${POSTGRES_DB:-patient360_db}
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      SECRET_KEY: ${SECRET_KEY}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      LLM_FALLBACK_TO_MOCK: "true"
+      STORAGE_LOCAL_PATH: /app/storage/documents
+    volumes:
+      - document_prod_storage:/app/storage/documents
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - patient360_network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/docker/frontend.Dockerfile
+    container_name: patient360-prod-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - patient360_network
+
+networks:
+  patient360_network:
+    name: patient360_prod_net
+
+volumes:
+  postgres_prod_data:
+    name: patient360_prod_postgres_data
+  qdrant_prod_data:
+    name: patient360_prod_qdrant_data
+  document_prod_storage:
+    name: patient360_prod_doc_storage

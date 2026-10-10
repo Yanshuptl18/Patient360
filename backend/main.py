@@ -4,7 +4,7 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import backend.models  # noqa: F401 (register models with Base)
@@ -13,6 +13,7 @@ from backend.core.config import settings
 from backend.core.database import Base, engine
 from backend.core.exceptions import register_exception_handlers
 from backend.core.logging import setup_logging
+from backend.core.metrics import MetricsMiddleware, generate_prometheus_response
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,9 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_STR}/redoc",
     lifespan=lifespan,
 )
+
+# Configure Prometheus Metrics Middleware
+app.add_middleware(MetricsMiddleware)
 
 # Configure CORS Middleware
 app.add_middleware(
@@ -77,3 +81,9 @@ def root() -> dict[str, str]:
 def basic_health() -> dict[str, str]:
     """Basic liveness ping for container orchestrators."""
     return {"status": "OK", "version": settings.VERSION}
+
+
+@app.get("/metrics", tags=["Observability"], include_in_schema=True)
+def get_prometheus_metrics() -> Response:
+    """Prometheus exposition endpoint for telemetry scrapers."""
+    return generate_prometheus_response()
