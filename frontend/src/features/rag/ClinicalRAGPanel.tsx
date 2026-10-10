@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { CitationItem, RAGQueryResponse } from '../../types';
 import { useAuth } from '../auth/AuthContext';
+import { PDFCitationViewerModal } from '../documents/PDFCitationViewerModal';
 
 interface ClinicalRAGPanelProps {
   patientId: string;
@@ -39,6 +40,7 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
   const [response, setResponse] = useState<RAGQueryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedCitation, setSelectedCitation] = useState<CitationItem | null>(null);
+  const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
 
   // Feedback state
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<'positive' | 'negative' | null>(null);
@@ -386,7 +388,7 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
 
                 {/* Selected Citation Inspector */}
                 {selectedCitation && (
-                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2 mt-2">
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2 mt-2">
                     <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
                       <span>Source Excerpt Verification</span>
                       {getStatusBadge(selectedCitation.verification_status)}
@@ -394,9 +396,20 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
                     <div className="p-2.5 rounded-lg bg-slate-950 font-mono text-[11px] text-teal-300 leading-relaxed border border-slate-800/80">
                       &quot;{selectedCitation.exact_quote}&quot;
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500">
-                      <span>Document: {selectedCitation.document_title}</span>
-                      <span>Physical Page: {selectedCitation.page_number}</span>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
+                      <div>
+                        <span>Document: {selectedCitation.document_title}</span>
+                        <span className="mx-1.5">•</span>
+                        <span>Physical Page: {selectedCitation.page_number}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsCitationModalOpen(true)}
+                        className="px-3 py-1.5 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 border border-teal-500/30 text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm shadow-teal-500/10"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Open In-Viewer PDF Provenance</span>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -477,6 +490,13 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
           </div>
         </div>
       )}
+
+      {/* In-Viewer PDF Citation Provenance Modal */}
+      <PDFCitationViewerModal
+        isOpen={isCitationModalOpen}
+        onClose={() => setIsCitationModalOpen(false)}
+        citation={selectedCitation}
+      />
     </div>
   );
 };

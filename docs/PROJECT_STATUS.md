@@ -10,8 +10,8 @@
 | **4** | Patient & Document Management | **Verified** | Phase 3 | Patient CRUD, PDF upload, storage adapter, cohort isolation | 33/33 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **5** | Document Ingestion, Parsing & Chunking | **Verified** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **6** | Embeddings & Vector Indexing | **Verified** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
-| **7** | **Baseline Grounded RAG** | **Completed** | Phase 6 | BaseLLMProvider, MockLLMProvider, GroundedPromptBuilder, CitationVerifier, ClinicalRAGPanel | 67/67 Pytest passed, Ruff clean, Mypy clean (74 files), Vite built in 5.58s | Pending Approval |
-| **8** | Advanced Hybrid RAG & Retrieval Opt. | Planned | Phase 7 | In-memory BM25, RRF merger, citation verifier | Pending Phase 8 | Planned |
+| **7** | Baseline Grounded RAG | **Verified** | Phase 6 | BaseLLMProvider, MockLLMProvider, GroundedPromptBuilder, CitationVerifier, ClinicalRAGPanel | 67/67 Pytest passed, Ruff clean, Mypy clean (74 files), Vite built in 5.58s | Approved |
+| **8** | **Advanced Hybrid RAG & Retrieval Opt.** | **Completed** | Phase 7 | In-memory BM25, RRF merger ($k=60$), HybridRetrievalService, PDFCitationViewerModal | 76/76 Pytest passed, Ruff clean, Mypy clean (82 files), Vite built in 9.10s | Pending Approval |
 | **9** | Longitudinal Timeline & Clinical Events | Planned | Phase 8 | Event extractor, contradiction detector, Timeline UI | Pending Phase 9 | Planned |
 | **10**| Bounded Agentic Workflows | Planned | Phase 9 | LangGraph state graph, read-only tools, approval gate | Pending Phase 10 | Planned |
 | **11**| Medical Research Intelligence | Planned | Phase 10 | Research schema, comparative matrix, dossier exporter | Pending Phase 11 | Planned |
@@ -178,11 +178,47 @@
   - `frontend/src/features/rag/ClinicalRAGPanel.tsx`: Interactive clinical Q&A drawer with quick suggestion pills, confidence score gauge, verified citation cards, exact source excerpt inspector, limitations caveats, and clinician rating modal.
   - `frontend/src/App.tsx`: Added seamless tab switcher (`Attached Documents` vs `Grounded Clinical RAG`) in patient dossier workspace; marked Phase 7 as `Verified` in `PHASES_DATA`.
 - [x] **11. Known Limitations Recorded:** BM25 sparse search and Reciprocal Rank Fusion (RRF) are scheduled for Phase 8; PDF in-viewer highlight navigation is scheduled for Phase 8.
-- [x] **12. Phase Tracker Updated:** Phase 7 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 8.
+- [x] **12. Phase Tracker Updated:** Phase 7 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 7 approved by user.
 
 ---
 
-## 9. Active Risks & Outstanding Issues
-* **Hybrid Retrieval:** Current retrieval uses dense vector search (FastEmbed 384-d). Exact clinical keywords (e.g. rare drug abbreviations or exact numeric codes) will benefit from BM25 sparse retrieval.
-* **Next Action:** Phase 8 will implement Advanced Hybrid RAG (In-memory BM25 sparse indexer, Reciprocal Rank Fusion merger with $k=60$, and interactive PDF viewer with clickable citations).
+## 9. Phase 8 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Advanced Hybrid RAG combining dense vector search (FastEmbed 384-d, Cosine similarity) and in-memory sparse keyword search (Okapi BM25 with clinical hyphen preservation) merged via Reciprocal Rank Fusion ($k=60$), integrated with end-to-end RAG synthesis, provenance verification, and in-viewer PDF citation highlighting aligned with FR-RET-01..05, FR-RAG-01..04, and RAG_DESIGN.
+- [x] **2. Modular Architecture Enforced:**
+  - Sparse Indexer: `backend/retrieval/bm25.py` (`BM25Index`, `BM25Document`, `BM25SearchResult`, `PatientBM25Registry`, `tokenize_clinical_text` preserving `NT-proBNP`, `eGFR`, `COVID-19`, `L858R`).
+  - Rank Fusion: `backend/retrieval/rrf.py` (`reciprocal_rank_fusion` with $RRF(d) = \sum_m \frac{1}{k + \text{Rank}_m(d)}$, $k=60$, dual score and rank telemetry).
+  - Orchestrator: `backend/retrieval/service.py` (`HybridRetrievalService`, `get_hybrid_retrieval_service`, lazy DB warming, Qdrant + BM25 parallel fetch).
+  - Ingestion Hook: `backend/ingestion/service.py` (`index_document_chunks_in_bm25` hook with per-patient partitioned cache updates and cleanup).
+  - RAG Integration: `backend/rag/service.py` (switched retrieval engine from dense-only to `HybridRetrievalService`, candidate telemetry reporting `sparse_candidates_count`).
+  - API Routes: `backend/api/v1/vector.py` (`POST /api/v1/vector/hybrid-search` with patient isolation checks and top-K parameterization).
+  - Schemas: `backend/schemas/vector.py` (`HybridSearchRequest`, `HybridSearchResultItem`, `HybridSearchResponse`), `backend/schemas/rag.py` (`RetrievalMetadata.sparse_candidates_count`).
+- [x] **3. No Secrets / Real PHI Committed:** All sparse BM25 indices and test corpora run against synthetic clinical dossiers (`SYN-HYB-01`, `Eleanor Vance`); zero real PHI stored.
+- [x] **4. Dependencies Documented:** FastEmbed, Qdrant-Client, PyMuPDF, FastAPI; pure Python/NumPy-free Okapi BM25 engine requires zero heavy C++ dependencies or external search services.
+- [x] **5. Automated Tests Passing:** **76/76 pytest tests pass** (9 new comprehensive tests in Phase 8):
+  - `tests/unit/test_bm25.py` (4 tests): Tokenization with clinical acronym preservation, Okapi BM25 scoring with term frequency weighting, empty query handling, `PatientBM25Registry` per-patient isolation and document purge.
+  - `tests/unit/test_rrf.py` (3 tests): Reciprocal Rank Fusion calculation with $k=60$, multi-retriever rank boost, sparse-only vs dense-only candidate merging, tie-breaking stability.
+  - `tests/unit/test_hybrid_benchmark.py` (1 benchmark test): Clinical acronym benchmark demonstrating Hybrid RRF retrieves `NT-proBNP` at Rank #1 despite semantic distractors.
+  - `tests/integration/test_hybrid_retrieval.py` (1 test): End-to-end ingestion, hybrid search API execution (`POST /api/v1/vector/hybrid-search`), dense/sparse rank verification, and cross-patient isolation security check (`403 Forbidden`).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 82 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 9.10s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** `POST /api/v1/vector/hybrid-search` enforces `check_user_patient_access`. `PatientBM25Registry` partitions BM25 indices strictly by `patient_id`, preventing any sparse keyword leaks across patient dossiers.
+- [x] **8. Error Handling & Edge Cases:** Fallback to SQLite DB warming when memory index is freshly initialized; empty query/zero-result graceful handling; division-by-zero protection in BM25 IDF; single candidate RRF stability.
+- [x] **9. Audit Trail Active:** Ingestion and retrieval events track dense candidates, sparse candidates, and merged RRF candidates in `RetrievalMetadata`.
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/documents/PDFCitationViewerModal.tsx`: Interactive modal with provenance excerpt inspector, quote text highlighting, page navigation jumper, native PDF stream viewer, copy quote button, and raw PDF download link.
+  - `frontend/src/features/rag/ClinicalRAGPanel.tsx`: Added "Open In-Viewer PDF Provenance" action button connected to `PDFCitationViewerModal`.
+  - `frontend/src/App.tsx`: Updated `PHASES_DATA` marking Phase 8 as "Verified".
+- [x] **11. Known Limitations Recorded:** Event timeline extraction and clinical contradiction detection are scheduled for Phase 9.
+- [x] **12. Phase Tracker Updated:** Phase 8 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 9.
+
+---
+
+## 10. Active Risks & Outstanding Issues
+* **Clinical Event Timeline Synthesis:** Patient records are currently synthesized on-demand via hybrid RAG, but lack longitudinal event chronologization (e.g. chronological mapping of diagnoses, encounters, lab tests, and med changes across disparate documents).
+* **Next Action:** Phase 9 will implement Longitudinal Timeline & Clinical Event Synthesis (structured event extractor, timeline normalizer, clinical contradiction surfacing, and interactive timeline visualization).
+

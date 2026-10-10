@@ -3,11 +3,16 @@
 import logging
 import time
 
+from sqlalchemy.orm import Session
+
 from backend.rag.citations import ABSTENTION_PHRASES, CitationVerifier
 from backend.rag.llm import BaseLLMProvider, get_llm_provider
 from backend.rag.prompt import GroundedPromptBuilder
+from backend.retrieval.service import (
+    HybridRetrievalService,
+    get_hybrid_retrieval_service,
+)
 from backend.schemas.rag import RAGQueryResponse, RetrievalMetadata
-from backend.vector.store import QdrantVectorStore, get_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +22,12 @@ class RAGService:
 
     def __init__(
         self,
-        vector_store: QdrantVectorStore | None = None,
+        retrieval_service: HybridRetrievalService | None = None,
         llm_provider: BaseLLMProvider | None = None,
         prompt_builder: GroundedPromptBuilder | None = None,
         citation_verifier: CitationVerifier | None = None,
     ) -> None:
-        self.vector_store = vector_store or get_vector_store()
+        self.retrieval_service = retrieval_service or get_hybrid_retrieval_service()
         self.llm_provider = llm_provider or get_llm_provider()
         self.prompt_builder = prompt_builder or GroundedPromptBuilder()
         self.citation_verifier = citation_verifier or CitationVerifier()
@@ -32,19 +37,21 @@ class RAGService:
         query: str,
         patient_id: str,
         top_k: int = 5,
+        db: Session | None = None,
     ) -> RAGQueryResponse:
         """
-        Executes dense retrieval against patient dossier, constructs evidence-grounded prompt,
-        generates answer, and parses/verifies citations.
+        Executes hybrid retrieval (Dense + BM25 + RRF) against patient dossier, constructs
+        evidence-grounded prompt, generates answer, and parses/verifies citations.
         """
         start_total = time.perf_counter()
 
-        # 1. Dense vector candidate retrieval
+        # 1. Hybrid candidate retrieval (Dense + Sparse + RRF)
         start_retrieval = time.perf_counter()
-        retrieved_chunks = self.vector_store.search(
+        retrieved_chunks, ret_meta = self.retrieval_service.search(
             query=query,
             patient_id=patient_id,
             top_k=top_k,
+            db=db,
         )
         retrieval_latency_ms = max(1, int((time.perf_counter() - start_retrieval) * 1000))
 
@@ -59,7 +66,8 @@ class RAGService:
                 limitations=["No relevant clinical documents found for this patient."],
                 confidence_score=0.0,
                 retrieval_metadata=RetrievalMetadata(
-                    dense_candidates_count=0,
+                    dense_candidates_count=ret_meta.get("dense_candidates_count", 0),
+                    sparse_candidates_count=ret_meta.get("sparse_candidates_count", 0),
                     merged_candidates_count=0,
                     retrieval_latency_ms=retrieval_latency_ms,
                     generation_latency_ms=0,
@@ -121,7 +129,8 @@ class RAGService:
             limitations=limitations,
             confidence_score=confidence_score,
             retrieval_metadata=RetrievalMetadata(
-                dense_candidates_count=len(retrieved_chunks),
+                dense_candidates_count=ret_meta.get("dense_candidates_count", len(retrieved_chunks)),
+                sparse_candidates_count=ret_meta.get("sparse_candidates_count", 0),
                 merged_candidates_count=len(retrieved_chunks),
                 retrieval_latency_ms=retrieval_latency_ms,
                 generation_latency_ms=generation_latency_ms,

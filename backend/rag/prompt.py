@@ -1,6 +1,7 @@
-"""Grounded prompt construction with strict context boundaries and anti-injection delimiters."""
+from collections.abc import Sequence
 
 from backend.core.config import settings
+from backend.retrieval.rrf import HybridSearchResult
 from backend.vector.store import VectorSearchResult
 
 CLINICAL_SYSTEM_PROMPT = """You are an evidence synthesis assistant for Patient360.
@@ -24,7 +25,7 @@ class GroundedPromptBuilder:
     def build_prompt(
         self,
         query: str,
-        retrieved_chunks: list[VectorSearchResult],
+        retrieved_chunks: Sequence[VectorSearchResult | HybridSearchResult],
     ) -> str:
         """
         Assembles verified candidate passages into an untrusted content enclosure

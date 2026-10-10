@@ -13,6 +13,7 @@ from backend.ingestion.extractor import extract_pages_from_pdf
 from backend.ingestion.normalizer import normalize_clinical_text
 from backend.models.chunk import DocumentChunk
 from backend.models.user import User
+from backend.retrieval.bm25 import BM25Document, get_bm25_registry
 from backend.schemas.chunk import IngestionResponse
 from backend.vector.store import get_vector_store
 
@@ -65,10 +66,13 @@ def ingest_document(
             patient_id=doc.patient_id,
         )
 
-        # 6. Idempotently clear existing chunks for this document in SQL and Vector Store
+        # 6. Idempotently clear existing chunks for this document in SQL, Vector Store, and BM25 Index
         db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
         vector_store = get_vector_store()
         vector_store.delete_document_chunks(doc.id)
+        if doc.patient_id:
+            bm25_registry = get_bm25_registry()
+            bm25_registry.delete_document_chunks(doc.patient_id, doc.id)
 
         # 7. Insert new chunks in SQL
         total_tokens = 0
@@ -91,8 +95,26 @@ def ingest_document(
         for c in inserted_chunks:
             db.refresh(c)
 
-        # 8. Index into Qdrant Vector Store
+        # 8. Index into Qdrant Vector Store and In-Memory BM25 Index
         vector_store.upsert_chunks(inserted_chunks)
+        if doc.patient_id:
+            bm25_registry = get_bm25_registry()
+            bm25_docs = [
+                BM25Document(
+                    chunk_id=c.id,
+                    document_id=c.document_id,
+                    patient_id=doc.patient_id,
+                    page_number=c.page_number,
+                    chunk_index=c.chunk_index,
+                    content=c.content,
+                    raw_content=c.raw_content,
+                    doc_title=doc.title,
+                    doc_type=doc.doc_type,
+                    doc_date=str(doc.doc_date) if doc.doc_date else None,
+                )
+                for c in inserted_chunks
+            ]
+            bm25_registry.index_chunks(doc.patient_id, bm25_docs)
 
         # 9. Mark document completed
         doc.ingestion_status = "completed"

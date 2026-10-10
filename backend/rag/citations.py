@@ -1,8 +1,10 @@
 """Citation extraction, provenance verification, and claim entailment analysis."""
 
 import re
+from collections.abc import Sequence
 from typing import Literal
 
+from backend.retrieval.rrf import HybridSearchResult
 from backend.schemas.rag import CitationItem
 from backend.vector.store import VectorSearchResult
 
@@ -25,7 +27,7 @@ class CitationVerifier:
     def verify(
         self,
         answer: str,
-        retrieved_chunks: list[VectorSearchResult],
+        retrieved_chunks: Sequence[VectorSearchResult | HybridSearchResult],
     ) -> tuple[list[CitationItem], bool]:
         """
         Parses all citations in the synthesized answer and checks provenance against candidate chunks.
@@ -38,7 +40,7 @@ class CitationVerifier:
             return [], True
 
         # Index retrieved chunks by (document_id, page_number)
-        chunk_map: dict[tuple[str, int], list[VectorSearchResult]] = {}
+        chunk_map: dict[tuple[str, int], list[VectorSearchResult | HybridSearchResult]] = {}
         for chunk in retrieved_chunks:
             key = (chunk.document_id, chunk.page_number)
             chunk_map.setdefault(key, []).append(chunk)

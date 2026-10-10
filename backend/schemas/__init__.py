@@ -33,6 +33,8 @@ from backend.schemas.rag import (
     RetrievalMetadata,
 )
 from backend.schemas.vector import (
+    HybridSearchRequest,
+    HybridSearchResultItem,
     VectorSearchRequest,
     VectorSearchResultItem,
     VectorStatsResponse,
@@ -62,6 +64,8 @@ __all__ = [
     "VectorSearchRequest",
     "VectorSearchResultItem",
     "VectorStatsResponse",
+    "HybridSearchRequest",
+    "HybridSearchResultItem",
     "RAGQueryRequest",
     "RAGQueryResponse",
     "CitationItem",

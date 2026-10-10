@@ -139,6 +139,7 @@ export interface CitationItem {
 
 export interface RetrievalMetadata {
   dense_candidates_count: number;
+  sparse_candidates_count: number;
   merged_candidates_count: number;
   retrieval_latency_ms: number;
   generation_latency_ms: number;

@@ -37,3 +37,32 @@ class VectorStatsResponse(BaseModel):
     indexed_vectors_count: int
     dimensions: int
     is_embedded: bool
+
+
+class HybridSearchRequest(BaseModel):
+    """Payload for hybrid (dense vector + sparse BM25 + RRF) retrieval."""
+
+    query: str = Field(..., min_length=1, description="Natural language clinical search query")
+    patient_id: str = Field(..., description="Patient ID to isolate search")
+    top_k: int = Field(default=5, ge=1, le=50, description="Number of merged candidates to return")
+    rrf_k: int = Field(default=60, ge=1, le=200, description="RRF smoothing constant")
+
+
+class HybridSearchResultItem(BaseModel):
+    """Ranked candidate merged using Reciprocal Rank Fusion."""
+
+    chunk_id: str
+    document_id: str
+    patient_id: str | None
+    page_number: int
+    chunk_index: int
+    content: str
+    raw_content: str
+    rrf_score: float
+    dense_rank: int | None
+    sparse_rank: int | None
+    dense_score: float | None
+    sparse_score: float | None
+    doc_title: str
+    doc_type: str
+    doc_date: str | None

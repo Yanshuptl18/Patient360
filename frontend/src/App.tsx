@@ -18,7 +18,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 5, name: 'Ingestion & Chunking', status: 'Verified', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
   { number: 6, name: 'Embeddings & Qdrant', status: 'Verified', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
   { number: 7, name: 'Baseline Grounded RAG', status: 'Verified', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
-  { number: 8, name: 'Advanced Hybrid RAG', status: 'Planned', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
+  { number: 8, name: 'Advanced Hybrid RAG', status: 'Verified', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Planned', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
   { number: 10, name: 'Bounded Agentic Workflows', status: 'Planned', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
   { number: 11, name: 'Research Intelligence', status: 'Planned', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },

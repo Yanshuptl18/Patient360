@@ -28,6 +28,7 @@ class RetrievalMetadata(BaseModel):
     """Performance telemetry and candidate counts for the RAG query."""
 
     dense_candidates_count: int
+    sparse_candidates_count: int = 0
     merged_candidates_count: int
     retrieval_latency_ms: int
     generation_latency_ms: int

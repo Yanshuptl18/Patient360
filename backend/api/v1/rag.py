@@ -46,6 +46,7 @@ def query_grounded_rag(
         query=request_body.query,
         patient_id=request_body.patient_id,
         top_k=request_body.top_k,
+        db=db,
     )
 
     # 3. Log immutable audit trail

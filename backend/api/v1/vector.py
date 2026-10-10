@@ -9,7 +9,10 @@ from backend.api.deps import get_current_user, get_db
 from backend.core.exceptions import AuthorizationError
 from backend.models.user import User
 from backend.patients.service import check_user_patient_access
+from backend.retrieval.service import get_hybrid_retrieval_service
 from backend.schemas.vector import (
+    HybridSearchRequest,
+    HybridSearchResultItem,
     VectorSearchRequest,
     VectorSearchResultItem,
     VectorStatsResponse,
@@ -71,6 +74,53 @@ def search_vector_embeddings(
             content=r.content,
             raw_content=r.raw_content,
             score=round(r.score, 4),
+            doc_title=r.doc_title,
+            doc_type=r.doc_type,
+            doc_date=r.doc_date,
+        )
+        for r in results
+    ]
+
+
+@router.post("/hybrid-search", response_model=list[HybridSearchResultItem], status_code=status.HTTP_200_OK)
+def search_hybrid_retrieval(
+    request: HybridSearchRequest,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[HybridSearchResultItem]:
+    """
+    Executes hybrid retrieval combining dense vector similarity (Qdrant), sparse keyword search (BM25),
+    and Reciprocal Rank Fusion (RRF).
+    Enforces strict patient-level access boundary.
+    """
+    if not check_user_patient_access(db, user=current_user, patient_id=request.patient_id, min_permission="read"):
+        raise AuthorizationError(
+            f"User '{current_user.email}' is not authorized to search patient dossier '{request.patient_id}'."
+        )
+
+    retrieval_service = get_hybrid_retrieval_service()
+    results, _meta = retrieval_service.search(
+        query=request.query,
+        patient_id=request.patient_id,
+        top_k=request.top_k,
+        rrf_k=request.rrf_k,
+        db=db,
+    )
+
+    return [
+        HybridSearchResultItem(
+            chunk_id=r.chunk_id,
+            document_id=r.document_id,
+            patient_id=r.patient_id,
+            page_number=r.page_number,
+            chunk_index=r.chunk_index,
+            content=r.content,
+            raw_content=r.raw_content,
+            rrf_score=r.rrf_score,
+            dense_rank=r.dense_rank,
+            sparse_rank=r.sparse_rank,
+            dense_score=round(r.dense_score, 4) if r.dense_score is not None else None,
+            sparse_score=round(r.sparse_score, 4) if r.sparse_score is not None else None,
             doc_title=r.doc_title,
             doc_type=r.doc_type,
             doc_date=r.doc_date,
