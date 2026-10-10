@@ -4,6 +4,7 @@ from backend.models.audit import AuditLog
 from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
 from backend.models.patient import Patient, UserPatientPermission
+from backend.models.research import ResearchStudy
 from backend.models.timeline import ClinicalEvent
 from backend.models.user import User
 
@@ -15,4 +16,6 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "ClinicalEvent",
+    "ResearchStudy",
 ]
+

@@ -12,6 +12,7 @@ from backend.core.database import Base
 if TYPE_CHECKING:
     from backend.models.chunk import DocumentChunk
     from backend.models.patient import Patient
+    from backend.models.research import ResearchStudy
 
 
 class Document(Base):
@@ -57,6 +58,10 @@ class Document(Base):
     chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
     )
+    research_study: Mapped["ResearchStudy | None"] = relationship(
+        "ResearchStudy", back_populates="document", uselist=False, cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Document {self.title} (Status: {self.ingestion_status})>"
+

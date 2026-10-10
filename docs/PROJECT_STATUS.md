@@ -3,7 +3,7 @@
 ## 1. Master Phase Tracker
 
 | Phase | Phase Name | Status | Prerequisites | Key Deliverables | Verification Evidence | Approval Status |
-| :---: | :--- | :---: | :--- | :--- | :--- | :---: |
+| :---: | :--- | :---: | :--- | :--- | :--- | :--- |
 | **1** | Discovery, Requirements & Architecture | **Verified** | Empty workspace | 15 docs in `docs/`, architecture diagrams, data models | Phase 1 document review completed | Approved |
 | **2** | Development Foundation & Tooling Setup | **Verified** | Phase 1 | Docker compose, FastAPI skeleton, React/Vite, health probes | Pytest 5/5 passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **3** | Authentication, Authorization & RBAC | **Verified** | Phase 2 | JWT auth, Argon2, RBAC guards, user tables, audit logger | 20/20 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
@@ -12,9 +12,9 @@
 | **6** | Embeddings & Vector Indexing | **Verified** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **7** | Baseline Grounded RAG | **Verified** | Phase 6 | BaseLLMProvider, MockLLMProvider, GroundedPromptBuilder, CitationVerifier, ClinicalRAGPanel | 67/67 Pytest passed, Ruff clean, Mypy clean (74 files), Vite built in 5.58s | Approved |
 | **8** | Advanced Hybrid RAG & Retrieval Opt. | **Verified** | Phase 7 | In-memory BM25, RRF merger ($k=60$), HybridRetrievalService, PDFCitationViewerModal | 76/76 Pytest passed, Ruff clean, Mypy clean (82 files), Vite built in 9.10s | Approved |
-| **9** | **Longitudinal Timeline & Clinical Events** | **Completed** | Phase 8 | ClinicalEvent model, extractor, contradiction detector, TimelineService, ClinicalTimelinePanel | 88/88 Pytest passed, Ruff clean, Mypy clean (93 files), Vite built in 5.14s | Pending Approval |
-| **10**| Bounded Agentic Workflows | Planned | Phase 9 | LangGraph state graph, read-only tools, approval gate | Pending Phase 10 | Planned |
-| **11**| Medical Research Intelligence | Planned | Phase 10 | Research schema, comparative matrix, dossier exporter | Pending Phase 11 | Planned |
+| **9** | Longitudinal Timeline & Clinical Events | **Verified** | Phase 8 | ClinicalEvent model, extractor, contradiction detector, TimelineService, ClinicalTimelinePanel | 88/88 Pytest passed, Ruff clean, Mypy clean (93 files), Vite built in 5.14s | Approved |
+| **10**| Bounded Agentic Workflows | **Verified** | Phase 9 | LangGraph state graph, read-only tools, approval gate | 102/102 Pytest passed, Ruff clean, Mypy clean (104 files), Vite built in 4.74s | Approved |
+| **11**| **Medical Research Intelligence** | **Completed** | Phase 10 | Research schema, comparative matrix, dossier exporter | 111/111 Pytest passed, Ruff clean, Mypy clean (114 files), Vite built in 5.07s | Pending Approval |
 | **12**| Comprehensive Evaluation Laboratory | Planned | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | Pending Phase 12 | Planned |
 | **13**| Security Hardening & Responsible AI | Planned | Phase 12 | STRIDE pen-tests, prompt injection defense, deletion purge | Pending Phase 13 | Planned |
 | **14**| Production Hardening & Observability | Planned | Phase 13 | Multi-stage Dockerfiles, Prometheus metrics, CI/CD | Pending Phase 14 | Planned |
@@ -280,14 +280,46 @@
   - `frontend/src/features/agents/ClinicalAgentPanel.tsx`: Interactive multi-step launcher with preset queries, state/loop budget meter, stepped telemetry trace inspector with expandable tool input/output JSON, Human-in-the-Loop review gate action banner (Approve / Reject), and certified report viewer with copy action.
   - `frontend/src/App.tsx`: Added 4th workspace tab (`Bounded Agents` with `Bot` icon); marked Phase 10 as `Verified` in `PHASES_DATA`.
 - [x] **11. Known Limitations Recorded:** Biomedical literature integration and cross-study comparative matrices are scheduled for Phase 11.
-- [x] **12. Phase Tracker Updated:** Phase 10 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 11.
+- [x] **12. Phase Tracker Updated:** Phase 10 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 10 reviewed and approved by user.
 
 ---
 
-## 12. Active Risks & Outstanding Issues
-* **Biomedical Literature Cross-Referencing:** Agentic inquiry currently focuses on patient EHR documents and historical records. Cross-referencing findings against PubMed / OpenAlex literature and clinical trial matrices will be established in Phase 11.
-* **Next Action:** Phase 11 will implement Research Intelligence (Biomedical Literature Search, OpenAlex / PubMed integration, Comparative Study Matrices, and Guideline Verification).
+## 12. Phase 11 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Medical Research Intelligence engine extracting structured biomedical parameters (DOI, PMID, study design taxonomy, sample size $N$, target population, interventions, primary endpoints, limitations), computing side-by-side Evidence Comparison Matrices with Oxford CEBM evidence grading, and exporting publication-ready Markdown research synthesis dossiers aligned with FR-RES-01..04.
+- [x] **2. Modular Architecture Enforced:**
+  - Database Model: `backend/models/research.py` (`ResearchStudy` with cascade link to `Document`, indexed `doi` and `pmid`), exported in `backend/models/__init__.py`.
+  - Pydantic Schemas: `backend/schemas/research.py` (`ResearchStudyResponse`, `StudyCompareRequest`, `StudyMatrixRow`, `StudyComparisonMatrix`, `DossierExportRequest`, `DossierExportResponse`), exported in `backend/schemas/__init__.py`.
+  - Parameter Extractor: `backend/research/extractor.py` (`StudyParameterExtractor` with DOI regex, PMID regex, study design taxonomy classifier, cohort size pattern matcher, population/intervention/outcome/limitation extractors).
+  - Comparative Matrix & Dossier Engine: `backend/research/matrix.py` (`determine_evidence_strength` with Oxford CEBM levels, `build_comparison_matrix`, `export_markdown_dossier` with Markdown tables and citation bibliography).
+  - Orchestration Service: `backend/research/service.py` (`ResearchService`, `get_research_service` managing document study extraction, search filtering, multi-study comparison, and export with audit trails).
+  - API Routes: `backend/api/v1/research.py` (`POST /extract/{document_id}`, `GET /studies`, `GET /studies/{id}`, `POST /compare`, `POST /export-dossier`), registered in `backend/api/v1/__init__.py`.
+- [x] **3. No Secrets / Real PHI Committed:** All research literature models and test suites run on open-access biomedical literature metadata and synthetic clinical trials (`10.1056/NEJMoa2022103`, `PMID: 32678530`, `DAPA-CKD`); zero proprietary or patient-sensitive PHI.
+- [x] **4. Dependencies Documented:** Pure Python regex and string parsing, SQLAlchemy, Pydantic v2, FastAPI; requires zero paid third-party API dependencies for offline execution.
+- [x] **5. Automated Tests Passing:** **111/111 pytest tests pass** (9 new tests in Phase 11):
+  - `tests/unit/test_study_extractor.py` (4 tests): Full study parameter extraction (DOI, PMID, RCT design, $N=4304$, population, intervention, endpoint, limitations), observational study classification, regex fallback heuristics, and empty text handling.
+  - `tests/unit/test_research_matrix.py` (3 tests): Oxford CEBM evidence strength assignment (High for Meta-Analysis and large RCT, Moderate for small RCT and prospective cohort, Low-Moderate for retrospective cohort, Preliminary for case series), multi-trial comparison matrix synthesis, and Markdown dossier export with markdown table formatting.
+  - `tests/integration/test_research_pipeline.py` (2 tests): End-to-end study extraction via API, catalog querying, multi-study comparison matrix generation, Markdown dossier export, and unauthenticated request rejection (`401 Unauthorized`).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 114 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 5.07s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** All research endpoints enforce user authentication (`get_current_user`). Audit logging tracks extraction, comparison queries, and dossier export operations.
+- [x] **8. Error Handling & Edge Cases:** Fallback heuristics when structured sections or identifiers are absent; cohort size regex supporting comma-separated, compact, and verbal forms; single-sentence section boundaries captured; duplicate or invalid IDs return structured 404/400 errors.
+- [x] **9. Audit Trail Active:** Append-only database audit logs record `RESEARCH_STUDY_EXTRACTED`, `RESEARCH_MATRIX_GENERATED`, and `RESEARCH_DOSSIER_EXPORTED`.
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/research/ResearchIntelligencePanel.tsx`: Multi-study explorer with text search, study design dropdown filter, selection counter badge, interactive side-by-side comparison matrix with Oxford evidence strength badges, synthesis card, and publication-ready Markdown research dossier exporter with Copy and Download actions.
+  - `frontend/src/App.tsx`: Added 5th workspace tab (`Research Intelligence` with `FileSearch` icon); marked Phase 11 as `Verified` in `PHASES_DATA`.
+- [x] **11. Known Limitations Recorded:** Quantitative RAG retrieval benchmarking, synthetic test datasets, and automated faithfulness/recall scoring are scheduled for Phase 12 (Evaluation Laboratory).
+- [x] **12. Phase Tracker Updated:** Phase 11 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 12.
+
+---
+
+## 13. Active Risks & Outstanding Issues
+* **Quantitative Retrieval Benchmarking:** While hybrid retrieval (BM25 + Dense) and comparative research intelligence are operational, formal synthetic golden-dataset evaluation metrics (Faithfulness, Context Recall, Answer Relevance) remain to be measured in Phase 12.
+* **Next Action:** Phase 12 will implement the Comprehensive Evaluation Laboratory (50-item synthetic clinical benchmark runner, automated evaluation metrics harness, and interactive Evaluation Lab UI).
 
 
 

@@ -41,6 +41,18 @@ from backend.schemas.rag import (
     RAGQueryResponse,
     RetrievalMetadata,
 )
+from backend.schemas.research import (
+    DossierExportRequest,
+    DossierExportResponse,
+    EvidenceStrength,
+    ResearchStudyBase,
+    ResearchStudyCreate,
+    ResearchStudyResponse,
+    StudyCompareRequest,
+    StudyComparisonMatrix,
+    StudyExtractRequest,
+    StudyMatrixRow,
+)
 from backend.schemas.timeline import (
     ClinicalEventBase,
     ClinicalEventCreate,
@@ -116,5 +128,14 @@ __all__ = [
     "AgentRunSnapshot",
     "AgentApprovalRequest",
     "AgentApprovalResponse",
+    "EvidenceStrength",
+    "ResearchStudyBase",
+    "ResearchStudyCreate",
+    "ResearchStudyResponse",
+    "StudyExtractRequest",
+    "StudyCompareRequest",
+    "StudyMatrixRow",
+    "StudyComparisonMatrix",
+    "DossierExportRequest",
+    "DossierExportResponse",
 ]
-

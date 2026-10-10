@@ -9,6 +9,7 @@ import { DocumentList } from './features/documents/DocumentList';
 import { ClinicalRAGPanel } from './features/rag/ClinicalRAGPanel';
 import { ClinicalTimelinePanel } from './features/timeline/ClinicalTimelinePanel';
 import { ClinicalAgentPanel } from './features/agents/ClinicalAgentPanel';
+import { ResearchIntelligencePanel } from './features/research/ResearchIntelligencePanel';
 import { PhaseInfo, Patient, Document } from './types';
 import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles } from 'lucide-react';
 
@@ -23,7 +24,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 8, name: 'Advanced Hybrid RAG', status: 'Verified', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Verified', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
   { number: 10, name: 'Bounded Agentic Workflows', status: 'Verified', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
-  { number: 11, name: 'Research Intelligence', status: 'Planned', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
+  { number: 11, name: 'Research Intelligence', status: 'Verified', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
   { number: 12, name: 'Evaluation Laboratory', status: 'Planned', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
   { number: 13, name: 'Security & Responsible AI', status: 'Planned', description: 'Prompt-injection pen tests, audit logs, and data erasure.', tag: 'Hardening' },
   { number: 14, name: 'Production Hardening', status: 'Planned', description: 'Multi-stage Docker, Prometheus metrics, and CI/CD pipelines.', tag: 'DevOps' },
@@ -34,7 +35,7 @@ const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents'>('documents');
+  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents' | 'research'>('documents');
 
   const { user, isAuthenticated, token } = useAuth();
 
@@ -280,6 +281,19 @@ const MainContent: React.FC = () => {
                         <Bot className="w-3.5 h-3.5" />
                         <span>Bounded Agents</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActivePatientTab('research')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          activePatientTab === 'research'
+                            ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <FileSearch className="w-3.5 h-3.5" />
+                        <span>Research Intelligence</span>
+                      </button>
                     </div>
 
                     {/* Active View */}
@@ -301,11 +315,13 @@ const MainContent: React.FC = () => {
                           patientId={selectedPatient.id}
                           patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                         />
-                      ) : (
+                      ) : activePatientTab === 'agents' ? (
                         <ClinicalAgentPanel
                           patientId={selectedPatient.id}
                           patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                         />
+                      ) : (
+                        <ResearchIntelligencePanel />
                       )}
                     </div>
 

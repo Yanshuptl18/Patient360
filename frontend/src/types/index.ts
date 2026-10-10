@@ -309,4 +309,55 @@ export interface AgentApprovalResponse {
   final_report?: string | null;
 }
 
+export type EvidenceStrength = 'High' | 'Moderate' | 'Low-Moderate' | 'Preliminary';
+
+export interface ResearchStudy {
+  id: string;
+  document_id: string;
+  pmid?: string | null;
+  doi?: string | null;
+  title: string;
+  authors?: string | null;
+  publication_date?: string | null;
+  study_design?: string | null;
+  population_description?: string | null;
+  sample_size?: number | null;
+  intervention?: string | null;
+  primary_outcome?: string | null;
+  limitations?: string | null;
+  created_at: string;
+}
+
+export interface StudyMatrixRow {
+  study_id: string;
+  title: string;
+  doi?: string | null;
+  pmid?: string | null;
+  authors?: string | null;
+  publication_year?: number | null;
+  study_design?: string | null;
+  sample_size?: number | null;
+  population?: string | null;
+  intervention?: string | null;
+  primary_outcome?: string | null;
+  limitations?: string | null;
+  evidence_strength: EvidenceStrength;
+}
+
+export interface StudyComparisonMatrix {
+  comparison_topic: string;
+  studies_count: number;
+  matrix_rows: StudyMatrixRow[];
+  synthesized_findings: string;
+  guideline_alignment?: string | null;
+}
+
+export interface DossierExportResponse {
+  title: string;
+  markdown_content: string;
+  studies_included_count: number;
+  generated_at_iso: string;
+}
+
+
 

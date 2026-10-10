@@ -9,6 +9,7 @@ from backend.api.v1 import (
     health,
     patients,
     rag,
+    research,
     timeline,
     vector,
 )
@@ -22,4 +23,6 @@ api_router.include_router(vector.router, prefix="/vector", tags=["Vector Store &
 api_router.include_router(rag.router, prefix="/rag", tags=["Grounded RAG & Evidence Synthesis"])
 api_router.include_router(timeline.router, prefix="/timeline", tags=["Longitudinal Timeline & Clinical Events"])
 api_router.include_router(agents.router, prefix="/agents", tags=["Bounded Agentic Workflows"])
+api_router.include_router(research.router, prefix="/research", tags=["Medical Research Intelligence"])
+
 
