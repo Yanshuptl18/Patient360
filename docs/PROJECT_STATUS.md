@@ -9,8 +9,8 @@
 | **3** | Authentication, Authorization & RBAC | **Verified** | Phase 2 | JWT auth, Argon2, RBAC guards, user tables, audit logger | 20/20 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **4** | Patient & Document Management | **Verified** | Phase 3 | Patient CRUD, PDF upload, storage adapter, cohort isolation | 33/33 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **5** | Document Ingestion, Parsing & Chunking | **Verified** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
-| **6** | **Embeddings & Vector Indexing** | **Completed** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean (63 files), Vite built in 4.16s | Pending Approval |
-| **7** | Baseline Grounded RAG | Planned | Phase 6 | LLM adapter, grounded prompt builder, citation parser | Pending Phase 7 | Planned |
+| **6** | Embeddings & Vector Indexing | **Verified** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
+| **7** | **Baseline Grounded RAG** | **Completed** | Phase 6 | BaseLLMProvider, MockLLMProvider, GroundedPromptBuilder, CitationVerifier, ClinicalRAGPanel | 67/67 Pytest passed, Ruff clean, Mypy clean (74 files), Vite built in 5.58s | Pending Approval |
 | **8** | Advanced Hybrid RAG & Retrieval Opt. | Planned | Phase 7 | In-memory BM25, RRF merger, citation verifier | Pending Phase 8 | Planned |
 | **9** | Longitudinal Timeline & Clinical Events | Planned | Phase 8 | Event extractor, contradiction detector, Timeline UI | Pending Phase 9 | Planned |
 | **10**| Bounded Agentic Workflows | Planned | Phase 9 | LangGraph state graph, read-only tools, approval gate | Pending Phase 10 | Planned |
@@ -145,11 +145,44 @@
   - `frontend/src/features/documents/DocumentList.tsx`: Added "Semantic Search" action button to patient dossier header.
   - `frontend/src/App.tsx`: Updated `PHASES_DATA` marking Phase 6 as "Verified".
 - [x] **11. Known Limitations Recorded:** BM25 sparse search and reciprocal rank fusion (RRF) are scheduled for Phase 8; LLM synthesis over retrieved vector chunks is scheduled for Phase 7.
-- [x] **12. Phase Tracker Updated:** Phase 6 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 7.
+- [x] **12. Phase Tracker Updated:** Phase 6 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 6 reviewed and approved by user.
 
 ---
 
-## 8. Active Risks & Outstanding Issues
-* **LLM Generation:** Retrieved vector chunks are currently inspected directly via `POST /api/v1/vector/search` and the Semantic Search Modal. Grounded answer generation with strict citation verification will be implemented in Phase 7.
-* **Next Action:** Phase 7 will build the Baseline Grounded RAG engine (`backend/rag/`), integrating the LLM generation adapter, structured prompt builder, citation validator, and interactive RAG Q&A chat drawer.
+## 8. Phase 7 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Evidence-grounded clinical question-answering with dense vector retrieval, context token budget management, anti-injection passage boundaries, LLM generation adapter, citation verification, and deterministic abstention aligned with FR-RET-01..05, FR-RAG-01..04, and RAG_DESIGN.
+- [x] **2. Modular Architecture Enforced:**
+  - LLM Interface: `backend/rag/llm.py` (`BaseLLMProvider`, `MockLLMProvider`, `get_llm_provider`, `LLMResponse`).
+  - Context & Prompt Builder: `backend/rag/prompt.py` (`GroundedPromptBuilder`, `CLINICAL_SYSTEM_PROMPT`, untrusted delimiter enclosures `<<<UNTRUSTED_DOCUMENT_CONTENT [Doc: ..., Page: ...]>>>`).
+  - Citation Engine: `backend/rag/citations.py` (`CitationVerifier`, exact claim-to-passage quote resolution, `supported`/`partially_supported`/`unsupported` status assignment, abstention detection).
+  - Orchestrator Service: `backend/rag/service.py` (`RAGService`, `get_rag_service`, confidence score calculation, limitations detection, performance telemetry).
+  - Schemas: `backend/schemas/rag.py` (`RAGQueryRequest`, `RAGQueryResponse`, `CitationItem`, `RetrievalMetadata`, `RAGFeedbackRequest`, `RAGFeedbackResponse`).
+  - API Routes: `backend/api/v1/rag.py` (`POST /query`, `POST /feedback`).
+- [x] **3. No Secrets / Real PHI Committed:** All clinical prompts and test fixtures use synthetic patients (`SYN-RAG-01`, `Eleanor Vance`); zero real PHI stored; API keys kept in environment variables with safe offline `MockLLMProvider` fallback.
+- [x] **4. Dependencies Documented:** FastEmbed, PyMuPDF, Qdrant-Client, Pydantic, and FastAPI verified without requiring external cloud API keys or heavy GPU runtimes for standard operation.
+- [x] **5. Automated Tests Passing:** **67/67 pytest tests pass** (11 new comprehensive tests in Phase 7):
+  - `tests/unit/test_rag_prompt.py` (2 tests): Prompt delimiter injection, untrusted document boundaries, and context token budget truncation.
+  - `tests/unit/test_rag_citations.py` (3 tests): Citation extraction, exact quote resolution, unsupported/hallucinated citation detection, and abstention phrase recognition.
+  - `tests/unit/test_rag_llm.py` (2 tests): Grounded answer generation with page citations, deterministic abstention on unmentioned clinical inquiries.
+  - `tests/integration/test_rag_pipeline.py` (4 tests): End-to-end ingestion and grounded RAG query (with page 2 citation and supported status); deterministic abstention on unmentioned facts (`is_abstention=True`); cross-patient access boundary rejection (`403 Forbidden`); clinician feedback submission (`201 Created`).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 74 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 5.58s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** `POST /api/v1/rag/query` and `POST /api/v1/rag/feedback` strictly enforce tenant/patient authorization (`check_user_patient_access`). Non-permitted users receive `403 Forbidden`. Document passages are isolated within untrusted content delimiters to neutralize prompt injection.
+- [x] **8. Error Handling & Edge Cases:** Zero retrieved chunks gracefully return clean abstention without crashing; ungrounded inquiries trigger standard clinical abstention (`"Insufficient evidence documented in available records."`); token overflow handled safely via budget truncation.
+- [x] **9. Audit Trail Active:** Append-only audit logging records `RAG_QUERY_EXECUTED` (with query length, candidate count, citation count, abstention flag, confidence score) and `RAG_FEEDBACK_SUBMITTED` (with rating, issue type, comment).
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/rag/ClinicalRAGPanel.tsx`: Interactive clinical Q&A drawer with quick suggestion pills, confidence score gauge, verified citation cards, exact source excerpt inspector, limitations caveats, and clinician rating modal.
+  - `frontend/src/App.tsx`: Added seamless tab switcher (`Attached Documents` vs `Grounded Clinical RAG`) in patient dossier workspace; marked Phase 7 as `Verified` in `PHASES_DATA`.
+- [x] **11. Known Limitations Recorded:** BM25 sparse search and Reciprocal Rank Fusion (RRF) are scheduled for Phase 8; PDF in-viewer highlight navigation is scheduled for Phase 8.
+- [x] **12. Phase Tracker Updated:** Phase 7 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review before Phase 8.
+
+---
+
+## 9. Active Risks & Outstanding Issues
+* **Hybrid Retrieval:** Current retrieval uses dense vector search (FastEmbed 384-d). Exact clinical keywords (e.g. rare drug abbreviations or exact numeric codes) will benefit from BM25 sparse retrieval.
+* **Next Action:** Phase 8 will implement Advanced Hybrid RAG (In-memory BM25 sparse indexer, Reciprocal Rank Fusion merger with $k=60$, and interactive PDF viewer with clickable citations).

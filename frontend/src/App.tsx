@@ -6,8 +6,9 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginModal } from './features/auth/LoginModal';
 import { PatientList } from './features/patients/PatientList';
 import { DocumentList } from './features/documents/DocumentList';
+import { ClinicalRAGPanel } from './features/rag/ClinicalRAGPanel';
 import { PhaseInfo, Patient, Document } from './types';
-import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2 } from 'lucide-react';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles } from 'lucide-react';
 
 const PHASES_DATA: PhaseInfo[] = [
   { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
@@ -16,7 +17,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 4, name: 'Patient & Doc Management', status: 'Verified', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
   { number: 5, name: 'Ingestion & Chunking', status: 'Verified', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
   { number: 6, name: 'Embeddings & Qdrant', status: 'Verified', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
-  { number: 7, name: 'Baseline Grounded RAG', status: 'Planned', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
+  { number: 7, name: 'Baseline Grounded RAG', status: 'Verified', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
   { number: 8, name: 'Advanced Hybrid RAG', status: 'Planned', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Planned', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
   { number: 10, name: 'Bounded Agentic Workflows', status: 'Planned', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
@@ -31,6 +32,7 @@ const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag'>('documents');
   const { user, isAuthenticated, token } = useAuth();
 
   const fetchDocuments = useCallback(
@@ -219,14 +221,55 @@ const MainContent: React.FC = () => {
                 />
               </div>
 
-              <div className="lg:col-span-2 h-[620px]">
+              <div className="lg:col-span-2 h-[620px] flex flex-col">
                 {selectedPatient ? (
-                  <DocumentList
-                    patientId={selectedPatient.id}
-                    patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
-                    documents={documents}
-                    onRefresh={() => fetchDocuments(selectedPatient.id)}
-                  />
+                  <div className="flex flex-col h-full">
+                    {/* Tab Navigation */}
+                    <div className="flex items-center space-x-2 mb-3 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800 shrink-0 w-fit">
+                      <button
+                        type="button"
+                        onClick={() => setActivePatientTab('documents')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          activePatientTab === 'documents'
+                            ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Attached Documents ({documents.length})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActivePatientTab('rag')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          activePatientTab === 'rag'
+                            ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Grounded Clinical RAG</span>
+                      </button>
+                    </div>
+
+                    {/* Active View */}
+                    <div className="flex-1 min-h-0">
+                      {activePatientTab === 'documents' ? (
+                        <DocumentList
+                          patientId={selectedPatient.id}
+                          patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
+                          documents={documents}
+                          onRefresh={() => fetchDocuments(selectedPatient.id)}
+                        />
+                      ) : (
+                        <ClinicalRAGPanel
+                          patientId={selectedPatient.id}
+                          patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
+                        />
+                      )}
+                    </div>
+                  </div>
                 ) : (
                   <div className="h-full rounded-3xl bg-slate-900/60 border border-slate-800 p-8 flex flex-col items-center justify-center text-center">
                     <Database className="w-12 h-12 text-slate-600 mb-3" />

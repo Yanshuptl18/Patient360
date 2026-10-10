@@ -127,3 +127,40 @@ export interface VectorStatsResponse {
   dimensions: number;
   is_embedded: boolean;
 }
+
+export interface CitationItem {
+  document_id: string;
+  document_title: string;
+  page_number: number;
+  exact_quote: string;
+  claim_text: string;
+  verification_status: 'supported' | 'partially_supported' | 'unsupported';
+}
+
+export interface RetrievalMetadata {
+  dense_candidates_count: number;
+  merged_candidates_count: number;
+  retrieval_latency_ms: number;
+  generation_latency_ms: number;
+  total_latency_ms: number;
+  is_abstention: boolean;
+}
+
+export interface RAGQueryResponse {
+  query: string;
+  patient_id: string;
+  answer: string;
+  citations: CitationItem[];
+  limitations: string[];
+  confidence_score: number;
+  retrieval_metadata: RetrievalMetadata;
+}
+
+export interface RAGFeedbackRequest {
+  patient_id: string;
+  query: string;
+  answer: string;
+  rating: 'positive' | 'negative';
+  issue_type?: string | null;
+  comment?: string | null;
+}

@@ -24,6 +24,14 @@ from backend.schemas.patient import (
     PatientResponse,
     PermissionGrantRequest,
 )
+from backend.schemas.rag import (
+    CitationItem,
+    RAGFeedbackRequest,
+    RAGFeedbackResponse,
+    RAGQueryRequest,
+    RAGQueryResponse,
+    RetrievalMetadata,
+)
 from backend.schemas.vector import (
     VectorSearchRequest,
     VectorSearchResultItem,
@@ -54,4 +62,10 @@ __all__ = [
     "VectorSearchRequest",
     "VectorSearchResultItem",
     "VectorStatsResponse",
+    "RAGQueryRequest",
+    "RAGQueryResponse",
+    "CitationItem",
+    "RetrievalMetadata",
+    "RAGFeedbackRequest",
+    "RAGFeedbackResponse",
 ]

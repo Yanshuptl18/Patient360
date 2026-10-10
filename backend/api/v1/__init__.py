@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from backend.api.v1 import auth, documents, health, patients, vector
+from backend.api.v1 import auth, documents, health, patients, rag, vector
 
 api_router = APIRouter()
 api_router.include_router(health.router, prefix="/health", tags=["System Health"])
@@ -10,3 +10,4 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & R
 api_router.include_router(patients.router, prefix="/patients", tags=["Patient Records"])
 api_router.include_router(documents.router, prefix="/documents", tags=["Document Management"])
 api_router.include_router(vector.router, prefix="/vector", tags=["Vector Store & Retrieval"])
+api_router.include_router(rag.router, prefix="/rag", tags=["Grounded RAG & Evidence Synthesis"])
