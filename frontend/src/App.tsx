@@ -29,7 +29,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 12, name: 'Evaluation Laboratory', status: 'Verified', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
   { number: 13, name: 'Security & Responsible AI', status: 'Verified', description: 'Multi-provider LLM gateway (Gemini/Ollama/Mock), emergency red-flags, audit sanitizer, cascading purge.', tag: 'Hardening' },
   { number: 14, name: 'Production Hardening', status: 'Verified', description: 'Multi-stage Docker, Nginx reverse proxy, Prometheus /metrics, and GitHub Actions CI.', tag: 'DevOps' },
-  { number: 15, name: 'Portfolio & Demo Release', status: 'Planned', description: 'Pre-seeded synthetic cohorts, case studies, and documentation.', tag: 'Release' },
+  { number: 15, name: 'Portfolio & Demo Release', status: 'Verified', description: 'Pre-seeded synthetic cohorts, landmark RCTs, zero-cost deploy guides, and release docs.', tag: 'Release' },
 ];
 
 const MainContent: React.FC = () => {
