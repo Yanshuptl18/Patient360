@@ -15,6 +15,7 @@ from backend.models.chunk import DocumentChunk
 from backend.models.user import User
 from backend.retrieval.bm25 import BM25Document, get_bm25_registry
 from backend.schemas.chunk import IngestionResponse
+from backend.timeline.service import get_timeline_service
 from backend.vector.store import get_vector_store
 
 logger = logging.getLogger(__name__)
@@ -115,6 +116,13 @@ def ingest_document(
                 for c in inserted_chunks
             ]
             bm25_registry.index_chunks(doc.patient_id, bm25_docs)
+
+            # Auto-extract longitudinal clinical events
+            try:
+                timeline_svc = get_timeline_service()
+                timeline_svc.extract_events_for_patient(db, patient_id=doc.patient_id, document_ids=[doc.id])
+            except Exception as t_err:
+                logger.warning(f"Could not auto-extract timeline events for document {doc.id}: {t_err}")
 
         # 9. Mark document completed
         doc.ingestion_status = "completed"

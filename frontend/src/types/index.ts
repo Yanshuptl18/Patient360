@@ -165,3 +165,82 @@ export interface RAGFeedbackRequest {
   issue_type?: string | null;
   comment?: string | null;
 }
+
+export type ClinicalEventType =
+  | 'diagnosis'
+  | 'medication'
+  | 'procedure'
+  | 'encounter'
+  | 'lab_result'
+  | 'allergy';
+
+export type DatePrecision = 'day' | 'month' | 'year' | 'approximate';
+
+export type ClinicalStatus = 'active' | 'historical' | 'resolved' | 'disputed';
+
+export interface ClinicalEvent {
+  id: string;
+  patient_id: string;
+  document_id: string;
+  chunk_id?: string | null;
+  event_type: ClinicalEventType;
+  event_date: string;
+  event_date_precision: DatePrecision;
+  document_date?: string | null;
+  description: string;
+  value_or_dosage?: string | null;
+  clinical_status: ClinicalStatus;
+  confidence_score: number;
+  contradiction_flag: boolean;
+  contradiction_details?: string | null;
+  created_at: string;
+  document_title?: string | null;
+  page_number?: number | null;
+  exact_quote?: string | null;
+}
+
+export interface ContradictionItem {
+  event_id_1: string;
+  event_id_2: string;
+  event_1_summary: string;
+  event_2_summary: string;
+  document_title_1: string;
+  document_title_2: string;
+  page_number_1?: number | null;
+  page_number_2?: number | null;
+  conflict_type:
+    | 'allergy_conflict'
+    | 'status_conflict'
+    | 'date_conflict'
+    | 'value_conflict'
+    | 'general_conflict';
+  severity: 'critical' | 'moderate' | 'minor';
+  explanation: string;
+  suggested_resolution?: string | null;
+}
+
+export interface TimelineSummary {
+  total_events: number;
+  event_counts_by_type: Record<string, number>;
+  earliest_date?: string | null;
+  latest_date?: string | null;
+  total_contradictions: number;
+}
+
+export interface PatientTimelineResponse {
+  patient_id: string;
+  patient_name: string;
+  summary: TimelineSummary;
+  contradictions: ContradictionItem[];
+  events: ClinicalEvent[];
+}
+
+export interface TimelineExtractResponse {
+  patient_id: string;
+  events_extracted_count: number;
+  contradictions_detected_count: number;
+  documents_processed_count: number;
+  status: string;
+  message: string;
+}
+

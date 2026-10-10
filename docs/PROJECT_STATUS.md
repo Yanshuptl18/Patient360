@@ -11,8 +11,8 @@
 | **5** | Document Ingestion, Parsing & Chunking | **Verified** | Phase 4 | PyMuPDF extractor, normalizer, semantic chunker | 48/48 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **6** | Embeddings & Vector Indexing | **Verified** | Phase 5 | FastEmbed CPU provider, Qdrant collection, payload search, SemanticSearchModal | 56/56 Pytest passed, Ruff clean, Mypy clean, Vite built | Approved |
 | **7** | Baseline Grounded RAG | **Verified** | Phase 6 | BaseLLMProvider, MockLLMProvider, GroundedPromptBuilder, CitationVerifier, ClinicalRAGPanel | 67/67 Pytest passed, Ruff clean, Mypy clean (74 files), Vite built in 5.58s | Approved |
-| **8** | **Advanced Hybrid RAG & Retrieval Opt.** | **Completed** | Phase 7 | In-memory BM25, RRF merger ($k=60$), HybridRetrievalService, PDFCitationViewerModal | 76/76 Pytest passed, Ruff clean, Mypy clean (82 files), Vite built in 9.10s | Pending Approval |
-| **9** | Longitudinal Timeline & Clinical Events | Planned | Phase 8 | Event extractor, contradiction detector, Timeline UI | Pending Phase 9 | Planned |
+| **8** | Advanced Hybrid RAG & Retrieval Opt. | **Verified** | Phase 7 | In-memory BM25, RRF merger ($k=60$), HybridRetrievalService, PDFCitationViewerModal | 76/76 Pytest passed, Ruff clean, Mypy clean (82 files), Vite built in 9.10s | Approved |
+| **9** | **Longitudinal Timeline & Clinical Events** | **Completed** | Phase 8 | ClinicalEvent model, extractor, contradiction detector, TimelineService, ClinicalTimelinePanel | 88/88 Pytest passed, Ruff clean, Mypy clean (93 files), Vite built in 5.14s | Pending Approval |
 | **10**| Bounded Agentic Workflows | Planned | Phase 9 | LangGraph state graph, read-only tools, approval gate | Pending Phase 10 | Planned |
 | **11**| Medical Research Intelligence | Planned | Phase 10 | Research schema, comparative matrix, dossier exporter | Pending Phase 11 | Planned |
 | **12**| Comprehensive Evaluation Laboratory | Planned | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | Pending Phase 12 | Planned |
@@ -213,12 +213,47 @@
   - `frontend/src/features/rag/ClinicalRAGPanel.tsx`: Added "Open In-Viewer PDF Provenance" action button connected to `PDFCitationViewerModal`.
   - `frontend/src/App.tsx`: Updated `PHASES_DATA` marking Phase 8 as "Verified".
 - [x] **11. Known Limitations Recorded:** Event timeline extraction and clinical contradiction detection are scheduled for Phase 9.
-- [x] **12. Phase Tracker Updated:** Phase 8 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 9.
+- [x] **12. Phase Tracker Updated:** Phase 8 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 8 approved by user.
 
 ---
 
-## 10. Active Risks & Outstanding Issues
-* **Clinical Event Timeline Synthesis:** Patient records are currently synthesized on-demand via hybrid RAG, but lack longitudinal event chronologization (e.g. chronological mapping of diagnoses, encounters, lab tests, and med changes across disparate documents).
-* **Next Action:** Phase 9 will implement Longitudinal Timeline & Clinical Event Synthesis (structured event extractor, timeline normalizer, clinical contradiction surfacing, and interactive timeline visualization).
+## 10. Phase 9 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Longitudinal clinical timeline and contradiction engine extracting dated clinical events (Diagnoses, Medications, Encounters, Labs, Procedures, Allergies) with explicit distinction between `event_date` and `document_date`, temporal precision tagging (`day`, `month`, `year`, `approximate`), and automated cross-document contradiction detection aligned with FR-TIME-01..04.
+- [x] **2. Modular Architecture Enforced:**
+  - Database Model: `backend/models/timeline.py` (`ClinicalEvent` with indexes on `(patient_id, event_date)` and `(patient_id, contradiction_flag)`).
+  - Pydantic Schemas: `backend/schemas/timeline.py` (`ClinicalEventResponse`, `ContradictionItem`, `TimelineSummary`, `PatientTimelineResponse`, `TimelineExtractResponse`).
+  - Event Extractor: `backend/timeline/extractor.py` (`ClinicalEventExtractor`, multi-format `parse_text_date`, heuristic clinical regex patterns for allergies, medications, procedures, labs, diagnoses, encounters).
+  - Contradiction Engine: `backend/timeline/contradictions.py` (`ContradictionDetector` surfacing NKDA vs allergy, allergy vs active med, divergent surgical dates, status discrepancies).
+  - Orchestration Service: `backend/timeline/service.py` (`TimelineService`, `get_timeline_service` managing idempotent chunk event extraction, auto-extraction on access, chronological queries, summary metrics).
+  - Ingestion Integration: `backend/ingestion/service.py` (auto-extracts events for patient documents upon ingestion).
+  - API Routes: `backend/api/v1/timeline.py` (`GET /patients/{id}`, `POST /patients/{id}/extract`, `GET /patients/{id}/contradictions`).
+- [x] **3. No Secrets / Real PHI Committed:** All timeline test fixtures and extracted events run strictly against synthetic clinical profiles (`SYN-TIME-001`, `Eleanor Vance`); zero real PHI stored.
+- [x] **4. Dependencies Documented:** Standard Python libraries, regex, SQLAlchemy, Pydantic, FastAPI; requires zero external paid clinical NER services for local execution.
+- [x] **5. Automated Tests Passing:** **88/88 pytest tests pass** (12 new comprehensive tests in Phase 9):
+  - `tests/unit/test_clinical_extractor.py` (5 tests): Date parsing (ISO, US, word months, year only, approximate fallback), allergy extraction, medication extraction, diagnosis & procedure extraction, lab & encounter extraction.
+  - `tests/unit/test_contradiction_detector.py` (4 tests): NKDA vs specific allergy conflict, allergy vs active drug prescription, procedure divergent years (2018 vs 2021), consistent event negative testing.
+  - `tests/unit/test_timeline_sorting.py` (1 test): Chronological sorting, type filters, and timeline summary calculations.
+  - `tests/integration/test_timeline_pipeline.py` (2 tests): End-to-end multi-document ingestion with intentional contradictions, timeline query, contradiction surfacing, and 403 Forbidden cross-patient access rejection.
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 93 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 5.14s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** `check_user_patient_access` strictly enforced on all timeline routes; non-permitted users receive `403 Forbidden` (`code="FORBIDDEN"`).
+- [x] **8. Error Handling & Edge Cases:** Fallback to document date with `event_date_precision="approximate"`; empty timeline graceful handling; idempotent re-extraction wipes prior document events before writing.
+- [x] **9. Audit Trail Active:** Append-only audit logger records `TIMELINE_EVENTS_EXTRACTED` with counts of events, contradictions, and processed documents.
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/timeline/ClinicalTimelinePanel.tsx`: Interactive vertical milestone timeline with category color coding, contradiction alert banner with side-by-side comparison boxes, filter toolbar by event type and contradiction toggle, and jump-links to `PDFCitationViewerModal`.
+  - `frontend/src/App.tsx`: Added 3rd tab (`Longitudinal Timeline`) in patient workspace; marked Phase 9 as `Verified` in `PHASES_DATA`.
+- [x] **11. Known Limitations Recorded:** Bounded agentic multi-step workflows with LangGraph are scheduled for Phase 10.
+- [x] **12. Phase Tracker Updated:** Phase 9 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 10.
+
+---
+
+## 11. Active Risks & Outstanding Issues
+* **Bounded Agentic Workflows:** Complex clinical queries currently execute in a single retrieval-synthesis pass. Multi-step reasoning across disparate documents, contradictory fact reconciliation, and literature cross-referencing will benefit from bounded LangGraph agentic workflows with strict iteration ceilings.
+* **Next Action:** Phase 10 will implement Bounded Agentic Workflows (LangGraph state machine, bounded step ceiling of max 5 iterations, 30s timeout, read-only tools, and human clinician review approval gates).
+
 
