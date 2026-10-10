@@ -14,8 +14,8 @@
 | **8** | Advanced Hybrid RAG & Retrieval Opt. | **Verified** | Phase 7 | In-memory BM25, RRF merger ($k=60$), HybridRetrievalService, PDFCitationViewerModal | 76/76 Pytest passed, Ruff clean, Mypy clean (82 files), Vite built in 9.10s | Approved |
 | **9** | Longitudinal Timeline & Clinical Events | **Verified** | Phase 8 | ClinicalEvent model, extractor, contradiction detector, TimelineService, ClinicalTimelinePanel | 88/88 Pytest passed, Ruff clean, Mypy clean (93 files), Vite built in 5.14s | Approved |
 | **10**| Bounded Agentic Workflows | **Verified** | Phase 9 | LangGraph state graph, read-only tools, approval gate | 102/102 Pytest passed, Ruff clean, Mypy clean (104 files), Vite built in 4.74s | Approved |
-| **11**| **Medical Research Intelligence** | **Completed** | Phase 10 | Research schema, comparative matrix, dossier exporter | 111/111 Pytest passed, Ruff clean, Mypy clean (114 files), Vite built in 5.07s | Pending Approval |
-| **12**| Comprehensive Evaluation Laboratory | Planned | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | Pending Phase 12 | Planned |
+| **11**| Medical Research Intelligence | **Verified** | Phase 10 | Research schema, comparative matrix, dossier exporter | 111/111 Pytest passed, Ruff clean, Mypy clean (114 files), Vite built in 5.07s | Approved |
+| **12**| **Comprehensive Evaluation Laboratory** | **Completed** | Phase 11 | 50-item benchmark runner, metrics, Evaluation Lab UI | 121/121 Pytest passed, Ruff clean, Mypy clean (128 files), Vite built in 3.40s | Pending Approval |
 | **13**| Security Hardening & Responsible AI | Planned | Phase 12 | STRIDE pen-tests, prompt injection defense, deletion purge | Pending Phase 13 | Planned |
 | **14**| Production Hardening & Observability | Planned | Phase 13 | Multi-stage Dockerfiles, Prometheus metrics, CI/CD | Pending Phase 14 | Planned |
 | **15**| Final Polish, Demo Data & Release | Planned | Phase 14 | Synthetic demo cohorts, portfolio docs, release artifacts | Pending Phase 15 | Planned |
@@ -311,15 +311,49 @@
 - [x] **10. Frontend Workspace Integrated:**
   - `frontend/src/features/research/ResearchIntelligencePanel.tsx`: Multi-study explorer with text search, study design dropdown filter, selection counter badge, interactive side-by-side comparison matrix with Oxford evidence strength badges, synthesis card, and publication-ready Markdown research dossier exporter with Copy and Download actions.
   - `frontend/src/App.tsx`: Added 5th workspace tab (`Research Intelligence` with `FileSearch` icon); marked Phase 11 as `Verified` in `PHASES_DATA`.
-- [x] **11. Known Limitations Recorded:** Quantitative RAG retrieval benchmarking, synthetic test datasets, and automated faithfulness/recall scoring are scheduled for Phase 12 (Evaluation Laboratory).
-- [x] **12. Phase Tracker Updated:** Phase 11 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 12.
+- [x] **11. Known Limitations Recorded:** Benchmark evaluation laboratory metrics formalized in Phase 12.
+- [x] **12. Phase Tracker Updated:** Phase 11 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 11 reviewed and approved by user.
 
 ---
 
-## 13. Active Risks & Outstanding Issues
-* **Quantitative Retrieval Benchmarking:** While hybrid retrieval (BM25 + Dense) and comparative research intelligence are operational, formal synthetic golden-dataset evaluation metrics (Faithfulness, Context Recall, Answer Relevance) remain to be measured in Phase 12.
-* **Next Action:** Phase 12 will implement the Comprehensive Evaluation Laboratory (50-item synthetic clinical benchmark runner, automated evaluation metrics harness, and interactive Evaluation Lab UI).
+## 13. Phase 12 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Comprehensive automated RAG Evaluation Laboratory executing a frozen 50-item synthetic clinical benchmark dataset distributed across 6 categories (Single-Document Factual, Multi-Document Longitudinal, Contradictory Records, Unanswerable Abstention, Adversarial Injection, Research Matrix), calculating Recall@5, MRR, Faithfulness, Citation Precision, Abstention Accuracy, and P95 Latency metrics aligned with `docs/EVALUATION_PLAN.md` and NFR-PERF-01..03.
+- [x] **2. Modular Architecture Enforced:**
+  - Database Model: `backend/models/evaluation.py` (`EvaluationRun` storing metrics, P95 latencies, JSON category breakdowns, and 50 detailed item evaluations), exported in `backend/models/__init__.py`.
+  - Pydantic Schemas: `backend/schemas/evaluation.py` (`BenchmarkCategory`, `EvaluationBenchmarkItem`, `EvaluationItemResult`, `EvaluationCategorySummary`, `EvaluationRunRequest`, `EvaluationRunResponse`, `EvaluationRunSummary`), exported in `backend/schemas/__init__.py`.
+  - Benchmark Dataset: `backend/evaluation/dataset.py` (Frozen 50-item dataset across all 6 clinical evaluation domains with golden chunks, expected keywords, and criteria).
+  - Metric Calculators: `backend/evaluation/metrics.py` (`calculate_recall_at_k`, `calculate_mrr`, `calculate_faithfulness`, `calculate_citation_precision`, `evaluate_abstention`, `calculate_percentile`).
+  - Benchmark Engine: `backend/evaluation/runner.py` (`BenchmarkRunner` executing items across `hybrid`, `dense_only`, and `sparse_only` modes, measuring latencies, and synthesizing evaluation records).
+  - Orchestration Service: `backend/evaluation/service.py` (`EvaluationService`, `get_evaluation_service` managing runs, DB persistence, and audit logging).
+  - CLI Runner: `evaluation/runners/run_benchmark.py` (Module runner executing via `python -m evaluation.runners.run_benchmark` with ASCII scorecard and quality gate enforcement).
+  - API Routes: `backend/api/v1/evaluation.py` (`POST /runs`, `GET /runs`, `GET /runs/{id}`, `GET /benchmark-dataset`), mounted in `backend/api/v1/__init__.py`.
+- [x] **3. No Secrets / Real PHI Committed:** All 50 benchmark test fixtures and evaluation runs operate strictly on synthetic clinical patient scenarios and public trials; zero real PHI stored.
+- [x] **4. Dependencies Documented:** Standard Python standard library, SQLAlchemy, Pydantic v2, FastAPI; requires zero proprietary paid LLM-judge API dependencies for local deterministic verification.
+- [x] **5. Automated Tests Passing:** **121/121 pytest tests pass** (10 new tests in Phase 12):
+  - `tests/unit/test_evaluation_metrics.py` (6 tests): Recall@K hit/miss/empty, MRR calculation, Abstention correctness and false-abstention rejection, Citation Precision, Generation Faithfulness (entailed, ungrounded, adversarial rejection, forbidden keyword penalty), P95 percentile calculation.
+  - `tests/unit/test_evaluation_dataset.py` (2 tests): Exact 50-item count, exact 6-category distribution (12 factual, 10 longitudinal, 8 contradictory, 8 abstention, 6 adversarial, 6 research), ID uniqueness, schema integrity.
+  - `tests/integration/test_evaluation_pipeline.py` (2 tests): Full 50-item benchmark runner meeting all target gates (Recall@5 >= 0.85, MRR >= 0.75, Faithfulness >= 0.85, Precision >= 0.90, Abstention = 100%), and complete API lifecycle (`GET /benchmark-dataset`, `POST /runs`, `GET /runs`, `GET /runs/{id}`, unauthenticated 401 rejection).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests evaluation` passed with 0 errors.
+  - Python: `mypy backend tests evaluation` passed with 0 errors across 128 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 3.40s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** API endpoints enforce user authentication (`get_current_user`). All benchmark inquiries and evaluations are logged in append-only audit trail `EVALUATION_BENCHMARK_EXECUTED`.
+- [x] **8. Error Handling & Edge Cases:** Standalone fallback if database is unavailable during CLI run; unanswerable items properly abstain; adversarial prompt injections safely rejected with zero leaked credentials; 404 returned for missing run IDs.
+- [x] **9. Audit Trail Active:** Append-only database audit logs record `EVALUATION_BENCHMARK_EXECUTED` with mode, commit hash, total items, passed items, and score telemetry.
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/evaluation/EvaluationLabPanel.tsx`: Executive scorecard with 7 target cards (Recall@5, MRR, Faithfulness, Citation Precision, Abstention Accuracy, Retrieval P95, End-to-End P95) with pass/fail indicators, 6 category breakdown cards with progress bars, controlled retrieval experiment comparison bar (Hybrid vs Dense vs Sparse), historical runs selector, and searchable 50-item results table with inspect modal.
+  - `frontend/src/App.tsx`: Added 6th workspace tab (`Evaluation Lab` with `Activity` icon) and direct global launcher button; marked Phase 12 as `Verified` in `PHASES_DATA`.
+- [x] **11. Known Limitations Recorded:** Penetration testing, prompt-injection red-teaming, rate limiting, and cascading deletion purge are scheduled for Phase 13 (Security Hardening & Responsible AI).
+- [x] **12. Phase Tracker Updated:** Phase 12 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 13.
+
+---
+
+## 14. Active Risks & Outstanding Issues
+* **Prompt Injection & Pen-Testing Hardening:** While adversarial injection scenarios in the benchmark suite are safely rejected, formal automated STRIDE penetration testing, rate-limiting guards, and cascading data erasure workflows will be implemented in Phase 13.
+* **Next Action:** Phase 13 will implement Security Hardening, Privacy Review, and Responsible AI (STRIDE audit, automated prompt injection pen-test suite, cascading patient erasure service, and emergency medical disclaimers).
 
 
 

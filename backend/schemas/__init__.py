@@ -27,6 +27,15 @@ from backend.schemas.document import (
     DocumentUploadResponse,
     IngestionStatusEnum,
 )
+from backend.schemas.evaluation import (
+    BenchmarkCategory,
+    EvaluationBenchmarkItem,
+    EvaluationCategorySummary,
+    EvaluationItemResult,
+    EvaluationRunRequest,
+    EvaluationRunResponse,
+    EvaluationRunSummary,
+)
 from backend.schemas.patient import (
     PatientBase,
     PatientCreate,
@@ -138,4 +147,11 @@ __all__ = [
     "StudyComparisonMatrix",
     "DossierExportRequest",
     "DossierExportResponse",
+    "BenchmarkCategory",
+    "EvaluationBenchmarkItem",
+    "EvaluationItemResult",
+    "EvaluationCategorySummary",
+    "EvaluationRunRequest",
+    "EvaluationRunSummary",
+    "EvaluationRunResponse",
 ]

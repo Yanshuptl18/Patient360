@@ -6,6 +6,7 @@ from backend.api.v1 import (
     agents,
     auth,
     documents,
+    evaluation,
     health,
     patients,
     rag,
@@ -24,5 +25,6 @@ api_router.include_router(rag.router, prefix="/rag", tags=["Grounded RAG & Evide
 api_router.include_router(timeline.router, prefix="/timeline", tags=["Longitudinal Timeline & Clinical Events"])
 api_router.include_router(agents.router, prefix="/agents", tags=["Bounded Agentic Workflows"])
 api_router.include_router(research.router, prefix="/research", tags=["Medical Research Intelligence"])
+api_router.include_router(evaluation.router, prefix="/evaluation", tags=["Evaluation Laboratory"])
 
 

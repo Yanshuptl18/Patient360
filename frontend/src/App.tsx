@@ -10,8 +10,9 @@ import { ClinicalRAGPanel } from './features/rag/ClinicalRAGPanel';
 import { ClinicalTimelinePanel } from './features/timeline/ClinicalTimelinePanel';
 import { ClinicalAgentPanel } from './features/agents/ClinicalAgentPanel';
 import { ResearchIntelligencePanel } from './features/research/ResearchIntelligencePanel';
+import { EvaluationLabPanel } from './features/evaluation/EvaluationLabPanel';
 import { PhaseInfo, Patient, Document } from './types';
-import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles } from 'lucide-react';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles, Activity } from 'lucide-react';
 
 const PHASES_DATA: PhaseInfo[] = [
   { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
@@ -25,7 +26,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Verified', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
   { number: 10, name: 'Bounded Agentic Workflows', status: 'Verified', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
   { number: 11, name: 'Research Intelligence', status: 'Verified', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
-  { number: 12, name: 'Evaluation Laboratory', status: 'Planned', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
+  { number: 12, name: 'Evaluation Laboratory', status: 'Verified', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
   { number: 13, name: 'Security & Responsible AI', status: 'Planned', description: 'Prompt-injection pen tests, audit logs, and data erasure.', tag: 'Hardening' },
   { number: 14, name: 'Production Hardening', status: 'Planned', description: 'Multi-stage Docker, Prometheus metrics, and CI/CD pipelines.', tag: 'DevOps' },
   { number: 15, name: 'Portfolio & Demo Release', status: 'Planned', description: 'Pre-seeded synthetic cohorts, case studies, and documentation.', tag: 'Release' },
@@ -35,7 +36,8 @@ const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents' | 'research'>('documents');
+  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents' | 'research' | 'evaluation'>('documents');
+  const [showGlobalEvaluationLab, setShowGlobalEvaluationLab] = useState(false);
 
   const { user, isAuthenticated, token } = useAuth();
 
@@ -294,6 +296,19 @@ const MainContent: React.FC = () => {
                         <FileSearch className="w-3.5 h-3.5" />
                         <span>Research Intelligence</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActivePatientTab('evaluation')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          activePatientTab === 'evaluation'
+                            ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>Evaluation Lab</span>
+                      </button>
                     </div>
 
                     {/* Active View */}
@@ -320,19 +335,46 @@ const MainContent: React.FC = () => {
                           patientId={selectedPatient.id}
                           patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                         />
-                      ) : (
+                      ) : activePatientTab === 'research' ? (
                         <ResearchIntelligencePanel />
+                      ) : (
+                        <EvaluationLabPanel />
                       )}
                     </div>
 
+                  </div>
+                ) : showGlobalEvaluationLab ? (
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-3 bg-slate-900/60 p-2 rounded-2xl border border-slate-800">
+                      <div className="flex items-center space-x-2 text-xs text-slate-300">
+                        <Activity className="w-4 h-4 text-teal-400" />
+                        <span className="font-semibold">Global Benchmark Laboratory</span>
+                      </div>
+                      <button
+                        onClick={() => setShowGlobalEvaluationLab(false)}
+                        className="text-xs text-slate-400 hover:text-white px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors"
+                      >
+                        Back to Dossier Workspace
+                      </button>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                      <EvaluationLabPanel />
+                    </div>
                   </div>
                 ) : (
                   <div className="h-full rounded-3xl bg-slate-900/60 border border-slate-800 p-8 flex flex-col items-center justify-center text-center">
                     <Database className="w-12 h-12 text-slate-600 mb-3" />
                     <h3 className="text-sm font-semibold text-white">No Patient Selected</h3>
-                    <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                      Select an authorized patient dossier from the left panel to inspect attached clinical documents, or register a new synthetic cohort member.
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm mb-4">
+                      Select an authorized patient dossier from the left panel to inspect clinical documents, or launch the automated benchmark suite.
                     </p>
+                    <button
+                      onClick={() => setShowGlobalEvaluationLab(true)}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shadow-md"
+                    >
+                      <Activity className="w-3.5 h-3.5 text-teal-400" />
+                      <span>Launch Evaluation Laboratory</span>
+                    </button>
                   </div>
                 )}
               </div>

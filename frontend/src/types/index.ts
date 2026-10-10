@@ -359,5 +359,97 @@ export interface DossierExportResponse {
   generated_at_iso: string;
 }
 
+export type BenchmarkCategory =
+  | 'single_doc_factual'
+  | 'multi_doc_longitudinal'
+  | 'contradictory_records'
+  | 'unanswerable_abstention'
+  | 'adversarial_injection'
+  | 'research_matrix';
+
+export interface EvaluationBenchmarkItem {
+  id: string;
+  category: BenchmarkCategory;
+  title: string;
+  query: string;
+  patient_id?: string | null;
+  expected_golden_chunk_ids: string[];
+  expected_answer_keywords: string[];
+  forbidden_keywords: string[];
+  should_abstain: boolean;
+  has_contradiction: boolean;
+  is_adversarial: boolean;
+}
+
+export interface EvaluationItemResult {
+  item_id: string;
+  category: string;
+  query: string;
+  retrieved_chunk_ids: string[];
+  generated_answer: string;
+  citations: Array<{
+    document_id: string;
+    page_number: number;
+    verification_status?: string;
+  }>;
+  hit_at_5: boolean;
+  reciprocal_rank: number;
+  faithfulness_score: number;
+  citation_precision_score: number;
+  abstention_correct: boolean;
+  passed: boolean;
+  retrieval_latency_ms: number;
+  e2e_latency_ms: number;
+  failure_reason?: string | null;
+}
+
+export interface EvaluationCategorySummary {
+  category: string;
+  category_label: string;
+  total_items: number;
+  passed_items: number;
+  pass_rate: number;
+  avg_faithfulness: number;
+  avg_citation_precision: number;
+  avg_mrr: number;
+}
+
+export interface EvaluationRunSummary {
+  id: string;
+  name: string;
+  git_commit: string;
+  mode: string;
+  total_items: number;
+  passed_items: number;
+  recall_at_5: number;
+  mrr: number;
+  faithfulness: number;
+  citation_precision: number;
+  abstention_accuracy: number;
+  p95_retrieval_latency_ms: number;
+  p95_e2e_latency_ms: number;
+  created_at: string;
+}
+
+export interface EvaluationTargetMetric {
+  target: string;
+  achieved: string | number;
+  met: boolean;
+}
+
+export interface EvaluationRun extends EvaluationRunSummary {
+  summary_metrics: {
+    mode: string;
+    git_commit: string;
+    total_items: number;
+    passed_items: number;
+    pass_rate: number;
+    categories: Record<string, EvaluationCategorySummary>;
+    targets: Record<string, EvaluationTargetMetric>;
+  };
+  item_results: EvaluationItemResult[];
+}
+
+
 
 
