@@ -27,7 +27,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 10, name: 'Bounded Agentic Workflows', status: 'Verified', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
   { number: 11, name: 'Research Intelligence', status: 'Verified', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
   { number: 12, name: 'Evaluation Laboratory', status: 'Verified', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
-  { number: 13, name: 'Security & Responsible AI', status: 'Planned', description: 'Prompt-injection pen tests, audit logs, and data erasure.', tag: 'Hardening' },
+  { number: 13, name: 'Security & Responsible AI', status: 'Verified', description: 'Multi-provider LLM gateway (Gemini/Ollama/Mock), emergency red-flags, audit sanitizer, cascading purge.', tag: 'Hardening' },
   { number: 14, name: 'Production Hardening', status: 'Planned', description: 'Multi-stage Docker, Prometheus metrics, and CI/CD pipelines.', tag: 'DevOps' },
   { number: 15, name: 'Portfolio & Demo Release', status: 'Planned', description: 'Pre-seeded synthetic cohorts, case studies, and documentation.', tag: 'Release' },
 ];

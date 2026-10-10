@@ -33,4 +33,6 @@ def test_detailed_health_endpoint(client: TestClient) -> None:
     assert "database" in data["components"]
     assert "vector_store" in data["components"]
     assert "storage" in data["components"]
+    assert "llm_provider" in data["components"]
     assert data["components"]["storage"]["status"] == "UP"
+    assert data["components"]["llm_provider"]["status"] in ["UP", "DOWN"]

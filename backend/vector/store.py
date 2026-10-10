@@ -244,6 +244,21 @@ class QdrantVectorStore:
         )
         logger.info(f"Deleted vector chunks for document '{document_id}' from '{self.collection_name}'.")
 
+    def delete_patient_chunks(self, patient_id: str) -> None:
+        """Removes all vector embeddings belonging to a specific patient dossier."""
+        self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="patient_id",
+                        match=MatchValue(value=patient_id),
+                    )
+                ]
+            ),
+        )
+        logger.info(f"Deleted vector chunks for patient '{patient_id}' from '{self.collection_name}'.")
+
     def get_collection_stats(self) -> dict[str, Any]:
         """Returns statistics on the vector store collection."""
         try:

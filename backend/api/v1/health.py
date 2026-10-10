@@ -76,6 +76,17 @@ def check_storage_health() -> tuple[bool, int, str]:
         return False, latency_ms, f"Storage write check failed: {str(exc)[:80]}"
 
 
+def check_llm_health() -> tuple[bool, int, str]:
+    """Checks configured LLM provider connectivity (Gemini, Ollama, or Mock)."""
+    try:
+        from backend.rag.llm import get_llm_provider
+
+        provider = get_llm_provider()
+        return provider.check_health()
+    except Exception as exc:
+        return False, 0, f"LLM provider error: {exc}"
+
+
 @router.get("", response_model=HealthResponse)
 def get_health() -> HealthResponse:
     """
@@ -83,10 +94,12 @@ def get_health() -> HealthResponse:
     - PostgreSQL connection
     - Qdrant vector database liveness
     - Local document storage filesystem writeability
+    - Configured LLM provider connectivity
     """
     db_ok, db_lat, db_msg = check_database_connection()
     qd_ok, qd_lat, qd_msg = check_qdrant_health()
     st_ok, st_lat, st_msg = check_storage_health()
+    llm_ok, llm_lat, llm_msg = check_llm_health()
 
     components = {
         "database": ComponentHealth(
@@ -104,9 +117,15 @@ def get_health() -> HealthResponse:
             latency_ms=st_lat,
             message=st_msg,
         ),
+        "llm_provider": ComponentHealth(
+            status="UP" if llm_ok else "DOWN",
+            latency_ms=llm_lat,
+            message=llm_msg,
+        ),
     }
 
-    if db_ok and qd_ok and st_ok:
+    core_healthy = db_ok and qd_ok and st_ok
+    if core_healthy and llm_ok:
         overall_status = "HEALTHY"
     elif db_ok or qd_ok or st_ok:
         overall_status = "DEGRADED"

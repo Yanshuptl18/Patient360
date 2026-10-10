@@ -8,6 +8,12 @@ from sqlalchemy.orm import Session
 from backend.rag.citations import ABSTENTION_PHRASES, CitationVerifier
 from backend.rag.llm import BaseLLMProvider, get_llm_provider
 from backend.rag.prompt import GroundedPromptBuilder
+from backend.rag.safety import (
+    apply_clinical_safety_disclaimer,
+    check_emergency_symptoms,
+    detect_prompt_injection,
+    sanitize_prompt_input,
+)
 from backend.retrieval.service import (
     HybridRetrievalService,
     get_hybrid_retrieval_service,
@@ -42,13 +48,19 @@ class RAGService:
         """
         Executes hybrid retrieval (Dense + BM25 + RRF) against patient dossier, constructs
         evidence-grounded prompt, generates answer, and parses/verifies citations.
+        Enforces responsible AI safety filters, prompt sanitization, and clinical disclaimers.
         """
         start_total = time.perf_counter()
+
+        # 0. Safety review: emergency escalation & prompt injection detection
+        is_emergency, emergency_cat = check_emergency_symptoms(query)
+        is_injection, _ = detect_prompt_injection(query)
+        effective_query = sanitize_prompt_input(query) if is_injection else query
 
         # 1. Hybrid candidate retrieval (Dense + Sparse + RRF)
         start_retrieval = time.perf_counter()
         retrieved_chunks, ret_meta = self.retrieval_service.search(
-            query=query,
+            query=effective_query,
             patient_id=patient_id,
             top_k=top_k,
             db=db,
@@ -58,12 +70,24 @@ class RAGService:
         # Handle zero retrieved evidence
         if not retrieved_chunks:
             total_latency_ms = max(1, int((time.perf_counter() - start_total) * 1000))
+            raw_abstention = ABSTENTION_PHRASES[0].capitalize() + "."
+            safe_abstention = apply_clinical_safety_disclaimer(
+                raw_abstention,
+                is_emergency=is_emergency,
+                emergency_category=emergency_cat,
+            )
+            limitations = ["No relevant clinical documents found for this patient."]
+            if is_emergency and emergency_cat:
+                limitations.insert(0, f"EMERGENCY RED-FLAG: {emergency_cat}. Recommend immediate clinical triage.")
+            if is_injection:
+                limitations.append("Adversarial prompt injection pattern detected and neutralized.")
+
             return RAGQueryResponse(
                 query=query,
                 patient_id=patient_id,
-                answer=ABSTENTION_PHRASES[0].capitalize() + ".",
+                answer=safe_abstention,
                 citations=[],
-                limitations=["No relevant clinical documents found for this patient."],
+                limitations=limitations,
                 confidence_score=0.0,
                 retrieval_metadata=RetrievalMetadata(
                     dense_candidates_count=ret_meta.get("dense_candidates_count", 0),
@@ -78,7 +102,7 @@ class RAGService:
 
         # 2. Build structured grounded prompt
         prompt = self.prompt_builder.build_prompt(
-            query=query,
+            query=effective_query,
             retrieved_chunks=retrieved_chunks,
         )
 
@@ -98,7 +122,7 @@ class RAGService:
         )
 
         # 5. Derive limitations and confidence score
-        limitations: list[str] = []
+        limitations = []
         if is_abstention:
             confidence_score = 0.0
             limitations.append("The available records do not contain direct evidence addressing this inquiry.")
@@ -119,12 +143,24 @@ class RAGService:
                 confidence_score = 0.5
                 limitations.append("Response lacks explicit citation tags; verify manually against source files.")
 
+        if is_emergency and emergency_cat:
+            limitations.insert(0, f"EMERGENCY RED-FLAG: {emergency_cat}. Recommend immediate clinical triage.")
+        if is_injection:
+            limitations.append("Adversarial prompt injection pattern detected and neutralized.")
+
+        # 6. Apply Responsible AI safety disclaimer & emergency notice
+        safe_answer = apply_clinical_safety_disclaimer(
+            answer=llm_response.content,
+            is_emergency=is_emergency,
+            emergency_category=emergency_cat,
+        )
+
         total_latency_ms = max(1, int((time.perf_counter() - start_total) * 1000))
 
         return RAGQueryResponse(
             query=query,
             patient_id=patient_id,
-            answer=llm_response.content,
+            answer=safe_answer,
             citations=citations,
             limitations=limitations,
             confidence_score=confidence_score,

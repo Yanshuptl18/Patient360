@@ -55,9 +55,14 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-small-en-v1.5"
     EMBEDDING_DIMENSIONS: int = 384
 
-    # LLM Provider Configuration
-    LLM_PROVIDER: Literal["mock", "gemini", "openai", "claude"] = "mock"
+    # LLM Provider Configuration (Multi-Provider Gateway: Mock, Gemini, Ollama)
+    LLM_PROVIDER: Literal["mock", "gemini", "ollama", "openai", "claude"] = "mock"
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "qwen3:4b"
+    OLLAMA_TIMEOUT_SECONDS: int = 60
+    LLM_FALLBACK_TO_MOCK: bool = True
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
 

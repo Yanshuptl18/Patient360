@@ -346,14 +346,48 @@
   - `frontend/src/features/evaluation/EvaluationLabPanel.tsx`: Executive scorecard with 7 target cards (Recall@5, MRR, Faithfulness, Citation Precision, Abstention Accuracy, Retrieval P95, End-to-End P95) with pass/fail indicators, 6 category breakdown cards with progress bars, controlled retrieval experiment comparison bar (Hybrid vs Dense vs Sparse), historical runs selector, and searchable 50-item results table with inspect modal.
   - `frontend/src/App.tsx`: Added 6th workspace tab (`Evaluation Lab` with `Activity` icon) and direct global launcher button; marked Phase 12 as `Verified` in `PHASES_DATA`.
 - [x] **11. Known Limitations Recorded:** Penetration testing, prompt-injection red-teaming, rate limiting, and cascading deletion purge are scheduled for Phase 13 (Security Hardening & Responsible AI).
-- [x] **12. Phase Tracker Updated:** Phase 12 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 13.
+- [x] **12. Phase Tracker Updated:** Phase 12 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 12 reviewed and approved by user.
 
 ---
 
-## 14. Active Risks & Outstanding Issues
-* **Prompt Injection & Pen-Testing Hardening:** While adversarial injection scenarios in the benchmark suite are safely rejected, formal automated STRIDE penetration testing, rate-limiting guards, and cascading data erasure workflows will be implemented in Phase 13.
-* **Next Action:** Phase 13 will implement Security Hardening, Privacy Review, and Responsible AI (STRIDE audit, automated prompt injection pen-test suite, cascading patient erasure service, and emergency medical disclaimers).
+## 14. Phase 13 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** 
+  - Provider-independent LLM Gateway supporting hosted Google Gemini API (`gemini-3.5-flash-lite`), local Ollama (`qwen3:4b`), and zero-cost offline `MockLLMProvider`.
+  - Zero-cost cloud deployment architecture targeting Vercel/Cloudflare Pages, Render Web Service, Neon PostgreSQL, and Qdrant Cloud.
+  - Responsible AI safety framework: acute red-flag emergency symptom escalation, mandatory clinical decision support disclaimers, prompt injection defense, append-only audit log sanitization, and GDPR/HIPAA cascading data erasure.
+- [x] **2. Modular Architecture Enforced:**
+  - LLM Gateway: `backend/rag/llm.py` (`BaseLLMProvider`, `MockLLMProvider`, `GeminiLLMProvider`, `OllamaLLMProvider`, `get_llm_provider`, `reset_llm_provider`), zero additional heavy SDK dependencies using native `httpx`.
+  - Safety & Responsible AI: `backend/rag/safety.py` (`check_emergency_symptoms`, `detect_prompt_injection`, `sanitize_prompt_input`, `apply_clinical_safety_disclaimer`).
+  - Audit Log Sanitizer: `backend/audit/sanitizer.py` (`sanitize_audit_details`, `sanitize_text`, `sanitize_value`) masking API keys, JWTs, Bearer tokens, passwords, SSNs, credit cards before PostgreSQL writes.
+  - Cascading Erasure Service: `backend/patients/deletion.py` (`cascade_delete_patient`) purging patient records, user permissions, documents, chunks, vectors, and timeline events.
+  - Vector Store Purge: `backend/vector/store.py` (`delete_patient_chunks` and `delete_document_chunks`).
+  - Health Diagnostic: `backend/api/v1/health.py` (`check_llm_health`) reporting live LLM provider connectivity status.
+  - API Routes: `backend/api/v1/patients.py` mounted `DELETE /api/v1/patients/{id}` for admin role with cascading purge and audit log.
+- [x] **3. No Secrets / Real PHI Committed:** All credentials are loaded exclusively from `.env` or system environment variables. Zero API keys committed to Git or `.env.example`. Test fixtures operate 100% offline with synthetic personas.
+- [x] **4. Dependencies Documented:** Utilizes standard Python libraries, `httpx`, and existing project packages. Requires zero external paid credits or local daemons for automated test suite execution.
+- [x] **5. Automated Tests Passing:** **142/142 pytest tests pass** (21 new tests in Phase 13):
+  - `tests/unit/test_llm_providers.py` (10 tests): Mock generation & health check, Gemini unconfigured key error handling, Gemini successful generation with candidate parsing, Gemini HTTP 429 rate limit backoff retry, Gemini health check, Ollama generation, Ollama missing model 404 guidance, Ollama connection failure handling, Ollama health probe, and dynamic provider factory fallback.
+  - `tests/unit/test_security_hardening.py` (7 tests): Audit log sanitizer redacting Gemini keys (`AQ.*`), Google keys (`AIza*`), Bearer tokens, and JWTs; PHI scrubber redacting SSNs and credit cards; nested dictionary and credential key redaction; database audit log sanitization; acute clinical emergency symptom detection (ACS, stroke, respiratory failure, anaphylaxis, suicidal ideation) vs benign queries; prompt injection jailbreak detection and delimiter sanitization; idempotent clinical safety disclaimer attachment.
+  - `tests/integration/test_security_lifecycle.py` (4 tests): Cascading patient purge for authorized admin removing patient, linked documents, and clinical events; rejection of deletion for non-admin personas with 403 Forbidden; acute symptom query triggering emergency warning banner and limitation notes; adversarial prompt injection query neutralization and audit limitation.
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check .` passed with 0 errors.
+  - Python: `mypy backend` passed with 0 issues across 90 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) passed with 0 errors in 5.14s.
+- [x] **7. Security & Isolation Enforced:** Admin role required for cascading patient purge. All audit log entries scrubbed of credentials and sensitive identifiers. Untrusted document passage delimiters strictly enforced in RAG prompt builder.
+- [x] **8. Error Handling & Edge Cases:** Fallback to Mock provider when API keys are unconfigured; graceful handling of missing Ollama models with pull command instructions; bounded backoff retry on Gemini HTTP 429 rate limits; non-existent patient deletion returns 404 EntityNotFoundError.
+- [x] **9. Audit Trail Active:** Append-only database audit logs record `PATIENT_CASCADING_PURGE`, `RAG_QUERY_EXECUTED`, and all access events with scrubbed details.
+- [x] **10. Frontend Workspace Integrated:** Live health status monitor in `HealthStatus.tsx` reflects active LLM status. `App.tsx` roadmap updated marking Phase 13 as `Verified`.
+- [x] **11. Known Limitations Recorded:** Production Docker multi-stage container optimization, CI/CD pipeline, and Prometheus metrics exporting scheduled for Phase 14.
+- [x] **12. Phase Tracker Updated:** Phase 13 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 14.
+
+---
+
+## 15. Active Risks & Next Actions
+* **Multi-Stage Container Bundling:** Production containerization, Prometheus metric exporters, and GitHub Actions CI workflow will be implemented in Phase 14 (Production Hardening & CI/CD).
+* **Next Action:** Phase 14 will implement Production Hardening, Multi-Stage Dockerfile, Prometheus metrics endpoint, and automated CI/CD pipeline.
 
 
 

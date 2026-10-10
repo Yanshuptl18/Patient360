@@ -1,6 +1,6 @@
 """Patient dossier management API routes."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
@@ -9,6 +9,7 @@ from backend.api.deps import get_current_user, get_db, require_roles
 from backend.audit.service import log_audit_event
 from backend.core.exceptions import AuthorizationError
 from backend.models.user import User
+from backend.patients.deletion import cascade_delete_patient
 from backend.patients.service import (
     check_user_patient_access,
     create_patient,
@@ -115,3 +116,17 @@ def grant_permission(
         permission_level=grant_in.permission_level,
     )
     return {"status": "PERMISSION_GRANTED"}
+
+
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
+def delete_patient_dossier(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(require_roles(["admin"]))],
+) -> dict[str, Any]:
+    """
+    Cascading patient purge (GDPR / HIPAA Right-to-be-Forgotten).
+    Atomically erases patient demographics, documents, chunks, vectors, and timeline events.
+    Authorized for admin role only.
+    """
+    return cascade_delete_patient(db=db, patient_id=id, current_user_id=current_user.id)

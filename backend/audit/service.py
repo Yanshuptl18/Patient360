@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from backend.audit.sanitizer import sanitize_audit_details
 from backend.models.audit import AuditLog
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,10 @@ def log_audit_event(
 ) -> AuditLog:
     """
     Appends an immutable audit log record to PostgreSQL.
-    Guarantees no raw PHI is placed in the log.
+    Guarantees no raw API keys, tokens, or PHI are placed in the log.
     """
-    details_str = json.dumps(details or {})
+    sanitized_details = sanitize_audit_details(details)
+    details_str = json.dumps(sanitized_details)
     audit_entry = AuditLog(
         user_id=user_id,
         action=action,
