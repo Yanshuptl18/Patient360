@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     QDRANT_PORT: int = 6333
     QDRANT_GRPC_PORT: int = 6334
     QDRANT_COLLECTION_NAME: str = "patient360_chunks"
+    QDRANT_URL: str = ""
+    QDRANT_API_KEY: str = ""
 
     # Embedding Configuration (FastEmbed CPU-optimized)
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-small-en-v1.5"

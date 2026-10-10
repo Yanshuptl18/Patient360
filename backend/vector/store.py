@@ -68,16 +68,25 @@ class QdrantVectorStore:
             self.is_embedded = True
         else:
             try:
-                # Attempt connection to configured Qdrant service
-                self.client = QdrantClient(
-                    host=settings.QDRANT_HOST,
-                    port=settings.QDRANT_PORT,
-                    timeout=2,
-                )
+                # Attempt connection to configured Qdrant service or cloud cluster
+                if settings.QDRANT_URL or settings.QDRANT_HOST.startswith("http"):
+                    target_url = settings.QDRANT_URL or settings.QDRANT_HOST
+                    self.client = QdrantClient(
+                        url=target_url,
+                        api_key=settings.QDRANT_API_KEY or None,
+                        timeout=5,
+                    )
+                else:
+                    self.client = QdrantClient(
+                        host=settings.QDRANT_HOST,
+                        port=settings.QDRANT_PORT,
+                        api_key=settings.QDRANT_API_KEY or None,
+                        timeout=2,
+                    )
                 # Verify liveness
                 self.client.get_collections()
                 self.is_embedded = False
-                logger.info(f"Connected to Qdrant at {settings.QDRANT_HOST}:{settings.QDRANT_PORT}")
+                logger.info("Connected to Qdrant vector store service.")
             except Exception as err:
                 logger.warning(
                     f"Could not connect to Qdrant daemon ({err}). Falling back to in-memory embedded vector store."
