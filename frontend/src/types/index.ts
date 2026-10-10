@@ -244,3 +244,69 @@ export interface TimelineExtractResponse {
   message: string;
 }
 
+export type WorkflowStatus =
+  | 'planning'
+  | 'executing'
+  | 'awaiting_approval'
+  | 'completed'
+  | 'iteration_limit_reached'
+  | 'timeout_exceeded'
+  | 'rejected'
+  | 'failed';
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface WorkflowStepLog {
+  step_index: number;
+  node_name: string;
+  thought: string;
+  action_tool?: string | null;
+  tool_input?: Record<string, unknown> | null;
+  tool_output?: unknown | null;
+  timestamp_iso: string;
+}
+
+export interface AgentRunSnapshot {
+  run_id: string;
+  patient_id: string;
+  patient_name?: string | null;
+  query: string;
+  status: WorkflowStatus;
+  iteration_count: number;
+  max_iterations: number;
+  elapsed_seconds: number;
+  plan: string[];
+  steps: WorkflowStepLog[];
+  retrieved_evidence_count: number;
+  contradictions_found: Array<{
+    contradiction_id: string;
+    topic: string;
+    conflict_type: string;
+    severity: string;
+    description: string;
+    event_ids: string[];
+    resolution_recommendation: string;
+  }>;
+  draft_synthesis?: string | null;
+  final_report?: string | null;
+  approval_status: ApprovalStatus;
+  clinician_feedback?: string | null;
+  error_message?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgentApprovalRequest {
+  approved: boolean;
+  feedback?: string | null;
+}
+
+export interface AgentApprovalResponse {
+  run_id: string;
+  status: WorkflowStatus;
+  approval_status: ApprovalStatus;
+  message: string;
+  final_report?: string | null;
+}
+
+

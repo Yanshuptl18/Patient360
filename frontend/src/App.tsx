@@ -8,6 +8,7 @@ import { PatientList } from './features/patients/PatientList';
 import { DocumentList } from './features/documents/DocumentList';
 import { ClinicalRAGPanel } from './features/rag/ClinicalRAGPanel';
 import { ClinicalTimelinePanel } from './features/timeline/ClinicalTimelinePanel';
+import { ClinicalAgentPanel } from './features/agents/ClinicalAgentPanel';
 import { PhaseInfo, Patient, Document } from './types';
 import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const PHASES_DATA: PhaseInfo[] = [
   { number: 7, name: 'Baseline Grounded RAG', status: 'Verified', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
   { number: 8, name: 'Advanced Hybrid RAG', status: 'Verified', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
   { number: 9, name: 'Timeline & Event Synthesis', status: 'Verified', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
-  { number: 10, name: 'Bounded Agentic Workflows', status: 'Planned', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
+  { number: 10, name: 'Bounded Agentic Workflows', status: 'Verified', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
   { number: 11, name: 'Research Intelligence', status: 'Planned', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
   { number: 12, name: 'Evaluation Laboratory', status: 'Planned', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
   { number: 13, name: 'Security & Responsible AI', status: 'Planned', description: 'Prompt-injection pen tests, audit logs, and data erasure.', tag: 'Hardening' },
@@ -33,7 +34,8 @@ const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline'>('documents');
+  const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents'>('documents');
+
   const { user, isAuthenticated, token } = useAuth();
 
   const fetchDocuments = useCallback(
@@ -265,6 +267,19 @@ const MainContent: React.FC = () => {
                         <Clock className="w-3.5 h-3.5" />
                         <span>Longitudinal Timeline</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActivePatientTab('agents')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          activePatientTab === 'agents'
+                            ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Bot className="w-3.5 h-3.5" />
+                        <span>Bounded Agents</span>
+                      </button>
                     </div>
 
                     {/* Active View */}
@@ -281,13 +296,19 @@ const MainContent: React.FC = () => {
                           patientId={selectedPatient.id}
                           patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                         />
-                      ) : (
+                      ) : activePatientTab === 'timeline' ? (
                         <ClinicalTimelinePanel
+                          patientId={selectedPatient.id}
+                          patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
+                        />
+                      ) : (
+                        <ClinicalAgentPanel
                           patientId={selectedPatient.id}
                           patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                         />
                       )}
                     </div>
+
                   </div>
                 ) : (
                   <div className="h-full rounded-3xl bg-slate-900/60 border border-slate-800 p-8 flex flex-col items-center justify-center text-center">

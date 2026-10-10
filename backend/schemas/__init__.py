@@ -1,5 +1,14 @@
 """Pydantic Request and Response Schemas Package."""
 
+from backend.schemas.agent import (
+    AgentApprovalRequest,
+    AgentApprovalResponse,
+    AgentRunRequest,
+    AgentRunSnapshot,
+    ApprovalStatus,
+    WorkflowStatus,
+    WorkflowStepLog,
+)
 from backend.schemas.audit import AuditLogCreate, AuditLogResponse
 from backend.schemas.auth import (
     LoginRequest,
@@ -100,4 +109,12 @@ __all__ = [
     "PatientTimelineResponse",
     "TimelineExtractRequest",
     "TimelineExtractResponse",
+    "WorkflowStatus",
+    "ApprovalStatus",
+    "AgentRunRequest",
+    "WorkflowStepLog",
+    "AgentRunSnapshot",
+    "AgentApprovalRequest",
+    "AgentApprovalResponse",
 ]
+

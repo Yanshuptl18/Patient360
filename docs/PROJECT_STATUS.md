@@ -247,13 +247,47 @@
   - `frontend/src/features/timeline/ClinicalTimelinePanel.tsx`: Interactive vertical milestone timeline with category color coding, contradiction alert banner with side-by-side comparison boxes, filter toolbar by event type and contradiction toggle, and jump-links to `PDFCitationViewerModal`.
   - `frontend/src/App.tsx`: Added 3rd tab (`Longitudinal Timeline`) in patient workspace; marked Phase 9 as `Verified` in `PHASES_DATA`.
 - [x] **11. Known Limitations Recorded:** Bounded agentic multi-step workflows with LangGraph are scheduled for Phase 10.
-- [x] **12. Phase Tracker Updated:** Phase 9 marked Completed (Pending Approval).
-- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 10.
+- [x] **12. Phase Tracker Updated:** Phase 9 marked Verified and Approved.
+- [x] **13. Explicit User Approval Requested:** Phase 9 reviewed and approved by user.
 
 ---
 
-## 11. Active Risks & Outstanding Issues
-* **Bounded Agentic Workflows:** Complex clinical queries currently execute in a single retrieval-synthesis pass. Multi-step reasoning across disparate documents, contradictory fact reconciliation, and literature cross-referencing will benefit from bounded LangGraph agentic workflows with strict iteration ceilings.
-* **Next Action:** Phase 10 will implement Bounded Agentic Workflows (LangGraph state machine, bounded step ceiling of max 5 iterations, 30s timeout, read-only tools, and human clinician review approval gates).
+## 11. Phase 10 Verification Checklist (Definition of Done)
+
+- [x] **1. Requirements & Scope Documented:** Deterministic multi-step clinical inquiry state machine using LangGraph, bound to read-only tools, protected by a hard iteration ceiling (maximum 5 loops), a 30-second timeout guard, and an explicit Human-in-the-Loop clinician review gate before finalizing reports (aligned with FR-AGT-01..04).
+- [x] **2. Modular Architecture Enforced:**
+  - Pydantic Schemas: `backend/schemas/agent.py` (`AgentRunRequest` enforcing `max_iterations <= 5`, `WorkflowStepLog`, `AgentRunSnapshot`, `AgentApprovalRequest`, `AgentApprovalResponse`).
+  - Agent State: `backend/agents/state.py` (`AgentWorkflowState(TypedDict)` with full execution metadata, telemetry, and approval status).
+  - Read-Only Tools: `backend/agents/tools.py` (`get_patient_dossier`, `search_clinical_evidence`, `query_longitudinal_timeline`, `inspect_clinical_contradictions` — each strictly guarded by `check_user_patient_access`).
+  - LangGraph State Machine: `backend/agents/graph.py` (`build_clinical_agent_graph` with `planner_node`, `retrieval_node`, `reconciliation_node`, `gate_node`, `finalizer_node`, `iteration_limit_node`, `timeout_node`).
+  - Orchestration Service: `backend/agents/service.py` (`AgentWorkflowService`, `get_agent_service` managing run lifecycles, resume graph invocation upon clinician review, and audit logging).
+  - API Routes: `backend/api/v1/agents.py` (`POST /runs`, `GET /runs/{id}`, `POST /runs/{id}/review`, `GET /patients/{id}/runs`).
+- [x] **3. No Secrets / Real PHI Committed:** All agent workflows and test suites execute strictly against synthetic personas (`SYNTH-AGT-INT-01`, `Arthur Pendelton`); zero real PHI stored.
+- [x] **4. Dependencies Documented:** `langgraph>=1.2.0` (1.2.14) and `langchain-core>=1.4.0` (1.6.9) added to `requirements.txt` and verified in `.venv`.
+- [x] **5. Automated Tests Passing:** **102/102 pytest tests pass** (14 new comprehensive tests in Phase 10):
+  - `tests/unit/test_agent_tools.py` (3 tests): Read-only tool execution, patient metadata retrieval, and horizontal security boundary enforcement (`AuthorizationError`).
+  - `tests/unit/test_agent_iteration_limit.py` (4 tests): Schema validation ceiling (`le=5`), service-level clamping, state machine hard termination at `max_iterations`, and execution timeout guard (30s).
+  - `tests/unit/test_agent_approval_gate.py` (5 tests): Pausing at `awaiting_approval`, clinician approval report certification, clinician rejection workflow halt, invalid state rejection (400), and unauthorized review rejection (`AuthorizationError`).
+  - `tests/integration/test_agent_workflow.py` (2 tests): End-to-end multi-step inquiry API lifecycle (`POST /runs` -> `GET /runs/{id}` -> `POST /runs/{id}/review`), and cross-patient horizontal access rejection (`403 Forbidden`).
+- [x] **6. Static Checks Passing:**
+  - Python: `ruff check backend tests` passed with 0 errors.
+  - Python: `mypy backend tests` passed with 0 errors across 104 source files.
+  - Frontend: `npm run build` (`tsc && vite build`) produced production bundle in 4.74s with 0 errors.
+- [x] **7. Security & Isolation Enforced:** Every read-only tool and API route enforces `check_user_patient_access`. Horizontal privilege escalation attempts return `403 Forbidden` (`code="FORBIDDEN"`). Reviewing and approving reports requires clinical write permission.
+- [x] **8. Error Handling & Edge Cases:** Runaway loop prevention via dual schema + routing ceiling (`<= 5`); 30s budget timeout termination; double-review guard rejecting already-finalized runs with HTTP 400.
+- [x] **9. Audit Trail Active:** Append-only audit logger records `AGENT_RUN_INITIATED` and `AGENT_RUN_REVIEWED` (with clinician decision and feedback).
+- [x] **10. Frontend Workspace Integrated:**
+  - `frontend/src/features/agents/ClinicalAgentPanel.tsx`: Interactive multi-step launcher with preset queries, state/loop budget meter, stepped telemetry trace inspector with expandable tool input/output JSON, Human-in-the-Loop review gate action banner (Approve / Reject), and certified report viewer with copy action.
+  - `frontend/src/App.tsx`: Added 4th workspace tab (`Bounded Agents` with `Bot` icon); marked Phase 10 as `Verified` in `PHASES_DATA`.
+- [x] **11. Known Limitations Recorded:** Biomedical literature integration and cross-study comparative matrices are scheduled for Phase 11.
+- [x] **12. Phase Tracker Updated:** Phase 10 marked Completed (Pending Approval).
+- [x] **13. Explicit User Approval Requested:** Awaiting user review and approval before proceeding to Phase 11.
+
+---
+
+## 12. Active Risks & Outstanding Issues
+* **Biomedical Literature Cross-Referencing:** Agentic inquiry currently focuses on patient EHR documents and historical records. Cross-referencing findings against PubMed / OpenAlex literature and clinical trial matrices will be established in Phase 11.
+* **Next Action:** Phase 11 will implement Research Intelligence (Biomedical Literature Search, OpenAlex / PubMed integration, Comparative Study Matrices, and Guideline Verification).
+
 
 

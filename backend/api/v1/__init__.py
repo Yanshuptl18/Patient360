@@ -2,7 +2,16 @@
 
 from fastapi import APIRouter
 
-from backend.api.v1 import auth, documents, health, patients, rag, timeline, vector
+from backend.api.v1 import (
+    agents,
+    auth,
+    documents,
+    health,
+    patients,
+    rag,
+    timeline,
+    vector,
+)
 
 api_router = APIRouter()
 api_router.include_router(health.router, prefix="/health", tags=["System Health"])
@@ -12,3 +21,5 @@ api_router.include_router(documents.router, prefix="/documents", tags=["Document
 api_router.include_router(vector.router, prefix="/vector", tags=["Vector Store & Retrieval"])
 api_router.include_router(rag.router, prefix="/rag", tags=["Grounded RAG & Evidence Synthesis"])
 api_router.include_router(timeline.router, prefix="/timeline", tags=["Longitudinal Timeline & Clinical Events"])
+api_router.include_router(agents.router, prefix="/agents", tags=["Bounded Agentic Workflows"])
+
