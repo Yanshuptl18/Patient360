@@ -387,7 +387,7 @@ export const PDFCitationViewerModal: React.FC<PDFCitationViewerModalProps> = ({
           <div className="flex items-center space-x-2">
             <span>Evidence provenance grounded to Page {citation.page_number}</span>
             <span>•</span>
-            <span className="text-teal-400/80">Phase 8 Advanced Hybrid RAG</span>
+            <span className="text-teal-400/80">Advanced Hybrid RAG</span>
           </div>
 
           <div className="flex items-center space-x-3">

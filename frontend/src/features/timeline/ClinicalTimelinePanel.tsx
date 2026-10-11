@@ -207,7 +207,7 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
             </div>
             <h2 className="text-sm font-semibold text-white">Longitudinal Clinical Trajectory</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              Phase 9
+              Chronological Engine
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
               Contradiction Detection

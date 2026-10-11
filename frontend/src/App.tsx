@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { HealthStatus } from './components/HealthStatus';
-import { RoadmapCard } from './components/RoadmapCard';
+import { AboutPlatform } from './components/AboutPlatform';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginModal } from './features/auth/LoginModal';
 import { PatientList } from './features/patients/PatientList';
@@ -11,26 +11,8 @@ import { ClinicalTimelinePanel } from './features/timeline/ClinicalTimelinePanel
 import { ClinicalAgentPanel } from './features/agents/ClinicalAgentPanel';
 import { ResearchIntelligencePanel } from './features/research/ResearchIntelligencePanel';
 import { EvaluationLabPanel } from './features/evaluation/EvaluationLabPanel';
-import { PhaseInfo, Patient, Document } from './types';
+import { Patient, Document } from './types';
 import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles, Activity } from 'lucide-react';
-
-const PHASES_DATA: PhaseInfo[] = [
-  { number: 1, name: 'Discovery & Architecture', status: 'Verified', description: 'Complete 15-file blueprint, data models, and specifications.', tag: 'Architecture' },
-  { number: 2, name: 'Development Foundation', status: 'Verified', description: 'Docker Compose, FastAPI, React/Vite, health probes, and pytest.', tag: 'Foundation' },
-  { number: 3, name: 'Auth, Authorization & RBAC', status: 'Verified', description: 'JWT authentication, Argon2 hashing, and server-side RBAC guards.', tag: 'Security' },
-  { number: 4, name: 'Patient & Doc Management', status: 'Verified', description: 'Patient records, PDF upload, storage adapter, and tenant isolation.', tag: 'Core Data' },
-  { number: 5, name: 'Ingestion & Chunking', status: 'Verified', description: 'PyMuPDF page-aware extraction, clinical normalizer, and chunker.', tag: 'Ingestion' },
-  { number: 6, name: 'Embeddings & Qdrant', status: 'Verified', description: 'FastEmbed CPU vectors (384-dim) and Qdrant payload filters.', tag: 'Vector Store' },
-  { number: 7, name: 'Baseline Grounded RAG', status: 'Verified', description: 'End-to-end Q&A, context builder, and citation parser.', tag: 'RAG Pipeline' },
-  { number: 8, name: 'Advanced Hybrid RAG', status: 'Verified', description: 'BM25 sparse search, Reciprocal Rank Fusion, and citation verifier.', tag: 'Hybrid Search' },
-  { number: 9, name: 'Timeline & Event Synthesis', status: 'Verified', description: 'Chronological clinical timeline and contradiction surfacing.', tag: 'Timeline' },
-  { number: 10, name: 'Bounded Agentic Workflows', status: 'Verified', description: 'LangGraph multi-step workflows, read-only tools, and approval gates.', tag: 'Agents' },
-  { number: 11, name: 'Research Intelligence', status: 'Verified', description: 'Literature search, comparative study matrices, and report export.', tag: 'Research' },
-  { number: 12, name: 'Evaluation Laboratory', status: 'Verified', description: '50-item synthetic benchmark runner, Recall, Faithfulness, Precision.', tag: 'Evaluation' },
-  { number: 13, name: 'Security & Responsible AI', status: 'Verified', description: 'Multi-provider LLM gateway (Gemini/Ollama/Mock), emergency red-flags, audit sanitizer, cascading purge.', tag: 'Hardening' },
-  { number: 14, name: 'Production Hardening', status: 'Verified', description: 'Multi-stage Docker, Nginx reverse proxy, Prometheus /metrics, and GitHub Actions CI.', tag: 'DevOps' },
-  { number: 15, name: 'Portfolio & Demo Release', status: 'Verified', description: 'Pre-seeded synthetic cohorts, landmark RCTs, zero-cost deploy guides, and release docs.', tag: 'Release' },
-];
 
 const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -214,7 +196,7 @@ const MainContent: React.FC = () => {
               <div>
                 <h2 className="text-base font-semibold text-white">Patient Dossiers & Document Registry</h2>
                 <p className="text-xs text-slate-400">
-                  Phase 4 — Isolated clinical records, PDF validation, and cryptographic SHA-256 storage
+                  Isolated clinical records, PDF validation, and cryptographic SHA-256 storage
                 </p>
               </div>
             </div>
@@ -385,8 +367,8 @@ const MainContent: React.FC = () => {
         {/* Live Infrastructure Health Monitor */}
         <HealthStatus />
 
-        {/* Phase Progression Tracker */}
-        <RoadmapCard phases={PHASES_DATA} />
+        {/* About Patient360 Platform Overview */}
+        <AboutPlatform />
       </main>
 
       {/* Login Modal */}

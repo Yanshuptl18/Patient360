@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
             <div className="flex items-center space-x-2">
               <span className="font-bold text-lg text-white tracking-tight">Patient360</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                Phase 3 RBAC
+                RBAC Secured
               </span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">Healthcare Intelligence & Grounded RAG Platform</p>

@@ -79,7 +79,7 @@ export const ChunkInspectorModal: React.FC<ChunkInspectorModalProps> = ({
               <div className="flex items-center space-x-2">
                 <h2 className="text-sm font-semibold text-white">Semantic Chunks & Provenance Inspector</h2>
                 <span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-mono">
-                  Phase 5
+                  Page-Aware Chunks
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5 truncate max-w-lg">

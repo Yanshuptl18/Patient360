@@ -179,7 +179,7 @@ export const ResearchIntelligencePanel: React.FC = () => {
             <div className="flex items-center space-x-2">
               <h2 className="text-sm font-bold text-white tracking-tight">Medical Research Intelligence</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
-                Phase 11
+                PICO Matrix Engine
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">

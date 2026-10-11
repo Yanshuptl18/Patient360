@@ -33,6 +33,7 @@ export interface HealthResponse {
     database: ComponentHealth;
     vector_store: ComponentHealth;
     storage: ComponentHealth;
+    llm_provider?: ComponentHealth;
   };
 }
 

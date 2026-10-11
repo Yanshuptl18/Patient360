@@ -146,7 +146,7 @@ export const EvaluationLabPanel: React.FC = () => {
           <div>
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium mb-2">
               <Activity className="w-3.5 h-3.5" />
-              <span>Phase 12 — Comprehensive Evaluation Laboratory</span>
+              <span>Comprehensive Evaluation Laboratory</span>
             </div>
             <h2 className="text-xl font-bold text-white tracking-tight">
               RAG & Retrieval Evaluation Laboratory
@@ -404,7 +404,7 @@ export const EvaluationLabPanel: React.FC = () => {
         <div className="flex items-center space-x-2 mb-2">
           <Cpu className="w-4 h-4 text-cyan-400" />
           <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
-            Controlled Retrieval Experiment Comparison (Phases 7–8 & 12)
+            Controlled Retrieval Experiment Comparison (BM25 vs FastEmbed vs Hybrid RRF)
           </h3>
         </div>
         <p className="text-xs text-slate-400 mb-4 leading-relaxed">
