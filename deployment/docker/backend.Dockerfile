@@ -50,11 +50,13 @@ RUN mkdir -p /app/storage/documents && \
 
 USER appuser
 
-EXPOSE 8000
+# Cloud Run dynamic port support (defaults to 8080 on GCP, fallback 8000)
+ENV PORT=8080
+EXPOSE 8080
 
 # Container liveness healthcheck
 HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')" || exit 1
+    CMD python -c "import urllib.request, os; p = os.environ.get('PORT', '8080'); urllib.request.urlopen(f'http://127.0.0.1:{p}/health')" || exit 1
 
-# Launch ASGI production server with 2 worker processes
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Launch ASGI production server respecting PORT environment variable
+CMD ["sh", "-c", "exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 2"]

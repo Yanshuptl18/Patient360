@@ -1,0 +1,65 @@
+# ==============================================================================
+# Patient360: Google Cloud Build CI/CD Pipeline
+# Builds and deploys backend and frontend services to Google Cloud Run
+# ==============================================================================
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE_NAME: patient360-backend
+  _FRONTEND_SERVICE: patient360-frontend
+  _REPOSITORY: patient360
+
+steps:
+  # ----------------------------------------------------------------------------
+  # Step 1: Build Backend Container Image
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'deployment/docker/backend.Dockerfile'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend:${SHORT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend:latest'
+      - '.'
+    id: 'build-backend'
+
+  # ----------------------------------------------------------------------------
+  # Step 2: Push Backend Image to Artifact Registry
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend'
+    id: 'push-backend'
+
+  # ----------------------------------------------------------------------------
+  # Step 3: Deploy Backend Service to Cloud Run
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend:latest'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=1Gi'
+      - '--cpu=1'
+      - '--timeout=60s'
+      - '--concurrency=80'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--set-env-vars=ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-flash-latest,QDRANT_COLLECTION_NAME=patient360_chunks'
+    id: 'deploy-backend'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend:latest'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/backend:${SHORT_SHA}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

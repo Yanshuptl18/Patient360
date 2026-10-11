@@ -25,7 +25,17 @@ else:
     engine_kwargs["pool_size"] = 5
     engine_kwargs["max_overflow"] = 10
 
-engine = create_engine(settings.DATABASE_URL, **engine_kwargs)
+try:
+    engine = create_engine(settings.DATABASE_URL, **engine_kwargs)
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+except Exception as err:
+    if not settings.DATABASE_URL.startswith("sqlite"):
+        logger.warning(
+            f"Configured primary database unreachable ({err}). "
+            "Falling back to local SQLite database at './patient360_dev.db'."
+        )
+        engine = create_engine("sqlite:///./patient360_dev.db", connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
