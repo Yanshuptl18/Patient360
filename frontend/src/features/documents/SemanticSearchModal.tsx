@@ -126,12 +126,12 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-semibold text-white">Dense Vector Semantic Search</h2>
+                <h2 className="text-sm font-semibold text-white">Contextual Clinical Search</h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                  FastEmbed 384-d
+                  Semantic Index
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Cosine HNSW
+                  Concept Matching
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -166,7 +166,7 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
             <div className="flex items-center space-x-2">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span className="text-emerald-400 font-medium">
-                {stats.is_embedded ? 'Embedded In-Memory Qdrant' : 'Active Qdrant Daemon'}
+                Clinical Search Engine Active
               </span>
             </div>
           </div>
@@ -251,10 +251,9 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
                 <Search className="w-6 h-6" />
               </div>
               <div className="max-w-md">
-                <h3 className="text-sm font-medium text-slate-300 mb-1">Vector Search Ready</h3>
+                <h3 className="text-sm font-medium text-slate-300 mb-1">Clinical Search Ready</h3>
                 <p className="text-xs text-slate-500">
-                  Enter a clinical query or select one of the suggested keywords above to perform dense
-                  retrieval against patient chunks indexed in Qdrant.
+                  Enter a clinical query or select one of the suggested terms above to search across verified passages in this patient's medical records.
                 </p>
               </div>
             </div>
@@ -264,10 +263,9 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
             <div className="py-16 text-center text-slate-500 flex flex-col items-center justify-center space-y-3">
               <AlertCircle className="w-8 h-8 text-slate-600" />
               <div>
-                <h3 className="text-sm font-medium text-slate-300 mb-1">No Matching Chunks Found</h3>
+                <h3 className="text-sm font-medium text-slate-300 mb-1">No Matching Passages Found</h3>
                 <p className="text-xs text-slate-500 max-w-sm">
-                  No indexed chunks for this patient matched the semantic similarity query. Make sure
-                  documents have been ingested and try alternative search terms.
+                  No clinical passages matched your inquiry. Make sure documents have been processed and try alternative medical terms.
                 </p>
               </div>
             </div>
@@ -291,7 +289,7 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/30">
                     Page {item.page_number}
                   </span>
-                  <span className="text-slate-500 text-xs">• Chunk {item.chunk_index}</span>
+                  <span className="text-slate-500 text-xs">• Section {item.chunk_index + 1}</span>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -300,12 +298,12 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
                       item.score
                     )}`}
                   >
-                    Cosine Score: {item.score.toFixed(4)} ({(item.score * 100).toFixed(1)}%)
+                    Clinical Relevance: {(item.score * 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
 
-              {/* Chunk Content */}
+              {/* Passage Content */}
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-800/80 font-sans text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
                 {item.content}
               </div>
@@ -314,7 +312,7 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800/40">
                 <div className="flex items-center space-x-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Verified Isolated Patient Scope: {patientName}</span>
+                  <span>Verified Patient Scope: {patientName}</span>
                 </div>
                 {item.doc_date && (
                   <div className="flex items-center space-x-1">
@@ -330,7 +328,7 @@ export const SemanticSearchModal: React.FC<SemanticSearchModalProps> = ({
         {/* Footer */}
         <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 shrink-0">
           <span>
-            {hasSearched ? `Found ${results.length} ranked chunk matches` : 'Ready to retrieve'}
+            {hasSearched ? `Found ${results.length} relevant clinical passages` : 'Ready for inquiry'}
           </span>
           <button
             onClick={onClose}

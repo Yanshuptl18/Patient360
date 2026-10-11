@@ -163,12 +163,12 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
             <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400">
               <Sparkles className="w-4 h-4" />
             </div>
-            <h2 className="text-sm font-semibold text-white">Grounded Clinical Synthesis (RAG)</h2>
+            <h2 className="text-sm font-semibold text-white">Evidence-Grounded Clinical Inquiries</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              Zero Temperature
+              Objective Determinism
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              Deterministic Citations
+              Verifiable Citations
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -190,15 +190,15 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
           />
 
           <div className="flex items-center space-x-1.5 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400">
-            <span>Top-K:</span>
+            <span>Sources:</span>
             <select
               value={topK}
               onChange={(e) => setTopK(parseInt(e.target.value, 10))}
               className="bg-transparent text-slate-200 font-medium focus:outline-none"
             >
-              <option value="3" className="bg-slate-900">3</option>
-              <option value="5" className="bg-slate-900">5</option>
-              <option value="10" className="bg-slate-900">10</option>
+              <option value="3" className="bg-slate-900">3 Top Sources</option>
+              <option value="5" className="bg-slate-900">5 Top Sources</option>
+              <option value="10" className="bg-slate-900">10 Top Sources</option>
             </select>
           </div>
 
@@ -330,10 +330,10 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
 
                   <div className="flex items-center space-x-2 text-slate-500 text-[10px]">
                     <Clock className="w-3 h-3" />
-                    <span>Total Latency: {response.retrieval_metadata.total_latency_ms}ms</span>
+                    <span>Response Time: {response.retrieval_metadata.total_latency_ms}ms</span>
                     <span>•</span>
                     <Layers className="w-3 h-3" />
-                    <span>Chunks: {response.retrieval_metadata.merged_candidates_count}</span>
+                    <span>Verified Sources: {response.retrieval_metadata.merged_candidates_count}</span>
                   </div>
                 </div>
               </div>

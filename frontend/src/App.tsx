@@ -12,7 +12,7 @@ import { ClinicalAgentPanel } from './features/agents/ClinicalAgentPanel';
 import { ResearchIntelligencePanel } from './features/research/ResearchIntelligencePanel';
 import { EvaluationLabPanel } from './features/evaluation/EvaluationLabPanel';
 import { Patient, Document } from './types';
-import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, ShieldAlert, KeyRound, Database, FolderGit2, Sparkles, Activity } from 'lucide-react';
+import { FileText, Clock, FileSearch, Bot, CheckCircle2, ShieldCheck, KeyRound, Database, FolderGit2, Sparkles, Activity } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -68,14 +68,14 @@ const MainContent: React.FC = () => {
                   Authenticated as {user.full_name} ({user.email})
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Role: <span className="font-semibold text-slate-200 uppercase">{user.role}</span> • Permissions:{' '}
+                  Role: <span className="font-semibold text-slate-200 uppercase">{user.role}</span> • Clinical Permissions:{' '}
                   {user.role === 'admin'
-                    ? 'Full Administrative & RBAC Configuration'
+                    ? 'Clinical Director & Department Security Administration'
                     : user.role === 'reviewer'
-                    ? 'Permitted Patient Records & Longitudinal Timelines'
+                    ? 'Patient Records, Clinical Notes & Longitudinal Timelines'
                     : user.role === 'researcher'
                     ? 'Biomedical Literature & Comparative Study Matrices'
-                    : 'Synthetic Demonstration Datasets Only'}
+                    : 'Standard Clinical Data Access'}
                 </div>
               </div>
             </div>
@@ -87,22 +87,22 @@ const MainContent: React.FC = () => {
         ) : (
           <div className="mb-6 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-xl bg-slate-800 text-slate-400">
-                <ShieldAlert className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-slate-200">Unauthenticated Session</div>
+                <div className="text-xs font-semibold text-slate-200">Clinical Provider Verification</div>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Sign in with a demo persona to test server-side role-based access control and patient isolation.
+                  Sign in or register with your institutional email to access patient dossiers, timelines, and research synthesis.
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 shrink-0"
+              className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold transition-all shadow-md shadow-teal-500/20 shrink-0 cursor-pointer"
             >
-              Sign In as Demo Persona
+              Sign In / Register with OTP
             </button>
           </div>
         )}
@@ -137,7 +137,7 @@ const MainContent: React.FC = () => {
               </div>
               <div className="flex items-center space-x-1.5">
                 <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                <span>Server-Side RBAC Enforcement</span>
+                <span>Enterprise Access Governance</span>
               </div>
             </div>
           </div>
@@ -151,7 +151,7 @@ const MainContent: React.FC = () => {
             </div>
             <h3 className="text-sm font-semibold text-white">Document Intelligence</h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Hybrid retrieval (Dense + BM25) with exact claim-to-passage citation tracking.
+              Precision contextual search with exact claim-to-passage citation tracking.
             </p>
           </div>
 
@@ -179,9 +179,9 @@ const MainContent: React.FC = () => {
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-3">
               <Bot className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-semibold text-white">Bounded Agents</h3>
+            <h3 className="text-sm font-semibold text-white">Clinical Synthesis Agents</h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              LangGraph state machine with 5-iteration ceiling, timeouts, and human approval gates.
+              Multi-step reasoning workflows with mandatory physician review and approval.
             </p>
           </div>
         </div>
@@ -196,7 +196,7 @@ const MainContent: React.FC = () => {
               <div>
                 <h2 className="text-base font-semibold text-white">Patient Dossiers & Document Registry</h2>
                 <p className="text-xs text-slate-400">
-                  Isolated clinical records, PDF validation, and cryptographic SHA-256 storage
+                  Isolated clinical records, document validation, and tamper-evident storage
                 </p>
               </div>
             </div>
@@ -377,14 +377,14 @@ const MainContent: React.FC = () => {
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-900/40 py-6 mt-12 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Patient360 Platform. Developed under strict modular architecture and healthcare safety standards.</p>
+          <p>© 2026 Patient360 Platform. Evidence-Grounded Healthcare Intelligence & Clinical Synthesis.</p>
           <div className="flex items-center space-x-4">
             <a href="/api/v1/health" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
-              Health Probe API
+              Platform Status
             </a>
             <span className="text-slate-700">•</span>
             <a href="/api/v1/docs" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
-              OpenAPI Spec
+              Clinical Guide
             </a>
           </div>
         </div>

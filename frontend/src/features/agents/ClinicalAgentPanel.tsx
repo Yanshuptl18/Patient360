@@ -175,11 +175,11 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
             <div className="flex items-center space-x-2">
               <h2 className="text-sm font-bold text-white tracking-tight">Bounded Clinical Agent</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                LangGraph State Machine
+                Clinical Reasoning Engine
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Subject: <span className="font-semibold text-slate-200">{patientName}</span> • Read-only tools • Hard 5-loop ceiling
+              Patient Dossier: <span className="font-semibold text-slate-200">{patientName}</span> • Evidence-Bounded • Mandatory Clinician Approval
             </p>
           </div>
         </div>
@@ -254,7 +254,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Executing LangGraph State Machine...</span>
+                    <span>Synthesizing Clinical Evidence...</span>
                   </>
                 ) : (
                   <>
@@ -533,7 +533,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
               <Bot className="w-12 h-12 text-slate-700 mb-3" />
               <h3 className="text-sm font-semibold text-white">Bounded Clinical Inquiry</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                Formulate an inquiry on the left to invoke the LangGraph bounded state machine with hybrid retrieval and human certification gates.
+                Formulate a clinical inquiry to synthesize patient records with verified page citations and mandatory physician certification.
               </p>
             </div>
           )}

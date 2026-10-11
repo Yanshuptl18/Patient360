@@ -94,7 +94,7 @@ export const AboutPlatform: React.FC = () => {
               </div>
               <h3 className="text-base font-semibold text-white">Unified Patient Dossiers</h3>
               <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                Aggregates diverse medical documentation—including discharge summaries, pathology reports, molecular genetics, and outpatient notes—into isolated, structured patient profiles with SHA-256 cryptographic file integrity.
+                Aggregates diverse medical documentation—including discharge summaries, pathology reports, molecular genetics, and outpatient notes—into isolated, structured patient profiles with certified tamper-proof record validation.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800/60 text-[11px] text-teal-400 flex items-center space-x-1.5 font-medium">
@@ -349,30 +349,30 @@ export const AboutPlatform: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-              <div className="text-xs font-semibold text-teal-400 mb-1">Hybrid Retrieval</div>
+              <div className="text-xs font-semibold text-teal-400 mb-1">Precision Clinical Search</div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Reciprocal Rank Fusion merging dense vector cosine similarity (FastEmbed) with sparse keyword search (BM25).
+                Intelligent combination of clinical concept understanding with exact medical terminology matching.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-              <div className="text-xs font-semibold text-cyan-400 mb-1">Vector Storage</div>
+              <div className="text-xs font-semibold text-cyan-400 mb-1">Secure Record Index</div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Qdrant vector engine supporting embedded in-memory mode or standalone clusters with isolated tenant filtering.
+                Contextual patient indexing with complete tenant isolation and zero unauthorized record leakage.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-              <div className="text-xs font-semibold text-emerald-400 mb-1">Multi-LLM Gateway</div>
+              <div className="text-xs font-semibold text-emerald-400 mb-1">Clinical AI Intelligence</div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Provider-agnostic interface supporting Google Gemini, local offline Ollama (Qwen 4B), and zero-cost mock providers.
+                Evidence-grounded clinical synthesis with strict medical citation verification and automatic abstention.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-              <div className="text-xs font-semibold text-purple-400 mb-1">Audit Trail</div>
+              <div className="text-xs font-semibold text-purple-400 mb-1">Compliance Audit Trail</div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Cryptographic logging of all access, exports, and document reads with automated PII/PHI sanitization.
+                Complete institutional logging of clinical inquiries and document views with automated PII/PHI sanitization.
               </p>
             </div>
           </div>

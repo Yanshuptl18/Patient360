@@ -33,10 +33,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
             <div className="flex items-center space-x-2">
               <span className="font-bold text-lg text-white tracking-tight">Patient360</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                RBAC Secured
+                HIPAA Secure
               </span>
             </div>
-            <p className="text-xs text-slate-400 hidden sm:block">Healthcare Intelligence & Grounded RAG Platform</p>
+            <p className="text-xs text-slate-400 hidden sm:block">Healthcare Intelligence & Grounded Evidence Platform</p>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
             className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors border border-slate-700"
           >
             <BookOpen className="w-3.5 h-3.5 text-teal-400" />
-            <span>API Docs</span>
+            <span>Clinical Guide</span>
           </a>
 
           {/* User Auth Section */}

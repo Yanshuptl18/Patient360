@@ -264,37 +264,37 @@ export const DocumentList: React.FC<DocumentListProps> = ({
 
                   {/* Actions */}
                   <div className="flex items-center space-x-1">
-                    {/* Parse & Ingest button if pending or failed */}
+                    {/* Process & Ingest button if pending or failed */}
                     {doc.ingestion_status !== 'completed' && user?.role !== 'demo' && (
                       <button
                         onClick={() => handleIngest(doc)}
                         disabled={isIngestingId === doc.id}
-                        title="Parse & Chunk Document with PyMuPDF"
+                        title="Process & Index Clinical Document"
                         className="p-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 transition-all text-[11px] font-medium flex items-center space-x-1 disabled:opacity-50"
                       >
                         {isIngestingId === doc.id ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span className="hidden sm:inline">Parsing...</span>
+                            <span className="hidden sm:inline">Processing...</span>
                           </>
                         ) : (
                           <>
                             <Play className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Parse PDF</span>
+                            <span className="hidden sm:inline">Process Record</span>
                           </>
                         )}
                       </button>
                     )}
 
-                    {/* View Chunks button if completed */}
+                    {/* View Passages button if completed */}
                     {doc.ingestion_status === 'completed' && (
                       <button
                         onClick={() => setInspectingDocument(doc)}
-                        title="Inspect Extracted Chunks & Provenance"
+                        title="Review Extracted Clinical Passages & Sources"
                         className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all text-[11px] font-medium flex items-center space-x-1"
                       >
                         <Layers className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Chunks</span>
+                        <span className="hidden sm:inline">Passages</span>
                       </button>
                     )}
 

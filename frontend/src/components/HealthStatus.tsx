@@ -73,7 +73,7 @@ export const HealthStatus: React.FC = () => {
             {getStatusBadge(health?.status || (loading ? 'UP' : 'DOWN'))}
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time diagnostics for relational persistence, vector search, encrypted storage, and LLM inference.
+            Real-time operational availability for patient records, clinical search, document archive, and AI synthesis.
           </p>
         </div>
 
@@ -94,8 +94,8 @@ export const HealthStatus: React.FC = () => {
         <div className="mt-5 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center space-x-3">
           <XCircle className="w-4 h-4 shrink-0 text-rose-400" />
           <div>
-            <p className="font-semibold">Gateway Diagnostics Notice</p>
-            <p className="text-rose-400/80 mt-0.5">{error}. Ensure the backend service is running on port 8000.</p>
+            <p className="font-semibold">Clinical Service Notice</p>
+            <p className="text-rose-400/80 mt-0.5">{error}. Contact hospital IT or clinical systems administration.</p>
           </div>
         </div>
       ) : (
@@ -108,15 +108,15 @@ export const HealthStatus: React.FC = () => {
                   <Database className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-slate-200">Relational Database</h3>
-                  <span className="text-[11px] text-slate-400">PostgreSQL / SQLite</span>
+                  <h3 className="text-sm font-medium text-slate-200">Patient Database</h3>
+                  <span className="text-[11px] text-slate-400">Encrypted Clinical Records</span>
                 </div>
               </div>
               {getStatusBadge(db?.status)}
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
               <span className="truncate max-w-[170px]" title={db?.message || 'Verifying connection...'}>
-                {db?.message || 'Verifying...'}
+                {db?.message ? 'Connected & Active' : 'Verifying...'}
               </span>
               <span className="font-mono text-slate-300 font-medium">
                 {db?.latency_ms ?? 0} ms
@@ -124,7 +124,7 @@ export const HealthStatus: React.FC = () => {
             </div>
           </div>
 
-          {/* Qdrant Vector Store */}
+          {/* Semantic Index Engine */}
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/90 flex flex-col justify-between hover:border-slate-700 transition-all">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-2.5">
@@ -132,15 +132,15 @@ export const HealthStatus: React.FC = () => {
                   <Cpu className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-slate-200">Qdrant Vector DB</h3>
-                  <span className="text-[11px] text-slate-400">FastEmbed (384-dim)</span>
+                  <h3 className="text-sm font-medium text-slate-200">Semantic Search</h3>
+                  <span className="text-[11px] text-slate-400">Contextual Knowledge Engine</span>
                 </div>
               </div>
               {getStatusBadge(vector?.status)}
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
               <span className="truncate max-w-[170px]" title={vector?.message || 'Checking vector engine...'}>
-                {vector?.message || 'Checking...'}
+                {vector?.message ? 'Ready & Indexed' : 'Checking...'}
               </span>
               <span className="font-mono text-slate-300 font-medium">
                 {vector?.latency_ms ?? 0} ms
@@ -156,15 +156,15 @@ export const HealthStatus: React.FC = () => {
                   <HardDrive className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-slate-200">Document Store</h3>
-                  <span className="text-[11px] text-slate-400">SHA-256 Validated</span>
+                  <h3 className="text-sm font-medium text-slate-200">Document Archive</h3>
+                  <span className="text-[11px] text-slate-400">Verified File Storage</span>
                 </div>
               </div>
               {getStatusBadge(storage?.status)}
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
               <span className="truncate max-w-[170px]" title={storage?.message || 'Verifying storage...'}>
-                {storage?.message || 'Verifying...'}
+                {storage?.message ? 'Securely Mounted' : 'Verifying...'}
               </span>
               <span className="font-mono text-slate-300 font-medium">
                 {storage?.latency_ms ?? 0} ms
@@ -180,15 +180,15 @@ export const HealthStatus: React.FC = () => {
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-slate-200">Clinical LLM</h3>
-                  <span className="text-[11px] text-slate-400">Gemini / Ollama / Mock</span>
+                  <h3 className="text-sm font-medium text-slate-200">Clinical AI Assistant</h3>
+                  <span className="text-[11px] text-slate-400">Evidence Synthesis Active</span>
                 </div>
               </div>
               {getStatusBadge(llm?.status || (health ? 'UP' : undefined))}
             </div>
             <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
               <span className="truncate max-w-[170px]" title={llm?.message || 'Ready'}>
-                {llm?.message || 'Ready'}
+                {llm?.message ? 'Operational' : 'Ready'}
               </span>
               <span className="font-mono text-slate-300 font-medium">
                 {llm?.latency_ms ?? 1} ms

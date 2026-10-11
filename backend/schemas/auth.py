@@ -13,6 +13,8 @@ class RoleEnum(StrEnum):
     REVIEWER = "reviewer"
     RESEARCHER = "researcher"
     DEMO = "demo"
+    DOCTOR = "doctor"
+    CLINICIAN = "clinician"
 
 
 class UserBase(BaseModel):
@@ -56,3 +58,23 @@ class TokenPayload(BaseModel):
     role: str
     type: str  # "access" or "refresh"
     exp: int
+
+
+class OtpRequest(BaseModel):
+    email: EmailStr
+    full_name: str | None = None
+    role: RoleEnum = RoleEnum.REVIEWER
+
+
+class OtpVerifyRequest(BaseModel):
+    email: EmailStr
+    otp: str = Field(min_length=6, max_length=6)
+    full_name: str | None = None
+    role: RoleEnum = RoleEnum.REVIEWER
+
+
+class OtpResponse(BaseModel):
+    status: str = "success"
+    message: str
+    email: str
+    dev_otp: str | None = None

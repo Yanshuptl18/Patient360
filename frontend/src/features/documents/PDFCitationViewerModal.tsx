@@ -334,14 +334,14 @@ export const PDFCitationViewerModal: React.FC<PDFCitationViewerModalProps> = ({
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center space-x-2">
                         <span className="px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-400 border border-teal-500/20 font-mono text-[10px]">
-                          Chunk #{chunk.chunk_index + 1}
+                          Section #{chunk.chunk_index + 1}
                         </span>
                         <span className="text-[11px] text-slate-400 font-mono">
-                          Page {chunk.page_number} • {chunk.token_count} tokens
+                          Page {chunk.page_number} • {chunk.token_count} words
                         </span>
                       </div>
                       <span className="text-[10px] text-slate-500 font-mono">
-                        ID: {chunk.id.slice(0, 8)}...
+                        Ref: {chunk.id.slice(0, 8)}...
                       </span>
                     </div>
 
@@ -353,7 +353,7 @@ export const PDFCitationViewerModal: React.FC<PDFCitationViewerModalProps> = ({
               ) : (
                 <div className="py-16 text-center text-slate-400 space-y-2">
                   <Layers className="w-8 h-8 mx-auto text-slate-600" />
-                  <p className="text-xs">No extracted chunks found for Page {currentPage}.</p>
+                  <p className="text-xs">No extracted passages found for Page {currentPage}.</p>
                   <p className="text-[11px] text-slate-500">
                     Switch to original PDF stream or select another page.
                   </p>

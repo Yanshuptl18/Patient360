@@ -77,9 +77,9 @@ export const ChunkInspectorModal: React.FC<ChunkInspectorModalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-semibold text-white">Semantic Chunks & Provenance Inspector</h2>
+                <h2 className="text-sm font-semibold text-white">Clinical Source Passages & Provenance</h2>
                 <span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-mono">
-                  Page-Aware Chunks
+                  Page-Aware Passages
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5 truncate max-w-lg">
@@ -100,7 +100,7 @@ export const ChunkInspectorModal: React.FC<ChunkInspectorModalProps> = ({
           <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
             <div className="text-[11px] text-slate-400 flex items-center space-x-1.5">
               <Layers className="w-3.5 h-3.5 text-teal-400" />
-              <span>Extracted Chunks</span>
+              <span>Extracted Passages</span>
             </div>
             <div className="text-base font-bold text-white mt-1">{chunks.length}</div>
           </div>
@@ -108,9 +108,9 @@ export const ChunkInspectorModal: React.FC<ChunkInspectorModalProps> = ({
           <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
             <div className="text-[11px] text-slate-400 flex items-center space-x-1.5">
               <Hash className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Total Tokens</span>
+              <span>Document Size</span>
             </div>
-            <div className="text-base font-bold text-white mt-1">{totalTokens.toLocaleString()}</div>
+            <div className="text-base font-bold text-white mt-1">{totalTokens.toLocaleString()} words</div>
           </div>
 
           <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
@@ -133,7 +133,7 @@ export const ChunkInspectorModal: React.FC<ChunkInspectorModalProps> = ({
         {/* Filter Toolbar */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 shrink-0">
           <div className="text-xs text-slate-400">
-            Showing <span className="font-semibold text-slate-200">{filteredChunks.length}</span> chunk
+            Showing <span className="font-semibold text-slate-200">{filteredChunks.length}</span> passage
             {filteredChunks.length === 1 ? '' : 's'}
           </div>
 

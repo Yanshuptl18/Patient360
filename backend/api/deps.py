@@ -55,6 +55,9 @@ def get_current_user(
     return user
 
 
+CLINICAL_REVIEW_ROLES = {"reviewer", "doctor", "clinician"}
+
+
 def require_role(required_role: str) -> Callable[[User], User]:
     """
     FastAPI dependency factory enforcing a specific RBAC role.
@@ -63,6 +66,8 @@ def require_role(required_role: str) -> Callable[[User], User]:
 
     def role_checker(current_user: Annotated[User, Depends(get_current_user)]) -> User:
         if current_user.role == "admin" or current_user.role == required_role:
+            return current_user
+        if required_role == "reviewer" and current_user.role in CLINICAL_REVIEW_ROLES:
             return current_user
         raise AuthorizationError(
             f"Role '{current_user.role}' is not authorized. Requires '{required_role}'."
@@ -79,6 +84,8 @@ def require_roles(allowed_roles: list[str]) -> Callable[[User], User]:
 
     def roles_checker(current_user: Annotated[User, Depends(get_current_user)]) -> User:
         if current_user.role == "admin" or current_user.role in allowed_roles:
+            return current_user
+        if "reviewer" in allowed_roles and current_user.role in CLINICAL_REVIEW_ROLES:
             return current_user
         raise AuthorizationError(
             f"Role '{current_user.role}' is not authorized. Permitted roles: {allowed_roles}."
