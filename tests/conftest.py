@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 # Enforce testing environment before importing app
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite:///./test_patient360.db"
+os.environ["LLM_PROVIDER"] = "mock"
 
 from backend.auth.service import seed_default_users
 from backend.core.database import Base, SessionLocal, engine

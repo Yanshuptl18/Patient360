@@ -33,9 +33,22 @@ class HealthResponse(BaseModel):
 def check_qdrant_health() -> tuple[bool, int, str]:
     """Checks Qdrant REST API liveness or active vector store instance."""
     start = time.perf_counter()
+
+    # Fast path: Check active vector store singleton first if embedded
+    try:
+        from backend.vector.store import get_vector_store
+
+        store = get_vector_store()
+        if getattr(store, "is_embedded", False):
+            stats = store.get_collection_stats()
+            latency_ms = max(1, int((time.perf_counter() - start) * 1000))
+            return True, latency_ms, f"Qdrant vector engine ready (Embedded, {stats.get('vectors_count', 0)} vectors)"
+    except Exception:
+        pass
+
     url = f"http://{settings.QDRANT_HOST}:{settings.QDRANT_PORT}/readyz"
     try:
-        with httpx.Client(timeout=1.0) as client:
+        with httpx.Client(timeout=0.5) as client:
             resp = client.get(url)
             latency_ms = int((time.perf_counter() - start) * 1000)
             if resp.status_code == 200:
@@ -76,13 +89,25 @@ def check_storage_health() -> tuple[bool, int, str]:
         return False, latency_ms, f"Storage write check failed: {str(exc)[:80]}"
 
 
+_last_llm_check_time = 0.0
+_last_llm_check_result: tuple[bool, int, str] | None = None
+
+
 def check_llm_health() -> tuple[bool, int, str]:
-    """Checks configured LLM provider connectivity (Gemini, Ollama, or Mock)."""
+    """Checks configured LLM provider connectivity (Gemini, Ollama, or Mock), cached for 30s."""
+    global _last_llm_check_time, _last_llm_check_result
+    now = time.time()
+    if _last_llm_check_result is not None and (now - _last_llm_check_time) < 30.0:
+        return _last_llm_check_result
+
     try:
         from backend.rag.llm import get_llm_provider
 
         provider = get_llm_provider()
-        return provider.check_health()
+        res = provider.check_health()
+        _last_llm_check_result = res
+        _last_llm_check_time = now
+        return res
     except Exception as exc:
         return False, 0, f"LLM provider error: {exc}"
 

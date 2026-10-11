@@ -397,11 +397,11 @@ const MainContent: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© 2026 Patient360 Platform. Developed under strict modular architecture and healthcare safety standards.</p>
           <div className="flex items-center space-x-4">
-            <a href="http://127.0.0.1:8000/api/v1/health" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
+            <a href="/api/v1/health" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
               Health Probe API
             </a>
             <span className="text-slate-700">•</span>
-            <a href="http://127.0.0.1:8000/api/v1/docs" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
+            <a href="/api/v1/docs" target="_blank" rel="noreferrer" className="hover:text-slate-300 transition-colors">
               OpenAPI Spec
             </a>
           </div>

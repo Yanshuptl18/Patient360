@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLogin }) => {
           </div>
 
           <a
-            href="http://127.0.0.1:8000/api/v1/docs"
+            href="/api/v1/docs"
             target="_blank"
             rel="noreferrer"
             className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors border border-slate-700"
