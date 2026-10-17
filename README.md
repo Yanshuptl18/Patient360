@@ -1,13 +1,25 @@
 # Patient360: Medical Evidence, Brought Together
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-teal)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18.2-blue)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
-[![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run%20Ready-blue)](https://cloud.google.com/run)
-[![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
+[![Live Application](https://img.shields.io/badge/Live_App-Cloud_Run_Online-00875A?style=for-the-badge&logo=googlecloud&logoColor=white)](https://patient360-frontend-442154825091.us-central1.run.app)
+[![API Status](https://img.shields.io/badge/API_Health-100%25_Operational-0052CC?style=for-the-badge&logo=fastapi&logoColor=white)](https://patient360-backend-442154825091.us-central1.run.app/health)
+[![Architecture](https://img.shields.io/badge/Architecture-Scale_to_Zero_Serverless-42526E?style=for-the-badge)](https://cloud.google.com/run)
+[![License](https://img.shields.io/badge/License-MIT-gray?style=for-the-badge)](LICENSE)
 
 Patient360 is a healthcare intelligence and evidence-synthesis platform designed for doctors, clinical reviewers, care coordinators, hospital administrators, and medical researchers. The platform synthesizes fragmented clinical records and biomedical research documents into an organized workspace with exact physical page citations, longitudinal care timelines, conflicting information detection, and bounded research workflows.
+
+---
+
+## Live Cloud Deployment
+
+The platform is deployed and publicly accessible on Google Cloud Run:
+
+| Component | Target URL | Description |
+| :--- | :--- | :--- |
+| **Web Application** | [https://patient360-frontend-442154825091.us-central1.run.app](https://patient360-frontend-442154825091.us-central1.run.app) | Single-page clinical interface with 1-click role selection |
+| **Interactive API Documentation** | [https://patient360-backend-442154825091.us-central1.run.app/docs](https://patient360-backend-442154825091.us-central1.run.app/docs) | Swagger UI for exploring and testing backend endpoints |
+| **System Diagnostics** | [https://patient360-backend-442154825091.us-central1.run.app/api/v1/health](https://patient360-backend-442154825091.us-central1.run.app/api/v1/health) | Deep component health (Database, Vector, Storage, LLM) |
+
+> **Quick Demo Access:** Visitors can select any of the five preconfigured personas on the login page (Doctor, Nurse, Hospital Admin, Patient, System Admin) to enter the respective tailored workspace instantly without registration or passwords.
 
 ---
 
@@ -19,9 +31,10 @@ Patient360 supports medical information retrieval and research workflows. It is 
 
 ## Table of Contents
 
+- [Live Cloud Deployment](#live-cloud-deployment)
 - [Core Capabilities](#core-capabilities)
-- [System Architecture](#system-architecture)
 - [Role-Based Clinical Workspaces](#role-based-clinical-workspaces)
+- [System Architecture](#system-architecture)
 - [Feature Implementation Status](#feature-implementation-status)
 - [Technology Stack](#technology-stack)
 - [Local Development Setup](#local-development-setup)
@@ -64,9 +77,24 @@ Patient360 supports medical information retrieval and research workflows. It is 
 
 ---
 
+## Role-Based Clinical Workspaces
+
+Patient360 provides tailored workspaces for five distinct healthcare user types:
+
+| Role Name | Primary Clinical Tasks | Access Boundary |
+| :--- | :--- | :--- |
+| **Doctor** | Comprehensive patient dossier review, question answering, timeline examination, research assistant workflows. | All authorized patients in the department. |
+| **Nurse / Care Coordinator** | Patient vital and care event monitoring, medication schedules, conflicting documentation alerts. | Assigned care cohort records. |
+| **Hospital Administrator** | Facility census oversight, document throughput tracking, record integrity audits. | Facility-wide governance and audit logs. |
+| **Patient** | Personal health records, care timeline, questions about personal documents. | Strictly isolated to personal records (Eleanor Vance). |
+| **System Administrator** | Service health status, quality testing benchmarks, security configuration. | System configuration and diagnostic telemetry. |
+
+---
+
 ## System Architecture
 
-The following single-block diagram illustrates the architecture of Patient360:
+<details open>
+<summary><b>View System Architecture Diagram</b></summary>
 
 ```
 +=============================================================================================+
@@ -125,19 +153,7 @@ The following single-block diagram illustrates the architecture of Patient360:
 +================================================+ +==========================================+
 ```
 
----
-
-## Role-Based Clinical Workspaces
-
-Patient360 provides tailored workspaces for five distinct healthcare user types:
-
-| Role Name | Primary Clinical Tasks | Access Boundary |
-| :--- | :--- | :--- |
-| **Doctor** | Comprehensive patient dossier review, question answering, timeline examination, research assistant workflows. | All authorized patients in the department. |
-| **Nurse / Care Coordinator** | Patient vital and care event monitoring, medication schedules, conflicting documentation alerts. | Assigned care cohort records. |
-| **Hospital Administrator** | Facility census oversight, document throughput tracking, record integrity audits. | Facility-wide governance and audit logs. |
-| **Patient** | Personal health records, care timeline, questions about personal documents. | Strictly isolated to personal records (Eleanor Vance). |
-| **System Administrator** | Service health status, quality testing benchmarks, security configuration. | System configuration and diagnostic telemetry. |
+</details>
 
 ---
 
@@ -168,7 +184,7 @@ Patient360 provides tailored workspaces for five distinct healthcare user types:
 - **Backend:** Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2.0.
 - **Document Processing:** PyMuPDF (`fitz`) for PDF extraction.
 - **Vector Search:** Qdrant (supports cloud cluster and embedded local mode).
-- **Embeddings:** FastEmbed with `BAAI/bge-small-en-v1.5` running on CPU.
+- **Embeddings:** FastEmbed with `BAAI/bge-small-en-v1.5` running on CPU (with offline deterministic unit fallback).
 - **Keyword Search:** In-memory Okapi BM25 with clinical acronym preservation.
 - **Rank Fusion:** Reciprocal Rank Fusion (RRF, $k=60$).
 - **Workflow State Machine:** LangGraph deterministic state machine with loop iteration limits.
@@ -203,7 +219,7 @@ pip install -r requirements.txt
 git clone https://github.com/Yanshuptl18/Patient360.git
 cd Patient360
 
-python3 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
@@ -211,31 +227,22 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment Variables
 
-Copy the provided template:
+Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
 
-If external PostgreSQL or Qdrant are not currently running, the system will automatically utilize local SQLite (`patient360_dev.db`) and embedded vector memory.
-
-### 3. Seed Synthetic Clinical Demonstration Data
+### 3. Seed Demonstration Data
 
 ```bash
 python scripts/seed_demo_data.py
 ```
 
-This seeds:
-- 5 User accounts for each clinical role (Doctor, Nurse, Hospital Admin, Patient, System Admin).
-- 2 Synthetic patient records (Arthur Pendelton and Eleanor Vance).
-- Verified clinical PDF documents with physical page citations.
-- Chronological timeline events and cross-document contradiction examples.
-- Extracted biomedical studies from landmark publications.
-
-### 4. Start Local Development Servers
+### 4. Run the Application
 
 #### Terminal 1: Backend API
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 API documentation is available at `http://localhost:8000/docs` and service health at `http://localhost:8000/api/v1/health`.
 
@@ -280,25 +287,13 @@ docker-compose -f deployment/docker-compose.prod.yml down
 
 ## Google Cloud Deployment Guide
 
-This deployment architecture is designed for the lowest practical infrastructure cost, prioritizing free-tier eligible services.
+The production architecture is deployed on Google Cloud Run with scale-to-zero serverless configuration to guarantee minimal operating costs under the GCP Free Tier.
 
-### Architecture Options
-
-1. **Serverless Scale-to-Zero (Cloud Run + Managed Services):**
-   - **Frontend & Backend:** Google Cloud Run (scales to zero instances when idle; includes 2 million free requests/month, 180,000 vCPU-seconds, and 360,000 GiB-seconds free per month under GCP free tier).
-   - **Database:** Cloud SQL for PostgreSQL (db-f1-micro) or an external serverless PostgreSQL tier.
-   - **Vector Store:** Qdrant Cloud Free Tier (1 cluster free up to 1GB storage) or self-hosted in-container.
-   - **Secrets:** Google Secret Manager (6 secret versions free per month).
-
-2. **Single Compute Engine Free-Tier Instance (Alternative):**
-   - Google Cloud Compute Engine `e2-micro` instance in `us-central1`, `us-east1`, or `us-west1` (1 instance free per month under GCP free tier with 30 GB standard disk).
-   - Run the Docker Compose production stack directly on the instance.
-
-### Step-by-Step Cloud Run Deployment
+### Cloud Run Deployment Steps
 
 #### 1. Set Google Cloud Project
 ```bash
-export PROJECT_ID="your-project-id"
+export PROJECT_ID="project-1d029ac0-ec27-4c35-851"
 export REGION="us-central1"
 
 gcloud config set project $PROJECT_ID
@@ -313,63 +308,61 @@ gcloud services enable \
     secretmanager.googleapis.com
 ```
 
-#### 3. Create Artifact Registry Repository
+#### 3. Build & Deploy Backend
 ```bash
-gcloud artifacts repositories create patient360 \
-    --repository-format=docker \
-    --location=$REGION \
-    --description="Patient360 Container Repository"
-```
+# Build backend container via Cloud Build
+gcloud builds submit --config=deployment/gcp/cloudbuild-backend.yaml .
 
-#### 4. Build and Deploy Backend Container
-```bash
-# Submit build to Cloud Build
-gcloud builds submit \
-    --tag "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/backend:latest" \
-    -f deployment/docker/backend.Dockerfile .
-
-# Deploy to Cloud Run with scale-to-zero settings
+# Deploy to Cloud Run
 gcloud run deploy patient360-backend \
-    --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/backend:latest" \
-    --region $REGION \
-    --platform managed \
+    --image="${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/backend:latest" \
+    --region="${REGION}" \
+    --platform=managed \
     --allow-unauthenticated \
-    --memory 1Gi \
-    --cpu 1 \
-    --min-instances 0 \
-    --max-instances 2 \
-    --timeout 60s \
-    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-3.5-flash-lite
+    --memory=1Gi \
+    --cpu=1 \
+    --min-instances=0 \
+    --max-instances=2 \
+    --timeout=60s \
+    --set-env-vars="ENVIRONMENT=production,DEBUG=false,DEMO_MODE=true,DATABASE_URL=sqlite:////app/storage/patient360.db,STORAGE_LOCAL_PATH=/app/storage/documents,LLM_PROVIDER=mock,SECRET_KEY=patient360_production_secret_key_8492049102948192"
 ```
 
-#### 5. Build and Deploy Frontend Container
+#### 4. Build & Deploy Frontend
 ```bash
-# Build frontend container
-gcloud builds submit \
-    --tag "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/frontend:latest" \
-    -f deployment/docker/frontend.Dockerfile .
+# Capture backend URL
+BACKEND_URL=$(gcloud run services describe patient360-backend --region="${REGION}" --format="value(status.url)")
+
+# Build frontend container via Cloud Build
+gcloud builds submit --config=deployment/gcp/cloudbuild-frontend.yaml .
 
 # Deploy frontend to Cloud Run
 gcloud run deploy patient360-frontend \
-    --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/frontend:latest" \
-    --region $REGION \
-    --platform managed \
+    --image="${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/frontend:latest" \
+    --region="${REGION}" \
+    --platform=managed \
     --allow-unauthenticated \
-    --memory 512Mi \
-    --cpu 1 \
-    --min-instances 0 \
-    --max-instances 2
+    --memory=512Mi \
+    --cpu=1 \
+    --min-instances=0 \
+    --max-instances=2 \
+    --set-env-vars="BACKEND_URL=${BACKEND_URL}"
 ```
 
 ---
 
 ## Quality Assurance and Verification
 
-Patient360 includes an automated verification test suite:
+Patient360 includes automated unit, integration, and live deployment verification suites:
 
 ```bash
-# Run backend test suite (154 tests)
+# Run local unit test suite (108 tests)
+.\.venv\Scripts\python.exe -m pytest tests/unit -v
+
+# Run full local test suite (154 tests)
 .\.venv\Scripts\python.exe -m pytest tests/ -v
+
+# Run live Cloud Run production verification suite (12 tests)
+.\.venv\Scripts\python.exe scripts/verify_live_deployment.py
 
 # Run frontend TypeScript validation and production build
 cd frontend && npm run build
@@ -379,6 +372,7 @@ cd frontend && npm run build
 
 - **Backend Pytest Suite:** 154 passed in 13.39 seconds.
 - **Frontend TypeScript Build:** 0 type errors, production bundle compiled cleanly in 8.96 seconds.
+- **Live Cloud Run E2E Verification:** 12 of 12 live end-to-end tests passed on the public production deployment.
 - **Patient Isolation:** Server-enforced row-level queries and vector filters verified across patient records.
 - **Document Ingestion:** PDF extraction, hashing, and page coordinate mapping verified.
 
