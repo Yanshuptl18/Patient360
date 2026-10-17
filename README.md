@@ -159,22 +159,22 @@ Patient360 provides tailored workspaces for five distinct healthcare user types:
 
 ## Feature Implementation Status
 
-| Feature Domain | Capability | Status | Verification Method |
-| :--- | :--- | :--- | :--- |
-| **Authentication** | JWT Authentication, Argon2 Hashing, Token Refresh | Implemented | Automated tests in `test_auth.py` |
-| **Demo Access** | One-Click Demo Role Selector (5 User Personas) | Implemented | End-to-end verified via `/api/v1/auth/demo-login` |
-| **Patient Isolation** | Server-side database & vector payload filtering | Implemented | Verified in `test_security_lifecycle.py` |
-| **Document Ingestion** | PDF parsing, physical page coordinates, SHA-256 hash | Implemented | Verified in `test_ingestion.py` |
-| **Hybrid Search** | FastEmbed 384-d dense vectors + Okapi BM25 + RRF | Implemented | Verified in `test_hybrid_retrieval.py` |
-| **Evidence QA** | Grounded question answering with page-level citations | Implemented | Verified in `test_rag_pipeline.py` |
-| **Citation Verifier** | Verbatim claim-to-quote source text matching | Implemented | Verified in `test_rag_citations.py` |
-| **Abstention** | Plain "insufficient evidence" handling | Implemented | Verified in `test_rag_pipeline.py` |
-| **Clinical Timeline** | Chronological event extraction (diagnoses, meds, labs) | Implemented | Verified in `test_timeline_pipeline.py` |
-| **Contradictions** | Cross-document conflicting information detection | Implemented | Verified in `test_contradiction_detector.py` |
-| **Biomedical Studies**| PICO parameter extraction and cross-study matrix | Implemented | Verified in `test_research_pipeline.py` |
-| **Research Assistant**| Multi-step bounded investigation with review gates | Implemented | Verified in `test_agent_workflow.py` |
-| **Quality Testing** | Evaluation lab benchmark suite for retrieval & latency | Implemented | Verified in `test_evaluation_pipeline.py` |
-| **Service Status** | Real-time health check endpoint (`/api/v1/health`) | Implemented | Verified in `test_health.py` |
+| Feature Domain | Capability |
+| :--- | :--- |
+| **Authentication** | JWT Authentication, Argon2 Hashing, Token Refresh |
+| **Demo Access** | One-Click Demo Role Selector (5 User Personas) |
+| **Patient Isolation** | Server-side database & vector payload filtering |
+| **Document Ingestion** | PDF parsing, physical page coordinates, SHA-256 hash |
+| **Hybrid Search** | FastEmbed 384-d dense vectors + Okapi BM25 + RRF |
+| **Evidence QA** | Grounded question answering with page-level citations |
+| **Citation Verifier** | Verbatim claim-to-quote source text matching |
+| **Abstention** | Plain "insufficient evidence" handling |
+| **Clinical Timeline** | Chronological event extraction (diagnoses, meds, labs) |
+| **Contradictions** | Cross-document conflicting information detection |
+| **Biomedical Studies** | PICO parameter extraction and cross-study matrix |
+| **Research Assistant** | Multi-step bounded investigation with review gates |
+| **Quality Testing** | Evaluation lab benchmark suite for retrieval & latency |
+| **Service Status** | Real-time health check endpoint (`/api/v1/health`) |
 
 ---
 
