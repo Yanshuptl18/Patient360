@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: Literal["development", "testing", "production"] = "development"
     DEBUG: bool = True
+    DEMO_MODE: bool = True
 
     # Server Bind Configuration
     BACKEND_HOST: str = "127.0.0.1"

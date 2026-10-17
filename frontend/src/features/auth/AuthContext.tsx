@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, LoginResponse } from '../../types';
+import { User, LoginResponse, DemoRoleItem, DemoRolesResponse } from '../../types';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
+  demoRoles: DemoRoleItem[];
+  demoMode: boolean;
+  loginAsDemo: (roleKey: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   requestOtp: (email: string, fullName?: string, role?: string) => Promise<{ dev_otp?: string; message: string }>;
   verifyOtp: (email: string, otp: string, fullName?: string, role?: string) => Promise<void>;
@@ -20,6 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('patient360_access_token'));
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [demoRoles, setDemoRoles] = useState<DemoRoleItem[]>([]);
+  const [demoMode, setDemoMode] = useState<boolean>(true);
 
   // Validate existing token and restore user profile
   useEffect(() => {
@@ -54,7 +59,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    const fetchDemoRoles = async () => {
+      try {
+        const res = await fetch('/api/v1/auth/demo-roles');
+        if (res.ok) {
+          const data: DemoRolesResponse = await res.json();
+          setDemoMode(data.demo_mode);
+          setDemoRoles(data.roles);
+        }
+      } catch (err) {
+        console.warn('Could not fetch demo roles:', err);
+      }
+    };
+
     restoreSession();
+    fetchDemoRoles();
   }, []);
 
   const requestOtp = async (email: string, fullName?: string, role?: string): Promise<{ dev_otp?: string; message: string }> => {
@@ -127,6 +146,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginAsDemo = async (roleKey: string): Promise<void> => {
+    setError(null);
+    try {
+      const res = await fetch('/api/v1/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role_key: roleKey }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.detail || errData?.error?.message || 'Demo authentication failed.');
+      }
+
+      const data: LoginResponse = await res.json();
+      localStorage.setItem('patient360_access_token', data.access_token);
+      setToken(data.access_token);
+      setUser(data.user);
+    } catch (err: any) {
+      setError(err.message || 'Demo login failed');
+      throw err;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('patient360_access_token');
     setToken(null);
@@ -140,6 +183,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isAuthenticated: !!user,
         loading,
+        demoRoles,
+        demoMode,
+        loginAsDemo,
         login,
         requestOtp,
         verifyOtp,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Bot,
+  FileSearch,
   Play,
   CheckCircle2,
   XCircle,
@@ -12,12 +12,10 @@ import {
   Activity,
   ShieldCheck,
   Sparkles,
-  Terminal,
   Loader2,
   Copy,
   Check,
 } from 'lucide-react';
-
 import {
   AgentRunSnapshot,
   WorkflowStepLog,
@@ -52,7 +50,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
   const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
   const [copied, setCopied] = useState(false);
 
-  // Fetch past runs for this patient
+  // Fetch past investigations for this patient
   const fetchPatientRuns = useCallback(async () => {
     if (!patientId || !token) return;
     try {
@@ -66,8 +64,8 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
           setActiveRun(data[0]);
         }
       }
-    } catch (err) {
-      console.error('Failed to load agent runs:', err);
+    } catch {
+      // Handled silently
     }
   }, [patientId, token, activeRun]);
 
@@ -98,7 +96,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData?.error?.message || 'Failed to execute agent workflow.');
+        throw new Error(errData?.error?.message || 'We could not complete this investigation.');
       }
 
       const snapshot: AgentRunSnapshot = await res.json();
@@ -107,7 +105,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
       setQuery('');
       setClinicianFeedback('');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Unknown error during workflow execution.');
+      setError(err instanceof Error ? err.message : 'Unable to complete the clinical investigation.');
     } finally {
       setIsSubmitting(false);
     }
@@ -137,7 +135,6 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
         throw new Error(errData?.error?.message || 'Review submission failed.');
       }
 
-      // Re-fetch updated snapshot
       const snapRes = await fetch(`/api/v1/agents/runs/${activeRun.run_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -164,41 +161,41 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/60 rounded-3xl border border-slate-800 p-5 shadow-2xl overflow-hidden">
-      {/* Header & Patient Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3 shrink-0">
+    <div className="flex flex-col h-full bg-white rounded-2xl border border-slate-200 p-5 shadow-sm overflow-hidden">
+      {/* Header and Patient Context */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-3 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-            <Bot className="w-5 h-5" />
+          <div className="p-2.5 rounded-xl bg-teal-50 text-teal-700 border border-teal-200">
+            <FileSearch className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-bold text-white tracking-tight">Bounded Clinical Agent</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                Clinical Reasoning Engine
+              <h2 className="text-base font-semibold text-slate-900 tracking-tight">Clinical Research Assistant</h2>
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+                Evidence Review Required
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Patient Dossier: <span className="font-semibold text-slate-200">{patientName}</span> • Evidence-Bounded • Mandatory Clinician Approval
+            <p className="text-xs text-slate-500 mt-0.5">
+              Patient: <span className="font-semibold text-slate-700">{patientName}</span> • Evidence-grounded multi-step inquiry
             </p>
           </div>
         </div>
 
-        {/* Past Runs Switcher */}
+        {/* Past Investigations Switcher */}
         {runs.length > 0 && (
           <div className="flex items-center space-x-2">
-            <span className="text-[11px] text-slate-400">Run History:</span>
+            <span className="text-xs text-slate-500">History:</span>
             <select
               value={activeRun?.run_id || ''}
               onChange={(e) => {
                 const found = runs.find((r) => r.run_id === e.target.value);
                 if (found) setActiveRun(found);
               }}
-              className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-teal-500"
+              className="bg-white border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-teal-500"
             >
               {runs.map((r, i) => (
                 <option key={r.run_id} value={r.run_id}>
-                  #{runs.length - i}: {r.query.slice(0, 32)}... ({r.status})
+                  #{runs.length - i}: {r.query.slice(0, 32)}... ({r.status.replace(/_/g, ' ')})
                 </option>
               ))}
             </select>
@@ -206,19 +203,19 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
         )}
       </div>
 
-      {/* Main Split Layout: Inquiry Launcher / Telemetry & Review */}
+      {/* Main Split Layout: Inquiry Launcher / Steps & Review */}
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-5 py-4 overflow-hidden">
-        {/* Left Column: Launcher & Telemetry Steps (5 cols) */}
+        {/* Left Column: Launcher & Telemetry Steps */}
         <div className="lg:col-span-5 flex flex-col h-full overflow-hidden space-y-4">
           {/* Query Launch Form */}
-          <div className="bg-slate-950/70 rounded-2xl border border-slate-800 p-4 shrink-0 shadow-inner">
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 shrink-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-                <span>New Multi-Step Inquiry</span>
+              <span className="text-xs font-semibold text-slate-700 flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                <span>Start an Investigation</span>
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
-                Max 5 Loops • 30s Budget
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                Evidence synthesis
               </span>
             </div>
 
@@ -226,10 +223,10 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter clinical inquiry (e.g. assess glycemic control and medication contraindications)..."
+                placeholder="Describe your clinical research question (e.g., assess glycemic control and medication contraindications)..."
                 rows={3}
                 disabled={isSubmitting}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none transition-colors"
+                className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-500 resize-none transition-colors"
               />
 
               {/* Quick Presets */}
@@ -239,7 +236,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
                     key={preset}
                     type="button"
                     onClick={() => setQuery(preset)}
-                    className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-colors cursor-pointer text-left"
+                    className="text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors cursor-pointer text-left"
                   >
                     {preset}
                   </button>
@@ -249,44 +246,44 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || !query.trim()}
-                className="w-full py-2 px-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2 px-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Synthesizing Clinical Evidence...</span>
+                    <span>Research in progress...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 fill-slate-950" />
-                    <span>Launch Bounded Clinical Workflow</span>
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    <span>Start Investigation</span>
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          {/* Stepped Telemetry Inspector */}
-          <div className="flex-1 min-h-0 bg-slate-950/70 rounded-2xl border border-slate-800 p-4 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800/80 shrink-0">
-              <span className="text-xs font-semibold text-slate-300 flex items-center space-x-1.5">
-                <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Execution Telemetry Trace</span>
+          {/* Stepped Progress Inspector */}
+          <div className="flex-1 min-h-0 bg-slate-50/50 rounded-xl border border-slate-200 p-4 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 shrink-0">
+              <span className="text-xs font-semibold text-slate-700 flex items-center space-x-1.5">
+                <Clock className="w-3.5 h-3.5 text-teal-600" />
+                <span>Investigation Steps Completed</span>
               </span>
               {activeRun && (
-                <span className="text-[10px] font-mono text-slate-400">
-                  {activeRun.steps.length} discrete steps logged
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
+                  {activeRun.steps.length} steps
                 </span>
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2.5 pt-3 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2 pt-3 pr-1">
               {!activeRun ? (
-                <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 py-8">
-                  <Activity className="w-8 h-8 mb-2 text-slate-600" />
-                  <p className="text-xs">No active workflow run selected.</p>
-                  <p className="text-[11px] text-slate-600 mt-1">
-                    Launch a clinical query above to observe real-time tool calls and state transitions.
+                <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 py-8">
+                  <Activity className="w-8 h-8 mb-2 text-slate-300" />
+                  <p className="text-xs text-slate-600 font-medium">No investigation active.</p>
+                  <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                    Start an inquiry above to observe completed steps and evidence gathered.
                   </p>
                 </div>
               ) : (
@@ -295,56 +292,50 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
                   return (
                     <div
                       key={step.step_index}
-                      className="rounded-xl bg-slate-900/90 border border-slate-800/90 p-3 text-xs"
+                      className="rounded-lg bg-white border border-slate-200 p-3 text-xs shadow-xs"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-mono text-[10px] font-bold">
+                          <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[11px]">
                             {step.step_index}
                           </span>
-                          <span className="font-semibold text-teal-300 uppercase tracking-wider text-[10px]">
-                            {step.node_name}
+                          <span className="font-semibold text-teal-800 text-xs">
+                            {step.node_name.replace(/_/g, ' ')}
                           </span>
-                          {step.action_tool && (
-                            <span className="px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[10px] font-mono">
-                              {step.action_tool}
-                            </span>
-                          )}
                         </div>
                         <button
                           type="button"
                           onClick={() => toggleStep(step.step_index)}
-                          className="text-slate-400 hover:text-white transition-colors"
+                          className="text-slate-400 hover:text-slate-600 transition-colors"
                         >
                           {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </button>
                       </div>
 
-                      <p className="text-slate-300 mt-2 text-[11px] leading-relaxed">
+                      <p className="text-slate-600 mt-1.5 text-xs leading-relaxed">
                         {step.thought}
                       </p>
 
                       {isExpanded && Boolean(step.tool_input || step.tool_output) && (
-                        <div className="mt-2.5 pt-2 border-t border-slate-800 space-y-1.5 font-mono text-[10px]">
+                        <div className="mt-2.5 pt-2 border-t border-slate-100 space-y-1.5 font-mono text-[11px]">
                           {Boolean(step.tool_input) && (
                             <div>
-                              <span className="text-slate-500 block mb-0.5">Input:</span>
-                              <pre className="bg-slate-950 p-2 rounded-lg text-slate-300 overflow-x-auto">
+                              <span className="text-slate-400 block mb-0.5 font-sans text-xs">Input:</span>
+                              <pre className="bg-slate-50 p-2 rounded border border-slate-200 text-slate-700 overflow-x-auto">
                                 {JSON.stringify(step.tool_input, null, 2)}
                               </pre>
                             </div>
                           )}
                           {Boolean(step.tool_output) && (
                             <div>
-                              <span className="text-slate-500 block mb-0.5">Output:</span>
-                              <pre className="bg-slate-950 p-2 rounded-lg text-teal-300/90 overflow-x-auto max-h-40">
+                              <span className="text-slate-400 block mb-0.5 font-sans text-xs">Findings:</span>
+                              <pre className="bg-slate-50 p-2 rounded border border-slate-200 text-teal-800 overflow-x-auto max-h-40">
                                 {JSON.stringify(step.tool_output, null, 2)}
                               </pre>
                             </div>
                           )}
                         </div>
                       )}
-
                     </div>
                   );
                 })
@@ -353,66 +344,64 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
           </div>
         </div>
 
-        {/* Right Column: State Banner, Draft Synthesis / Final Report, Review Gate (7 cols) */}
+        {/* Right Column: Status Banner, Draft Report, Review Gate */}
         <div className="lg:col-span-7 flex flex-col h-full overflow-hidden space-y-4">
           {error && (
-            <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center space-x-2 shrink-0">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center space-x-2 shrink-0">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {activeRun ? (
-            <div className="flex-1 flex flex-col min-h-0 bg-slate-950/70 rounded-2xl border border-slate-800 p-4 overflow-hidden">
-              {/* Observable State Header with Iteration Meter */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2 shrink-0">
+            <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200 p-4 overflow-hidden shadow-sm">
+              {/* State Header with Meter */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2 shrink-0">
                 <div className="flex items-center space-x-2">
                   <span
-                    className={`px-2.5 py-1 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                       activeRun.status === 'awaiting_approval'
-                        ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
                         : activeRun.status === 'completed'
-                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                         : activeRun.status === 'rejected'
-                        ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                        : 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
+                        ? 'bg-rose-50 text-rose-800 border border-rose-200'
+                        : 'bg-teal-50 text-teal-800 border border-teal-200'
                     }`}
                   >
-                    {activeRun.status.replace(/_/g, ' ')}
-                  </span>
-                  <span className="text-xs text-slate-400 font-mono">
-                    ID: {activeRun.run_id}
+                    {activeRun.status === 'awaiting_approval'
+                      ? 'Review and Approve Findings'
+                      : activeRun.status.replace(/_/g, ' ')}
                   </span>
                 </div>
 
-                {/* Meter Gauges */}
-                <div className="flex items-center space-x-4 text-xs font-mono">
-                  <div className="flex items-center space-x-1.5">
-                    <RotateCcw className="w-3.5 h-3.5 text-teal-400" />
-                    <span className="text-slate-400">Loops:</span>
-                    <span className="font-bold text-white">
+                <div className="flex items-center space-x-3 text-xs text-slate-500">
+                  <div className="flex items-center space-x-1">
+                    <RotateCcw className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Steps:</span>
+                    <span className="font-semibold text-slate-800">
                       {activeRun.iteration_count} / {activeRun.max_iterations}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1.5">
-                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-slate-400">Elapsed:</span>
-                    <span className="font-bold text-white">{activeRun.elapsed_seconds}s</span>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Duration:</span>
+                    <span className="font-semibold text-slate-800">{activeRun.elapsed_seconds}s</span>
                   </div>
                 </div>
               </div>
 
-              {/* Inquiry Prompt Display */}
-              <div className="py-2.5 border-b border-slate-800/80 text-xs shrink-0 flex items-center justify-between">
+              {/* Inquiry Prompt */}
+              <div className="py-2.5 border-b border-slate-200 text-xs shrink-0 flex items-center justify-between">
                 <div>
-                  <span className="text-slate-500">Inquiry: </span>
-                  <span className="font-medium text-slate-200">{activeRun.query}</span>
+                  <span className="text-slate-500">Question: </span>
+                  <span className="font-medium text-slate-900">{activeRun.query}</span>
                 </div>
                 {activeRun.final_report && (
                   <button
                     type="button"
                     onClick={() => copyToClipboard(activeRun.final_report || '')}
-                    className="flex items-center space-x-1 text-[11px] text-teal-400 hover:text-teal-300 transition-colors"
+                    className="flex items-center space-x-1 text-xs text-teal-600 hover:text-teal-700 transition-colors font-medium"
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied' : 'Copy Report'}</span>
@@ -420,52 +409,49 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
                 )}
               </div>
 
-              {/* Report Body View: Final Certified or Draft Synthesis */}
-              <div className="flex-1 overflow-y-auto py-3 pr-1 text-xs text-slate-300 leading-relaxed font-sans space-y-3">
+              {/* Report Body */}
+              <div className="flex-1 overflow-y-auto py-3 pr-1 text-xs text-slate-700 leading-relaxed space-y-3">
                 {activeRun.final_report ? (
-                  <div className="bg-slate-900/60 rounded-xl p-4 border border-emerald-500/20 whitespace-pre-wrap font-sans text-slate-200">
+                  <div className="bg-slate-50 rounded-lg p-4 border border-emerald-200 whitespace-pre-wrap text-slate-800 font-sans">
                     {activeRun.final_report}
                   </div>
                 ) : activeRun.draft_synthesis ? (
-                  <div className="bg-slate-900/40 rounded-xl p-4 border border-slate-800 whitespace-pre-wrap font-sans text-slate-200">
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 whitespace-pre-wrap text-slate-800 font-sans">
                     {activeRun.draft_synthesis}
                   </div>
                 ) : (
-                  <div className="p-8 text-center text-slate-500">
-                    No report draft generated yet.
+                  <div className="p-8 text-center text-slate-400">
+                    No draft report generated yet.
                   </div>
                 )}
               </div>
 
-              {/* Human-in-the-Loop Clinician Review Gate Banner */}
+              {/* Human Review Gate Banner */}
               {activeRun.status === 'awaiting_approval' && (
-                <div className="mt-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col space-y-3 shrink-0 shadow-lg shadow-amber-500/5">
+                <div className="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col space-y-3 shrink-0">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-300">
+                      <div className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
                         <AlertTriangle className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-amber-300">
-                          Human-in-the-Loop Clinician Review Gate
+                        <h4 className="text-xs font-semibold text-amber-900">
+                          Review and Approve Findings
                         </h4>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Autonomous workflow paused. Clinician certification required before final report delivery.
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          Investigation paused. Clinical review is required before final report completion.
                         </p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
-                      FR-AGT-04 Gated
-                    </span>
                   </div>
 
                   <input
                     type="text"
                     value={clinicianFeedback}
                     onChange={(e) => setClinicianFeedback(e.target.value)}
-                    placeholder="Optional clinician review feedback or certification addendum..."
+                    placeholder="Optional reviewer notes or comments..."
                     disabled={isReviewing}
-                    className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-amber-500"
                   />
 
                   <div className="flex items-center justify-end space-x-3 pt-1">
@@ -473,27 +459,27 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
                       type="button"
                       disabled={isReviewing}
                       onClick={() => handleReview(false)}
-                      className="px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium flex items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
                     >
                       <XCircle className="w-3.5 h-3.5" />
-                      <span>Reject Synthesis</span>
+                      <span>Reject Findings</span>
                     </button>
 
                     <button
                       type="button"
                       disabled={isReviewing}
                       onClick={() => handleReview(true)}
-                      className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/20 disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm disabled:opacity-50"
                     >
                       {isReviewing ? (
                         <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Certifying...</span>
+                          <span>Approving...</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Approve & Certify Report</span>
+                          <span>Approve and Finalize Report</span>
                         </>
                       )}
                     </button>
@@ -503,25 +489,25 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
 
               {/* Status footer for completed / rejected */}
               {activeRun.status === 'completed' && (
-                <div className="mt-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs shrink-0">
-                  <div className="flex items-center space-x-2 text-emerald-300">
+                <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs shrink-0">
+                  <div className="flex items-center space-x-2 text-emerald-800">
                     <ShieldCheck className="w-4 h-4" />
-                    <span className="font-semibold">Certified Clinical Intelligence Report Locked</span>
+                    <span className="font-semibold">Approved Clinical Evidence Report Finalized</span>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Audited by {user?.email || 'Clinician'}
+                  <span className="text-xs text-slate-500">
+                    Reviewed by {user?.email || 'Authorized Clinician'}
                   </span>
                 </div>
               )}
 
               {activeRun.status === 'rejected' && (
-                <div className="mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between text-xs shrink-0">
-                  <div className="flex items-center space-x-2 text-rose-300">
+                <div className="mt-3 p-3 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-between text-xs shrink-0">
+                  <div className="flex items-center space-x-2 text-rose-800">
                     <XCircle className="w-4 h-4" />
-                    <span className="font-semibold">Synthesis Rejected by Clinician</span>
+                    <span className="font-semibold">Findings Rejected by Reviewer</span>
                   </div>
                   {activeRun.clinician_feedback && (
-                    <span className="text-[11px] text-slate-400 italic">
+                    <span className="text-xs text-slate-500 italic">
                       "{activeRun.clinician_feedback}"
                     </span>
                   )}
@@ -529,11 +515,11 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex-1 bg-slate-950/70 rounded-2xl border border-slate-800 p-8 flex flex-col items-center justify-center text-center">
-              <Bot className="w-12 h-12 text-slate-700 mb-3" />
-              <h3 className="text-sm font-semibold text-white">Bounded Clinical Inquiry</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                Formulate a clinical inquiry to synthesize patient records with verified page citations and mandatory physician certification.
+            <div className="flex-1 bg-slate-50/50 rounded-xl border border-slate-200 p-8 flex flex-col items-center justify-center text-center">
+              <FileSearch className="w-10 h-10 text-slate-300 mb-3" />
+              <h3 className="text-sm font-semibold text-slate-800">Start an Investigation</h3>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                Describe a research question to examine patient records with verified page citations and mandatory review.
               </p>
             </div>
           )}

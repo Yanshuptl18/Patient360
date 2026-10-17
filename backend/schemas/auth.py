@@ -15,6 +15,9 @@ class RoleEnum(StrEnum):
     DEMO = "demo"
     DOCTOR = "doctor"
     CLINICIAN = "clinician"
+    NURSE = "nurse"
+    HOSPITAL_ADMIN = "hospital_admin"
+    PATIENT = "patient"
 
 
 class UserBase(BaseModel):
@@ -78,3 +81,23 @@ class OtpResponse(BaseModel):
     message: str
     email: str
     dev_otp: str | None = None
+
+
+class DemoLoginRequest(BaseModel):
+    role_key: str = Field(description="Role key: doctor, nurse, hospital_admin, patient, system_admin")
+
+
+class DemoRoleItem(BaseModel):
+    key: str
+    name: str
+    title: str
+    email: str
+    role: str
+    department: str
+    description: str
+    avatar_initials: str
+
+
+class DemoRolesResponse(BaseModel):
+    demo_mode: bool
+    roles: list[DemoRoleItem]

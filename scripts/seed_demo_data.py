@@ -165,6 +165,10 @@ def seed_demo_data(override_session: Session | None = None) -> None:
 
         # 3. Grant Permissions
         logger.info("3. Configuring user-patient RBAC mappings...")
+        doctor = get_user_by_email(db, "doctor@patient360.org")
+        nurse = get_user_by_email(db, "nurse@patient360.org")
+        patient_user = get_user_by_email(db, "patient@patient360.org")
+
         for p in patients_map.values():
             # Admin gets full admin access to all
             if not db.query(UserPatientPermission).filter_by(user_id=admin.id, patient_id=p.id).first():
@@ -179,6 +183,19 @@ def seed_demo_data(override_session: Session | None = None) -> None:
             if p.mrn_synthetic in ("SYNTH-10002", "SYNTH-10003"):
                 if not db.query(UserPatientPermission).filter_by(user_id=researcher.id, patient_id=p.id).first():
                     db.add(UserPatientPermission(user_id=researcher.id, patient_id=p.id, permission_level="read"))
+
+            # Doctor gets read/write access to all clinical cohort patients
+            if doctor and not db.query(UserPatientPermission).filter_by(user_id=doctor.id, patient_id=p.id).first():
+                db.add(UserPatientPermission(user_id=doctor.id, patient_id=p.id, permission_level="write"))
+
+            # Nurse gets read/write access to all clinical cohort patients for care coordination
+            if nurse and not db.query(UserPatientPermission).filter_by(user_id=nurse.id, patient_id=p.id).first():
+                db.add(UserPatientPermission(user_id=nurse.id, patient_id=p.id, permission_level="write"))
+
+            # Patient role is strictly isolated to Eleanor Vance's own record (SYNTH-10001)
+            if patient_user and p.mrn_synthetic == "SYNTH-10001":
+                if not db.query(UserPatientPermission).filter_by(user_id=patient_user.id, patient_id=p.id).first():
+                    db.add(UserPatientPermission(user_id=patient_user.id, patient_id=p.id, permission_level="read"))
 
         db.commit()
 

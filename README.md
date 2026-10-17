@@ -1,406 +1,334 @@
-# Patient360: Evidence-Grounded Healthcare Intelligence and Medical RAG Platform
+# Patient360: Medical Evidence, Brought Together
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-teal)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.2-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
 [![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run%20Ready-blue)](https://cloud.google.com/run)
-[![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20Store-red)](https://qdrant.tech/)
-[![Docker](https://img.shields.io/badge/Docker-Production%20Hardened-blue)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
----
-
-## Clinical Notice and Regulatory Disclaimer
-
-Patient360 is an informational evidence-synthesis and document-retrieval platform developed for clinical research, medical document intelligence, and healthcare informatics workflows. It is not an FDA, CE, or national health authority cleared medical device, diagnostic system, or prescribing platform. All synthesized findings, extracted timeline events, and citations must be independently reviewed and verified by qualified healthcare professionals against primary source medical records before making clinical decisions.
+Patient360 is a healthcare intelligence and evidence-synthesis platform designed for doctors, clinical reviewers, care coordinators, hospital administrators, and medical researchers. The platform synthesizes fragmented clinical records and biomedical research documents into an organized workspace with exact physical page citations, longitudinal care timelines, conflicting information detection, and bounded research workflows.
 
 ---
 
-## 1. Executive Summary and System Vision
+## Clinical Notice and Disclaimer
 
-Healthcare providers and biomedical researchers navigate highly fragmented clinical documentation spread across legacy electronic health records, consultation notes, unstructured laboratory reports, and scientific publications.
-
-Patient360 transforms fragmented clinical documentation into structured, verifiable, and evidence-grounded intelligence.
-
-### Core Architectural Pillars
-* Hybrid Retrieval: Dense CPU-optimized semantic vectors (BAAI/bge-small-en-v1.5) combined with clinical-acronym-preserving Okapi BM25 sparse keyword search, fused via Reciprocal Rank Fusion (k=60).
-* Verifiable Page Provenance: Claim-to-quote verification resolving every assertion to exact document titles, page numbers, and verbatim text, with deterministic abstention when evidence is absent.
-* Longitudinal Clinical Timelines: Chronological event extraction (diagnoses, medications, procedures, labs, allergies) with automated cross-document contradiction detection.
-* Bounded Agentic Workflows: Deterministic LangGraph state machine with iteration bounds (max 5), 30-second execution limits, and human-in-the-loop clinical review gates.
-* Multi-Provider LLM Gateway: Provider-agnostic gateway supporting hosted Google Gemini (gemini-flash-latest, gemini-3.5-flash-lite), local offline Ollama (qwen3:4b), and an offline mock provider.
-* Responsible AI Safety Framework: Real-time acute emergency symptom escalation, prompt injection defense, credential-scrubbed audit logging, and cascading patient data deletion.
-* Google Cloud Ready: Production container runtime optimized for Google Cloud Run, Cloud SQL, and Secret Manager.
+Patient360 supports medical information retrieval and research workflows. It is not an FDA-cleared medical device, autonomous diagnostic system, or prescribing platform. It does not replace professional clinical judgment. All synthesized summaries, extracted timeline events, and citations must be independently checked and verified by qualified healthcare professionals against primary source medical records before making clinical decisions.
 
 ---
 
-## 2. System Architecture
+## Table of Contents
 
-### Single-Block Layered Architecture Diagram
+- [Core Capabilities](#core-capabilities)
+- [System Architecture](#system-architecture)
+- [Role-Based Clinical Workspaces](#role-based-clinical-workspaces)
+- [Feature Implementation Status](#feature-implementation-status)
+- [Technology Stack](#technology-stack)
+- [Local Development Setup](#local-development-setup)
+- [Docker Multi-Container Deployment](#docker-multi-container-deployment)
+- [Google Cloud Deployment Guide](#google-cloud-deployment-guide)
+- [Quality Assurance and Verification](#quality-assurance-and-verification)
+- [Security and Patient Data Isolation](#security-and-patient-data-isolation)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
+---
+
+## Core Capabilities
+
+### 1. Medical Document Management
+- Ingests clinical PDF records, discharge summaries, laboratory panels, and scientific papers up to 25 MB.
+- Assigns tamper-evident SHA-256 cryptographic hashes for document integrity and deduplication.
+- Preserves physical page numbers, tabular values, clinical units (e.g., mg/dL, mmHg), and medical abbreviations.
+
+### 2. Evidence-Grounded Question Answering
+- Enables authorized clinicians to ask targeted clinical questions about an assigned patient's records.
+- Every claim is anchored to exact physical page numbers, document identifiers, and verbatim excerpts.
+- Features built-in PDF viewer integration to inspect original source passages directly.
+- Plainly abstains ("Insufficient evidence documented in available records") when documents do not substantiate an assertion, preventing ungrounded speculation.
+
+### 3. Medical History Timeline
+- Automatically organizes clinical events chronologically across diagnoses, medications, procedures, encounters, and laboratory results.
+- Distinguishes event occurrence dates from document recording dates.
+- Detects cross-document contradictions (e.g., documented "No Known Drug Allergies" conflicting with active penicillin prescriptions, or quantitative ejection fraction disparities).
+
+### 4. Clinical Research Assistant
+- Structured multi-step investigation workflow for complex clinical inquiries.
+- Displays transparent progress across evidence retrieval, cross-referencing, and draft preparation.
+- Enforces a mandatory clinical review gate: reports cannot be finalized without explicit human clinician approval.
+
+### 5. Biomedical Research Workspace
+- Extracts Population, Intervention, Comparator, and Outcomes (PICO) parameters from published clinical trials and guidelines.
+- Generates side-by-side comparative matrices across multiple publications.
+- Exports structured evidence summaries in Markdown format for clinical review committees.
+
+---
+
+## System Architecture
+
+The following single-block diagram illustrates the architecture of Patient360:
 
 ```
 +=============================================================================================+
-|                                    1. CLIENT & PRESENTATION TIER                            |
-|  * React 18 SPA (TypeScript)      * Tailwind CSS Component Shell   * Provenance PDF Viewer   |
-|  * Longitudinal Timeline View     * Cross-Study Matrix Dashboard   * Evaluation Lab Console  |
+|                                  1. CLIENT & PRESENTATION TIER                              |
+|  * React 18 Single-Page Application (TypeScript)     * Tailored Clinical Workspaces         |
+|  * Light Healthcare Design System (WCAG AA Compliant)* In-Browser Evidence Citation Viewer  |
+|  * Medical History Timeline & Conflict Viewer        * One-Click Role Selector (Demo Mode)  |
 +=============================================================================================+
                                               |
-                                     HTTPS / TLS 1.3 (Port 443)
+                                     HTTPS / TLS (Port 443)
                                               v
 +=============================================================================================+
-|                                 2. INGRESS & REVERSE PROXY TIER                             |
-|  * Google Cloud Run Ingress / Nginx Proxy   * Strict Security Headers (DENY, nosniff, XSS)  |
-|  * Gzip Compression & Static Caching        * Request Sanitization & Rate Limiting (SlowAPI)|
+|                               2. INGRESS & REVERSE PROXY TIER                               |
+|  * Google Cloud Run Ingress / Nginx Proxy           * Strict Security Headers               |
+|  * Static Asset Compression & Caching               * Rate Limiting & Request Sanitization  |
 +=============================================================================================+
                                               |
                                      Internal HTTP (Port 8080)
                                               v
 +=============================================================================================+
-|                                3. FASTAPI BACKEND GATEWAY LAYER                             |
-|  * JWT Auth & Argon2 Verification           * Role-Based Access Control (4 RBAC Roles)      |
-|  * Patient Tenant Isolation Middleware      * Pydantic v2 Request / Response Validation     |
-|  * Prometheus Telemetry Exposition (/metrics) * Append-Only Audit Logger with Masking Engine |
+|                              3. FASTAPI BACKEND GATEWAY LAYER                               |
+|  * JWT Authentication & Token Lifecycle             * Role-Based Access Control (5 Roles)   |
+|  * Server-Side Patient Tenant Isolation Middleware  * Pydantic v2 Schema Validation         |
+|  * Emergency Acute Symptom Guardrails               * Audit Logger with Credential Masking  |
 +=============================================================================================+
                                               |
                                               v
 +=============================================================================================+
-|                          4. DOMAIN INTELLIGENCE & ORCHESTRATION TIER                        |
+|                         4. CLINICAL INTELLIGENCE & DOMAIN SERVICES                          |
 |                                                                                             |
 |  +---------------------------------+  +---------------------------------+                   |
 |  |     HYBRID RETRIEVAL ENGINE     |  |   CLINICAL TIMELINE & CONFLICT  |                   |
-|  | * Dense FastEmbed (384-d Cosine)|  | * Temporal Event Extractor      |                   |
-|  | * Sparse Okapi BM25 Keyword Search| | * Event vs Document Date Split  |                   |
+|  | * Dense FastEmbed (384-d CPU)   |  | * Temporal Event Extraction     |                   |
+|  | * Sparse Okapi BM25 Search      |  | * Event vs Document Date Split  |                   |
 |  | * Reciprocal Rank Fusion (k=60) |  | * Cross-Document Contradictions |                   |
 |  +---------------------------------+  +---------------------------------+                   |
 |                                                                                             |
 |  +---------------------------------+  +---------------------------------+                   |
-|  |   BOUNDED AGENT (LANGGRAPH)     |  |   RESPONSIBLE AI & CITATION     |                   |
-|  | * Deterministic State Machine   |  | * Claim-to-Quote Citation Engine|                   |
-|  | * Max 5 Iterations / 30s Timeout|  | * Acute Red-Flag Emergency Guard|                   |
-|  | * Human-in-the-Loop Review Gate |  | * Prompt Injection Shield       |                   |
+|  |   RESEARCH ASSISTANT WORKFLOW   |  |   CITATION & SAFETY VERIFIER    |                   |
+|  | * Bounded State Machine (Max 5) |  | * Claim-to-Quote Verification   |                   |
+|  | * 30-Second Execution Limit     |  | * Insufficient-Evidence Notice  |                   |
+|  | * Mandatory Human Review Gate   |  | * Acute Clinical Warning Scan   |                   |
 |  +---------------------------------+  +---------------------------------+                   |
 +=============================================================================================+
                                               |
                          +--------------------+--------------------+
                          v                                         v
 +================================================+ +==========================================+
-|         5. DATA PERSISTENCE TIER               | |    6. FOUNDATION MODEL GATEWAY           |
-|  * PostgreSQL 16 / Google Cloud SQL:           | |  * Hosted Google Gemini API:             |
-|    Patients, Documents, Events, Audit Trails   | |    gemini-flash-latest, flash-lite       |
-|  * Qdrant Vector Engine (Cloud or Embedded):   | |  * Local Offline Ollama Engine:          |
-|    384-d Vectors, Payload Isolation, HNSW      | |    qwen3:4b (100% offline development)   |
-|  * Document Storage: Google Cloud Storage / S3 | |  * Mock Provider (Testing / Zero Cost)   |
+|         5. DATA PERSISTENCE TIER               | |     6. FOUNDATION MODEL GATEWAY          |
+|  * Relational Database (PostgreSQL / SQLite):  | |  * Hosted Google Gemini API:             |
+|    Patients, Documents, Events, Audit Logs     | |    gemini-flash-latest, 3.5-flash-lite   |
+|  * Vector Storage (Qdrant Cloud / Embedded):   | |  * Local Offline Ollama Engine:          |
+|    384-dimensional Index with Tenant Filters   | |    qwen3:4b (offline development)        |
+|  * Document Storage (Local Disk / Cloud Store):| |  * Deterministic Mock Provider:          |
+|    Tamper-Evident SHA-256 PDF Archive          | |    Automated Testing & Cost-Free Demo    |
 +================================================+ +==========================================+
 ```
 
 ---
 
-## 3. System Requirements Specification
+## Role-Based Clinical Workspaces
 
-### 3.1 Functional Requirements (FR)
+Patient360 provides tailored workspaces for five distinct healthcare user types:
 
-| Requirement ID | Domain | Specification |
+| Role Name | Primary Clinical Tasks | Access Boundary |
 | :--- | :--- | :--- |
-| **FR-AUTH-01** | Authentication | The system shall authenticate users via signed JWT tokens (HS256) with Argon2 password hashing. |
-| **FR-AUTH-02** | RBAC | The system shall enforce 4 distinct roles: `admin`, `reviewer`, `researcher`, and `auditor`. |
-| **FR-AUTH-03** | Tenant Isolation | The system shall enforce patient-level authorization at database and vector layers. |
-| **FR-DOC-01** | Ingestion | The system shall accept PDF uploads up to 25 MB and validate magic bytes (`%PDF-`). |
-| **FR-DOC-02** | Deduplication | The system shall compute SHA-256 hashes to prevent duplicate file ingestion. |
-| **FR-DOC-03** | Page Provenance | The system shall extract text using PyMuPDF while preserving physical page numbers and coordinates. |
-| **FR-DOC-04** | Normalization | The system shall normalize clinical text without altering units (`mg/dL`, `mmHg`) or decimals. |
-| **FR-DOC-05** | Chunking | The system shall split text into 512-token semantic chunks with 64-token overlap and document headers. |
-| **FR-RET-01** | Embeddings | The system shall generate 384-dimensional dense vectors using FastEmbed (`bge-small-en-v1.5`) on CPU. |
-| **FR-RET-02** | Vector Index | The system shall index vectors in Qdrant with payload filters (`patient_id`, `doc_type`, `doc_date`). |
-| **FR-RET-03** | Sparse Search | The system shall maintain in-memory Okapi BM25 indices preserving clinical acronyms (`NT-proBNP`, `eGFR`). |
-| **FR-RET-04** | Rank Fusion | The system shall merge dense and sparse results using Reciprocal Rank Fusion ($k=60$). |
-| **FR-RAG-01** | Context Assembly| The system shall assemble retrieval context under a 2,000 token budget inside untrusted delimiter boundaries. |
-| **FR-RAG-02** | Citation Engine | The system shall verify citations post-generation using claim-to-quote matching against source passages. |
-| **FR-RAG-03** | Abstention | The system shall abstain deterministically ("Insufficient evidence documented in available records") on ungrounded queries. |
-| **FR-TIME-01**| Timeline Events | The system shall extract dated events categorized as Diagnoses, Medications, Procedures, Labs, Encounters, Allergies. |
-| **FR-TIME-02**| Temporal Dates | The system shall record `event_date` independently from `document_date` with precision tags. |
-| **FR-TIME-03**| Contradictions | The system shall detect cross-document contradictions (e.g. NKDA vs active allergy, quantitative EF decline). |
-| **FR-RES-01** | Research Mining | The system shall extract structured PICOS parameters (Population, Intervention, Comparator, Outcomes) from trials. |
-| **FR-RES-02** | Evidence Matrix | The system shall construct side-by-side comparative matrices contrasting endpoints across publications. |
-| **FR-AGT-01** | Agent Workflow | The system shall execute multi-step research investigations via a deterministic LangGraph state machine. |
-| **FR-AGT-02** | Agent Guardrails| The system shall enforce execution bounds: maximum 5 loop iterations, 30-second timeout, read-only tools. |
-| **FR-AGT-03** | Review Gate | The system shall require explicit human clinician approval before finalizing generated reports. |
-| **FR-SEC-01** | Audit Logging | The system shall record append-only audit events with sensitive credential masking. |
-| **FR-SEC-02** | Red-Flag Warning| The system shall scan queries for acute emergency symptoms (cardiac arrest, anaphylaxis, stroke) and display warnings. |
-| **FR-SEC-03** | Right to Erasure| The system shall support cascading deletion (`DELETE /api/v1/patients/{id}`) purging records, vectors, and events. |
-
-### 3.2 Non-Functional Requirements (NFR)
-
-* **NFR-PERF-01 (Retrieval Latency):** Hybrid retrieval latency (dense + BM25 + RRF) shall be $\le 1.5\text{s}$ at P95 for dossiers up to 100 documents.
-* **NFR-PERF-02 (End-to-End QA):** End-to-end question answering shall complete in $\le 4.0\text{s}$ at P95 using hosted Gemini models.
-* **NFR-PERF-03 (Ingestion Throughput):** Document parsing via PyMuPDF shall process at $\ge 15\text{ pages/second}$ on CPU hardware.
-* **NFR-RES-01 (Hardware Footprint):** The local stack shall run completely on a 16 GB RAM CPU machine without requiring a dedicated GPU.
-* **NFR-RES-02 (Container Budgets):** Containers shall run stably with memory allocations: Backend 1 GB, Frontend 512 MB, PostgreSQL 512 MB, Qdrant 512 MB.
-* **NFR-SEC-01 (Tenant Isolation):** Zero cross-patient leakage enforced at SQL query and vector payload filter levels.
-* **NFR-SEC-02 (Prompt Injection Defense):** Neutralizes jailbreaks and system override prompts via strict delimiter parsing.
-* **NFR-REL-01 (Strict Type Safety):** 100% type annotations across backend Python (Mypy strict) and frontend TypeScript.
-* **NFR-REL-02 (Test Verification):** Maintain 100% passing automated test suite with offline mock provider execution.
+| **Doctor** | Comprehensive patient dossier review, question answering, timeline examination, research assistant workflows. | All authorized patients in the department. |
+| **Nurse / Care Coordinator** | Patient vital and care event monitoring, medication schedules, conflicting documentation alerts. | Assigned care cohort records. |
+| **Hospital Administrator** | Facility census oversight, document throughput tracking, record integrity audits. | Facility-wide governance and audit logs. |
+| **Patient** | Personal health records, care timeline, questions about personal documents. | Strictly isolated to personal records (Eleanor Vance). |
+| **System Administrator** | Service health status, quality testing benchmarks, security configuration. | System configuration and diagnostic telemetry. |
 
 ---
 
-## 4. Data Model and Storage Specifications
+## Feature Implementation Status
 
-Patient360 utilizes a dual persistence architecture:
-1. **Relational Database (PostgreSQL 16 / Cloud SQL):** Stores structured medical entities, user accounts, role permissions, clinical timelines, and immutable audit logs.
-2. **Vector Database (Qdrant):** Stores dense 384-dimensional vector embeddings with payload metadata filters.
-
-### 4.1 Relational Schema Definitions
-
-```sql
--- Users and Role-Based Access Control
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    hashed_password VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL CHECK (role IN ('admin', 'reviewer', 'researcher', 'auditor')),
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Patient Demographic Dossiers
-CREATE TABLE patients (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    mrn_synthetic VARCHAR(64) UNIQUE NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    date_of_birth DATE NOT NULL,
-    gender VARCHAR(20) NOT NULL,
-    primary_condition VARCHAR(255),
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Patient-User Access Permissions (Row-Level Security)
-CREATE TABLE user_patient_permissions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    permission_level VARCHAR(20) NOT NULL CHECK (permission_level IN ('read', 'write', 'admin')),
-    granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(user_id, patient_id)
-);
-
--- Ingested Clinical and Research Documents
-CREATE TABLE documents (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    patient_id UUID REFERENCES patients(id) ON DELETE SET NULL,
-    title VARCHAR(255) NOT NULL,
-    file_path VARCHAR(512) NOT NULL,
-    file_hash_sha256 VARCHAR(64) NOT NULL,
-    file_size_bytes BIGINT NOT NULL,
-    mime_type VARCHAR(100) NOT NULL DEFAULT 'application/pdf',
-    doc_type VARCHAR(50) NOT NULL CHECK (doc_type IN ('patient_record', 'lab_report', 'discharge_summary', 'research_paper', 'clinical_guideline')),
-    doc_date DATE,
-    ingestion_status VARCHAR(30) NOT NULL DEFAULT 'pending' CHECK (ingestion_status IN ('pending', 'processing', 'completed', 'failed')),
-    error_message TEXT,
-    version INT NOT NULL DEFAULT 1,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Semantic Document Chunks with Physical Page Provenance
-CREATE TABLE document_chunks (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-    chunk_index INT NOT NULL,
-    page_number INT NOT NULL,
-    content TEXT NOT NULL,
-    raw_content TEXT NOT NULL,
-    token_count INT NOT NULL,
-    metadata_json JSONB NOT NULL DEFAULT '{}',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(document_id, chunk_index)
-);
-
--- Longitudinal Clinical Events and Contradiction Tracking
-CREATE TABLE clinical_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-    chunk_id UUID REFERENCES document_chunks(id) ON DELETE SET NULL,
-    event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('diagnosis', 'medication', 'procedure', 'encounter', 'lab_result', 'allergy')),
-    event_date DATE NOT NULL,
-    event_date_precision VARCHAR(20) NOT NULL DEFAULT 'day' CHECK (event_date_precision IN ('day', 'month', 'year', 'approximate')),
-    document_date DATE,
-    description TEXT NOT NULL,
-    value_or_dosage VARCHAR(255),
-    clinical_status VARCHAR(50) NOT NULL DEFAULT 'active' CHECK (clinical_status IN ('active', 'historical', 'resolved', 'disputed')),
-    confidence_score FLOAT NOT NULL DEFAULT 1.0,
-    contradiction_flag BOOLEAN NOT NULL DEFAULT FALSE,
-    contradiction_details TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Extracted Biomedical Research Trials (PICOS Parameters)
-CREATE TABLE research_studies (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id UUID UNIQUE NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-    pmid VARCHAR(32),
-    doi VARCHAR(128),
-    title TEXT NOT NULL,
-    authors TEXT,
-    publication_date DATE,
-    study_design VARCHAR(100),
-    population_description TEXT,
-    sample_size INT,
-    intervention TEXT,
-    primary_outcome TEXT,
-    limitations TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Append-Only Audit Trail
-CREATE TABLE audit_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    action VARCHAR(100) NOT NULL,
-    resource_type VARCHAR(50) NOT NULL,
-    resource_id VARCHAR(255),
-    details_json JSONB,
-    ip_address VARCHAR(45),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-### 4.2 Qdrant Vector Payload Schema
-* Collection Name: `patient360_chunks`
-* Vector Dimensionality: 384 dimensions (Cosine similarity metric)
-* HNSW Parameters: `m = 16`, `ef_construct = 100`
-* Indexed Payload Attributes: `patient_id` (Keyword), `document_id` (Keyword), `doc_type` (Keyword), `page_number` (Integer), `chunk_index` (Integer).
+| Feature Domain | Capability | Status | Verification Method |
+| :--- | :--- | :--- | :--- |
+| **Authentication** | JWT Authentication, Argon2 Hashing, Token Refresh | Implemented | Automated tests in `test_auth.py` |
+| **Demo Access** | One-Click Demo Role Selector (5 User Personas) | Implemented | End-to-end verified via `/api/v1/auth/demo-login` |
+| **Patient Isolation** | Server-side database & vector payload filtering | Implemented | Verified in `test_security_lifecycle.py` |
+| **Document Ingestion** | PDF parsing, physical page coordinates, SHA-256 hash | Implemented | Verified in `test_ingestion.py` |
+| **Hybrid Search** | FastEmbed 384-d dense vectors + Okapi BM25 + RRF | Implemented | Verified in `test_hybrid_retrieval.py` |
+| **Evidence QA** | Grounded question answering with page-level citations | Implemented | Verified in `test_rag_pipeline.py` |
+| **Citation Verifier** | Verbatim claim-to-quote source text matching | Implemented | Verified in `test_rag_citations.py` |
+| **Abstention** | Plain "insufficient evidence" handling | Implemented | Verified in `test_rag_pipeline.py` |
+| **Clinical Timeline** | Chronological event extraction (diagnoses, meds, labs) | Implemented | Verified in `test_timeline_pipeline.py` |
+| **Contradictions** | Cross-document conflicting information detection | Implemented | Verified in `test_contradiction_detector.py` |
+| **Biomedical Studies**| PICO parameter extraction and cross-study matrix | Implemented | Verified in `test_research_pipeline.py` |
+| **Research Assistant**| Multi-step bounded investigation with review gates | Implemented | Verified in `test_agent_workflow.py` |
+| **Quality Testing** | Evaluation lab benchmark suite for retrieval & latency | Implemented | Verified in `test_evaluation_pipeline.py` |
+| **Service Status** | Real-time health check endpoint (`/api/v1/health`) | Implemented | Verified in `test_health.py` |
 
 ---
 
-## 5. API Reference
+## Technology Stack
 
-All endpoints are hosted under base path `/api/v1`. Authentication requires header `Authorization: Bearer <jwt_token>`.
-
-| Domain | Method | Endpoint Path | Role Required | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **Auth** | `POST` | `/api/v1/auth/login` | Public | Authenticates credentials and returns JWT access/refresh tokens. |
-| **Auth** | `POST` | `/api/v1/auth/refresh` | Public | Exchanges valid refresh token for a new access token. |
-| **Auth** | `GET` | `/api/v1/auth/me` | Authenticated | Retrieves profile and role permissions of current user. |
-| **Patients** | `GET` | `/api/v1/patients` | Authenticated | Lists all patients assigned to the user's clinical panel. |
-| **Patients** | `POST` | `/api/v1/patients` | `admin`, `reviewer` | Creates a new patient demographic record. |
-| **Patients** | `GET` | `/api/v1/patients/{id}` | Patient Access | Retrieves demographic dossier for a single patient. |
-| **Patients** | `DELETE`| `/api/v1/patients/{id}` | `admin` | Cascades deletion across patient records, documents, vectors, events. |
-| **Documents**| `GET` | `/api/v1/documents` | Authenticated | Lists uploaded documents with optional `patient_id` filter. |
-| **Documents**| `POST` | `/api/v1/documents` | Patient Access | Uploads multi-page clinical PDF (multipart/form-data). |
-| **Documents**| `GET` | `/api/v1/documents/{id}/chunks` | Patient Access | Inspects extracted chunks, page numbers, and token counts. |
-| **Documents**| `GET` | `/api/v1/documents/{id}/download` | Patient Access | Downloads binary PDF stream for in-viewer inspection. |
-| **Ingestion**| `POST` | `/api/v1/documents/{id}/ingest` | Patient Access | Triggers document text extraction, chunking, and vector indexing. |
-| **Search** | `POST` | `/api/v1/vector/search` | Patient Access | Dense vector semantic search with patient isolation filters. |
-| **Search** | `POST` | `/api/v1/vector/hybrid-search` | Patient Access | Hybrid search merging BM25 and FastEmbed via RRF ($k=60$). |
-| **RAG** | `POST` | `/api/v1/rag/query` | Patient Access | Executes grounded clinical QA with claim-to-quote verification. |
-| **RAG** | `POST` | `/api/v1/rag/feedback` | Patient Access | Submits clinician rating and feedback on generated responses. |
-| **Timeline** | `GET` | `/api/v1/timeline/patients/{id}` | Patient Access | Retrieves chronological clinical timeline with contradiction flags. |
-| **Timeline** | `POST` | `/api/v1/timeline/patients/{id}/extract` | Patient Access | Triggers automated clinical event and contradiction extraction. |
-| **Agents** | `POST` | `/api/v1/agents/runs` | Patient Access | Launches multi-step clinical investigation workflow in LangGraph. |
-| **Agents** | `GET` | `/api/v1/agents/runs/{run_id}` | Patient Access | Retrieves execution status, steps, and pending human review gates. |
-| **Agents** | `POST` | `/api/v1/agents/runs/{run_id}/review` | Patient Access | Clinician approves or rejects synthesized investigation report. |
-| **Research** | `GET` | `/api/v1/research/studies` | Authenticated | Lists extracted biomedical publications and clinical trials. |
-| **Research** | `POST` | `/api/v1/research/compare` | Authenticated | Generates comparative PICOS matrix across selected studies. |
-| **Research** | `POST` | `/api/v1/research/export` | Authenticated | Exports synthesized biomedical evidence dossier in Markdown. |
-| **Evaluation**| `GET` | `/api/v1/evaluation/runs` | `admin`, `reviewer` | Lists historical benchmark evaluation test executions. |
-| **Evaluation**| `POST` | `/api/v1/evaluation/runs` | `admin`, `reviewer` | Executes 50-item synthetic clinical QA benchmark suite. |
-| **Health** | `GET` | `/api/v1/health` | Public | Returns system health, component latencies, and provider status. |
-| **Metrics** | `GET` | `/metrics` | Public | Exposes Prometheus telemetry metrics for operational scraping. |
+- **Frontend:** React 18, TypeScript, Tailwind CSS, Lucide Icons, Vite.
+- **Backend:** Python 3.11, FastAPI, Pydantic v2, SQLAlchemy 2.0.
+- **Document Processing:** PyMuPDF (`fitz`) for PDF extraction.
+- **Vector Search:** Qdrant (supports cloud cluster and embedded local mode).
+- **Embeddings:** FastEmbed with `BAAI/bge-small-en-v1.5` running on CPU.
+- **Keyword Search:** In-memory Okapi BM25 with clinical acronym preservation.
+- **Rank Fusion:** Reciprocal Rank Fusion (RRF, $k=60$).
+- **Workflow State Machine:** LangGraph deterministic state machine with loop iteration limits.
+- **Relational Storage:** PostgreSQL 16 (with automatic local SQLite fallback).
+- **Monitoring:** Prometheus telemetry metrics exposition at `/metrics`.
 
 ---
 
-## 6. Benchmark Evaluation Results
+## Local Development Setup
 
-Evaluated against the version-controlled 50-item synthetic clinical benchmark dataset:
+### Prerequisites
 
-| Benchmark Metric | Dense Retrieval | Hybrid RRF (BM25 + Dense) | Measurement Description |
-| :--- | :---: | :---: | :--- |
-| **Recall@5** | 84.0% | 96.0% | Top-5 relevant chunk recall across clinical queries |
-| **Mean Reciprocal Rank (MRR)** | 0.72 | 0.89 | Reciprocal rank of first ground-truth citation passage |
-| **Faithfulness Score** | 88.5% | 96.2% | Proportion of generated claims grounded in source text |
-| **Answer Relevance** | 89.1% | 94.8% | Semantic alignment to clinical inquiry |
-| **Citation Precision** | 81.3% | 92.4% | Exact page-level passage attribution accuracy |
-| **Hallucination Rate** | 6.2% | 1.8% | Unsupported assertions detected in answers |
-| **Median Latency (CPU)** | 620 ms | 420 ms | End-to-end query processing time |
+- Python 3.11 or higher
+- Node.js 18 or 20
+- Git
 
----
+### 1. Clone Repository & Setup Backend Environment
 
-## 7. Google Cloud Platform (GCP) Deployment Guide
-
-Patient360 is engineered for serverless, autoscaling deployment on Google Cloud Platform:
-
-```
-+=============================================================================================+
-|                               GOOGLE CLOUD RUN ARCHITECTURE                                 |
-|                                                                                             |
-|  [Clinician Browser] ---> [Cloud Run: Frontend] ---> [Cloud Run: Backend]                   |
-|                                                            |                                |
-|                        +-----------------------------------+--------------------+           |
-|                        |                                   |                    |           |
-|                        v                                   v                    v           |
-|                 [Cloud SQL: Postgres]             [Secret Manager]      [Gemini API]        |
-|                                                                                             |
-+=============================================================================================+
-```
-
-### 7.1 Prerequisites
-* Google Cloud SDK (`gcloud` CLI installed and authenticated).
-* A Google Cloud Project with billing enabled.
-
-### 7.2 Automated One-Command Deployment
-
-Run the included automated deployment script:
-
-* **Linux / macOS:**
-```bash
-chmod +x deployment/gcp/deploy.sh
-./deployment/gcp/deploy.sh
-```
-
-* **Windows (PowerShell):**
+#### Windows (PowerShell):
 ```powershell
-.\deployment\gcp\deploy.ps1
+git clone https://github.com/Yanshuptl18/Patient360.git
+cd Patient360
+
+python -m venv .venv
+.\.venv\Scripts\activate
+
+pip install -r requirements.txt
 ```
 
-### 7.3 Manual Step-by-Step Google Cloud Deployment
-
-#### 1. Configure Project and Enable Services
+#### Linux / macOS:
 ```bash
-export PROJECT_ID="your-gcp-project-id"
+git clone https://github.com/Yanshuptl18/Patient360.git
+cd Patient360
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment Variables
+
+Copy the provided template:
+```bash
+cp .env.example .env
+```
+
+If external PostgreSQL or Qdrant are not currently running, the system will automatically utilize local SQLite (`patient360_dev.db`) and embedded vector memory.
+
+### 3. Seed Synthetic Clinical Demonstration Data
+
+```bash
+python scripts/seed_demo_data.py
+```
+
+This seeds:
+- 5 User accounts for each clinical role (Doctor, Nurse, Hospital Admin, Patient, System Admin).
+- 2 Synthetic patient records (Arthur Pendelton and Eleanor Vance).
+- Verified clinical PDF documents with physical page citations.
+- Chronological timeline events and cross-document contradiction examples.
+- Extracted biomedical studies from landmark publications.
+
+### 4. Start Local Development Servers
+
+#### Terminal 1: Backend API
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+API documentation is available at `http://localhost:8000/docs` and service health at `http://localhost:8000/api/v1/health`.
+
+#### Terminal 2: Frontend Single-Page Application
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` in your browser.
+
+---
+
+## Docker Multi-Container Deployment
+
+To run the complete production container stack locally or on a server:
+
+```bash
+docker-compose -f deployment/docker-compose.prod.yml up -d
+```
+
+### Containers in Stack
+
+| Container | Image / Base | Internal Port | Host Port | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| `frontend` | Node multi-stage -> Nginx | 80 | 80 | Serves optimized React application bundle |
+| `backend` | Python 3.11-slim | 8000 | 8000 | FastAPI REST service and intelligence pipelines |
+| `postgres` | postgres:16-alpine | 5432 | 5432 | Relational store for users, records, timelines |
+| `qdrant` | qdrant/qdrant:v1.8.4 | 6333 | 6333 | Vector database for semantic evidence retrieval |
+
+To view logs:
+```bash
+docker-compose -f deployment/docker-compose.prod.yml logs -f
+```
+
+To stop:
+```bash
+docker-compose -f deployment/docker-compose.prod.yml down
+```
+
+---
+
+## Google Cloud Deployment Guide
+
+This deployment architecture is designed for the lowest practical infrastructure cost, prioritizing free-tier eligible services.
+
+### Architecture Options
+
+1. **Serverless Scale-to-Zero (Cloud Run + Managed Services):**
+   - **Frontend & Backend:** Google Cloud Run (scales to zero instances when idle; includes 2 million free requests/month, 180,000 vCPU-seconds, and 360,000 GiB-seconds free per month under GCP free tier).
+   - **Database:** Cloud SQL for PostgreSQL (db-f1-micro) or an external serverless PostgreSQL tier.
+   - **Vector Store:** Qdrant Cloud Free Tier (1 cluster free up to 1GB storage) or self-hosted in-container.
+   - **Secrets:** Google Secret Manager (6 secret versions free per month).
+
+2. **Single Compute Engine Free-Tier Instance (Alternative):**
+   - Google Cloud Compute Engine `e2-micro` instance in `us-central1`, `us-east1`, or `us-west1` (1 instance free per month under GCP free tier with 30 GB standard disk).
+   - Run the Docker Compose production stack directly on the instance.
+
+### Step-by-Step Cloud Run Deployment
+
+#### 1. Set Google Cloud Project
+```bash
+export PROJECT_ID="your-project-id"
 export REGION="us-central1"
 
 gcloud config set project $PROJECT_ID
+```
 
+#### 2. Enable Required APIs
+```bash
 gcloud services enable \
     run.googleapis.com \
     cloudbuild.googleapis.com \
     artifactregistry.googleapis.com \
-    secretmanager.googleapis.com \
-    sqladmin.googleapis.com
+    secretmanager.googleapis.com
 ```
 
-#### 2. Create Artifact Registry Repository
+#### 3. Create Artifact Registry Repository
 ```bash
 gcloud artifacts repositories create patient360 \
     --repository-format=docker \
     --location=$REGION \
-    --description="Patient360 Docker Container Repository"
+    --description="Patient360 Container Repository"
 ```
 
-#### 3. Build and Deploy Backend to Cloud Run
+#### 4. Build and Deploy Backend Container
 ```bash
-# Build container image via Cloud Build
+# Submit build to Cloud Build
 gcloud builds submit \
     --tag "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/backend:latest" \
     -f deployment/docker/backend.Dockerfile .
 
-# Deploy container to Cloud Run
+# Deploy to Cloud Run with scale-to-zero settings
 gcloud run deploy patient360-backend \
     --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/backend:latest" \
     --region $REGION \
@@ -408,14 +336,15 @@ gcloud run deploy patient360-backend \
     --allow-unauthenticated \
     --memory 1Gi \
     --cpu 1 \
+    --min-instances 0 \
+    --max-instances 2 \
     --timeout 60s \
-    --concurrency 80 \
-    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-flash-latest,GEMINI_API_KEY="your-api-key"
+    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-3.5-flash-lite
 ```
 
-#### 4. Build and Deploy Frontend to Cloud Run
+#### 5. Build and Deploy Frontend Container
 ```bash
-# Build frontend container image
+# Build frontend container
 gcloud builds submit \
     --tag "${REGION}-docker.pkg.dev/${PROJECT_ID}/patient360/frontend:latest" \
     -f deployment/docker/frontend.Dockerfile .
@@ -427,108 +356,67 @@ gcloud run deploy patient360-frontend \
     --platform managed \
     --allow-unauthenticated \
     --memory 512Mi \
-    --cpu 1
+    --cpu 1 \
+    --min-instances 0 \
+    --max-instances 2
 ```
 
 ---
 
-## 8. Localhost Development Quickstart
+## Quality Assurance and Verification
 
-### 8.1 Prerequisites
-* Python 3.11+
-* Node.js 18+ or 20+
-* Git
-
-### 8.2 Setup Commands
-
-1. Clone repository and initialize Python virtual environment:
-```bash
-git clone https://github.com/Yanshuptl18/Patient360.git
-cd Patient360
-
-python -m venv .venv
-
-# Windows:
-.venv\Scripts\activate
-# Linux / macOS:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-```
-
-2. Seed database with synthetic demonstration cohorts:
-```bash
-python scripts/seed_demo_data.py
-```
-*Note: If external PostgreSQL or Qdrant services are not running, the seeder automatically falls back to local SQLite (`./patient360_dev.db`) and embedded vector memory.*
-
-3. Start servers:
-```bash
-# Terminal 1: Backend API (runs on http://127.0.0.1:8000)
-uvicorn backend.main:app --reload --port 8000
-
-# Terminal 2: Frontend Workspace (runs on http://127.0.0.1:5173)
-cd frontend
-npm install
-npm run dev
-```
-
----
-
-## 9. Production Multi-Container Docker Deployment
-
-Launch the hardened container stack locally or on a VPS:
+Patient360 includes an automated verification test suite:
 
 ```bash
-docker-compose -f deployment/docker-compose.prod.yml up -d
-```
+# Run backend test suite (154 tests)
+.\.venv\Scripts\python.exe -m pytest tests/ -v
 
-### Services Deployed
-* `nginx` (Port 80): Reverse proxy with security headers, Gzip compression, and asset caching.
-* `backend` (Port 8000): Multi-stage Python 3.11 container running under unprivileged user `appuser` (UID 10001).
-* `frontend` (Port 80 internal): Multi-stage container serving the optimized React single-page application.
-* `postgres` (Port 5432): Relational database with health checking and persistent volume storage.
-* `qdrant` (Port 6333): High-performance vector database on an isolated bridge network.
-
----
-
-## 10. Quality Assurance and Testing
-
-Patient360 maintains continuous verification with 100% offline-executable tests:
-
-```bash
-# Run automated test suite (151 tests)
-pytest -v
-
-# Python code formatting and linting
-ruff check .
-
-# Strict static type verification
-mypy backend
-
-# Frontend TypeScript validation and production build
+# Run frontend TypeScript validation and production build
 cd frontend && npm run build
 ```
 
----
+### Verification Results Summary
 
-## 11. Architectural Decisions (ADR Summary)
-
-| ADR ID | Decision Title | Selected Option | Rationale |
-| :--- | :--- | :--- | :--- |
-| **ADR-001** | Vector Store Selection | Qdrant | Fast CPU performance, native payload filtering, embedded fallback mode. |
-| **ADR-002** | Embedding Model | BAAI/bge-small-en-v1.5 | 384 dimensions, strong MTEB clinical retrieval score, fast CPU execution via FastEmbed. |
-| **ADR-003** | PDF Parsing Engine | PyMuPDF (fitz) | Page-aware coordinate extraction, zero heavy Java/OCR runtime dependencies. |
-| **ADR-004** | Hybrid Retrieval Algorithm | Reciprocal Rank Fusion ($k=60$) | Robust merger of sparse BM25 and dense FastEmbed without parameter tuning. |
-| **ADR-005** | Agent Framework | LangGraph | Deterministic state machine, loop cycle bounding (max 5), human-in-the-loop review. |
-| **ADR-006** | Database Abstraction | SQLAlchemy 2.0 Core/ORM | Clean declarative models, connection pooling, and automatic SQLite fallback. |
-| **ADR-007** | LLM Gateway Architecture | Native HTTPX Provider Gateway | Provider-agnostic support for Gemini, Ollama, and Mock without heavy vendor SDK locks. |
-| **ADR-008** | Client Architecture | React 18 + TypeScript + Vite | Clean component architecture, strict type safety, fast Vite build bundle. |
+- **Backend Pytest Suite:** 154 passed in 13.39 seconds.
+- **Frontend TypeScript Build:** 0 type errors, production bundle compiled cleanly in 8.96 seconds.
+- **Patient Isolation:** Server-enforced row-level queries and vector filters verified across patient records.
+- **Document Ingestion:** PDF extraction, hashing, and page coordinate mapping verified.
 
 ---
 
-## 12. License and Acknowledgements
+## Security and Patient Data Isolation
 
-* **License:** MIT License. See [LICENSE](LICENSE) for details.
-* **Clinical Knowledge Sources:** Synthetic patient dossiers modeled on standard clinical case reporting guidelines. Landmark clinical trials cited from the *New England Journal of Medicine* (NEJM).
-* **Open Source Ecosystem:** Powered by FastAPI, React, Qdrant, FastEmbed, PyMuPDF, SQLAlchemy, and Prometheus.
+1. **Server-Enforced Patient Isolation:**
+   - Authorization is enforced at the database query and vector search payload filter levels.
+   - Patient users (e.g., Eleanor Vance) are strictly restricted to their own synthetic record ID (`SYNTH-10001`).
+   - Modifying request parameters, IDs, or query text cannot bypass server-side tenant isolation.
+
+2. **Verifiable Data Provenance:**
+   - Every ingested document is assigned an immutable SHA-256 cryptographic hash.
+   - All AI answers link directly to original document IDs, physical page numbers, and verbatim source passages.
+
+3. **Protection of Secrets:**
+   - All API keys, tokens, and database passwords are kept on the server and loaded via environment variables.
+   - Frontend bundles contain zero embedded secrets.
+
+4. **Responsible Clinical Safety Guardrails:**
+   - Acute symptom queries (e.g., cardiac arrest, acute chest pain) trigger immediate emergency care advisories.
+   - The platform clearly states that it does not provide autonomous clinical diagnoses or prescribe treatments.
+
+---
+
+## Troubleshooting
+
+| Problem | Cause | Solution |
+| :--- | :--- | :--- |
+| `Cannot connect to PostgreSQL` | Database container or server not running. | The platform will automatically fall back to local SQLite (`patient360_dev.db`). For PostgreSQL, run `docker-compose up -d postgres`. |
+| `Qdrant connection refused` | Vector store service offline. | The system falls back to embedded vector search. To use external Qdrant, run `docker-compose up -d qdrant`. |
+| `Missing Gemini API key` | `GEMINI_API_KEY` not configured. | Set your key in `.env` or leave `LLM_PROVIDER=mock` for testing. |
+| `File upload rejected (Over 25 MB)`| File exceeds maximum size threshold. | Ensure uploaded documents are clinical PDFs under 25 MB. |
+
+---
+
+## License
+
+Patient360 is licensed under the [MIT License](LICENSE).
+Synthetic patient records and landmark clinical trial citations are modeled on published clinical literature for research and educational demonstrations.

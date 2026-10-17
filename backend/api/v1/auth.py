@@ -8,17 +8,22 @@ from sqlalchemy.orm import Session
 from backend.api.deps import get_current_user, get_db, require_role
 from backend.audit.service import log_audit_event
 from backend.auth.service import (
+    DEMO_PERSONAS,
     authenticate_user,
     create_user,
+    ensure_demo_user_and_permissions,
     get_user_by_email,
     get_user_by_id,
     seed_default_users,
 )
 from backend.core.config import settings
-from backend.core.exceptions import AuthenticationError
+from backend.core.exceptions import AuthenticationError, AuthorizationError
 from backend.core.security import create_access_token, create_refresh_token, decode_token
 from backend.models.user import User
 from backend.schemas.auth import (
+    DemoLoginRequest,
+    DemoRoleItem,
+    DemoRolesResponse,
     LoginRequest,
     OtpRequest,
     OtpResponse,
@@ -287,3 +292,70 @@ def seed_demo_accounts(
     """
     seeded = seed_default_users(db)
     return [UserResponse.model_validate(u) for u in seeded.values()]
+
+
+@router.get("/demo-roles", response_model=DemoRolesResponse)
+def get_demo_roles() -> DemoRolesResponse:
+    """
+    Returns the list of available one-click demo personas and demo mode status.
+    If demo mode is disabled, returns an empty role list.
+    """
+    if not settings.DEMO_MODE:
+        return DemoRolesResponse(demo_mode=False, roles=[])
+
+    roles_list = [
+        DemoRoleItem(
+            key=k,
+            name=v["full_name"],
+            title=v["title"],
+            email=v["email"],
+            role=v["role"],
+            department=v["department"],
+            description=v["description"],
+            avatar_initials=v["avatar_initials"],
+        )
+        for k, v in DEMO_PERSONAS.items()
+    ]
+    return DemoRolesResponse(demo_mode=True, roles=roles_list)
+
+
+@router.post("/demo-login", response_model=TokenResponse)
+def demo_login(
+    demo_in: DemoLoginRequest,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+) -> TokenResponse:
+    """
+    One-click demonstration authentication endpoint.
+    Instantly provisions/retrieves the designated demo user role,
+    configures their patient permissions, and returns real signed JWT session tokens.
+    """
+    if not settings.DEMO_MODE:
+        raise AuthorizationError("One-click demo mode is disabled on this server.")
+
+    user = ensure_demo_user_and_permissions(db, role_key=demo_in.role_key)
+
+    ip_addr = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    access_token = create_access_token(subject=user.id, role=user.role)
+    refresh_token = create_refresh_token(subject=user.id, role=user.role)
+
+    log_audit_event(
+        db,
+        action="DEMO_LOGIN_SUCCESS",
+        resource_type="auth",
+        user_id=user.id,
+        ip_address=ip_addr,
+        user_agent=user_agent,
+        status="SUCCESS",
+        details={"role_key": demo_in.role_key, "email": user.email, "role": user.role},
+    )
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserResponse.model_validate(user),
+    )
+

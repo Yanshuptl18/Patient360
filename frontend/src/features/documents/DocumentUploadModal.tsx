@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, UploadCloud, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, UploadCloud, FileText, AlertCircle } from 'lucide-react';
 import { Document, DocType } from '../../types';
 import { useAuth } from '../auth/AuthContext';
 
@@ -43,7 +43,6 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     setSelectedFile(file);
     setError(null);
     if (!title) {
-      // Clean filename for title
       setTitle(file.name.replace(/\.pdf$/i, ''));
     }
   };
@@ -106,32 +105,32 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-6 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg rounded-3xl bg-white border border-slate-200 shadow-xl p-6 overflow-hidden text-slate-900">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-teal-50 text-teal-700 border border-teal-200">
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Upload Clinical Document</h2>
-              <p className="text-xs text-slate-400">
-                Attaching to patient dossier: <span className="text-teal-400 font-medium">{patientName}</span>
+              <h2 className="text-base font-bold text-slate-900">Add Medical Document</h2>
+              <p className="text-xs text-slate-500">
+                Attaching to patient dossier: <span className="text-teal-800 font-semibold">{patientName}</span>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -146,17 +145,17 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
+            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors ${
               isDragging
-                ? 'border-teal-400 bg-teal-500/10'
+                ? 'border-teal-500 bg-teal-50/50'
                 : selectedFile
-                ? 'border-teal-500/50 bg-slate-950/60'
-                : 'border-slate-800 hover:border-slate-700 bg-slate-950/40'
+                ? 'border-teal-300 bg-teal-50/20'
+                : 'border-slate-200 hover:border-slate-300 bg-slate-50'
             }`}
           >
             <input
-              ref={fileInputRef}
               type="file"
+              ref={fileInputRef}
               accept=".pdf,application/pdf"
               className="hidden"
               onChange={(e) => {
@@ -167,91 +166,87 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
             />
 
             {selectedFile ? (
-              <div className="flex items-center justify-center space-x-3 text-left">
-                <div className="p-2 rounded-xl bg-teal-500/20 text-teal-300">
-                  <FileText className="w-6 h-6" />
+              <div className="flex items-center justify-center space-x-3">
+                <FileText className="w-8 h-8 text-teal-700 shrink-0" />
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-900">{selectedFile.name}</p>
+                  <p className="text-[11px] text-slate-500">
+                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • PDF Ready
+                  </p>
                 </div>
-                <div>
-                  <div className="text-xs font-semibold text-white truncate max-w-[260px]">
-                    {selectedFile.name}
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • PDF Document
-                  </div>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-teal-400 shrink-0 ml-auto" />
               </div>
             ) : (
               <div>
-                <UploadCloud className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-slate-300">
-                  Drag and drop PDF here, or <span className="text-teal-400">browse files</span>
+                <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-slate-700">
+                  Click to browse or drag and drop PDF file here
                 </p>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  PDF format only (%PDF- header verified) • Maximum 25 MB
+                  Supported format: PDF up to 25 MB
                 </p>
               </div>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Document Title</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Document Title</label>
             <input
               type="text"
               required
-              placeholder="e.g. FoundationOne CDx Genomic Profile Report"
+              placeholder="e.g. Oncology Consultation Summary 2024-03"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-teal-500"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-teal-600"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Document Type</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Document Category</label>
               <select
                 value={docType}
                 onChange={(e) => setDocType(e.target.value as DocType)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-teal-600"
               >
-                <option value="patient_record">Patient Record / EHR</option>
+                <option value="patient_record">Patient Record / Clinical Note</option>
                 <option value="lab_report">Laboratory Report</option>
                 <option value="discharge_summary">Discharge Summary</option>
                 <option value="research_paper">Research Paper</option>
                 <option value="clinical_guideline">Clinical Guideline</option>
               </select>
             </div>
+
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Document Date</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Document Date</label>
               <input
                 type="date"
                 value={docDate}
                 onChange={(e) => setDocDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-teal-500"
+                className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-teal-600"
               />
             </div>
           </div>
 
-          <div className="pt-3 flex items-center justify-end space-x-3 border-t border-slate-800">
+          <div className="pt-3 flex items-center justify-end space-x-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
               disabled={isUploading}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isUploading || !selectedFile}
-              className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 disabled:opacity-50 text-slate-950 text-xs font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center space-x-1.5"
+              className="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-50 text-white text-xs font-semibold shadow-xs transition-all flex items-center space-x-1.5"
             >
               {isUploading ? (
-                <span>Validating & Storing...</span>
+                <span>Adding Document...</span>
               ) : (
                 <>
-                  <UploadCloud className="w-3.5 h-3.5" />
-                  <span>Upload & Register</span>
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Upload Document</span>
                 </>
               )}
             </button>

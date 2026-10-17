@@ -1,4 +1,29 @@
-export type Role = 'admin' | 'reviewer' | 'researcher' | 'demo';
+export type Role =
+  | 'admin'
+  | 'reviewer'
+  | 'researcher'
+  | 'demo'
+  | 'doctor'
+  | 'clinician'
+  | 'nurse'
+  | 'hospital_admin'
+  | 'patient';
+
+export interface DemoRoleItem {
+  key: string;
+  name: string;
+  title: string;
+  email: string;
+  role: string;
+  department: string;
+  description: string;
+  avatar_initials: string;
+}
+
+export interface DemoRolesResponse {
+  demo_mode: boolean;
+  roles: DemoRoleItem[];
+}
 
 export interface User {
   id: string;

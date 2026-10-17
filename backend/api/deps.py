@@ -55,7 +55,8 @@ def get_current_user(
     return user
 
 
-CLINICAL_REVIEW_ROLES = {"reviewer", "doctor", "clinician"}
+CLINICAL_REVIEW_ROLES = {"reviewer", "doctor", "clinician", "nurse"}
+ADMIN_ROLES = {"admin", "hospital_admin"}
 
 
 def require_role(required_role: str) -> Callable[[User], User]:
@@ -65,7 +66,9 @@ def require_role(required_role: str) -> Callable[[User], User]:
     """
 
     def role_checker(current_user: Annotated[User, Depends(get_current_user)]) -> User:
-        if current_user.role == "admin" or current_user.role == required_role:
+        if current_user.role == required_role or current_user.role == "admin":
+            return current_user
+        if required_role == "admin" and current_user.role in ADMIN_ROLES:
             return current_user
         if required_role == "reviewer" and current_user.role in CLINICAL_REVIEW_ROLES:
             return current_user
@@ -85,6 +88,8 @@ def require_roles(allowed_roles: list[str]) -> Callable[[User], User]:
     def roles_checker(current_user: Annotated[User, Depends(get_current_user)]) -> User:
         if current_user.role == "admin" or current_user.role in allowed_roles:
             return current_user
+        if "admin" in allowed_roles and current_user.role in ADMIN_ROLES:
+            return current_user
         if "reviewer" in allowed_roles and current_user.role in CLINICAL_REVIEW_ROLES:
             return current_user
         raise AuthorizationError(
@@ -92,3 +97,4 @@ def require_roles(allowed_roles: list[str]) -> Callable[[User], User]:
         )
 
     return roles_checker
+

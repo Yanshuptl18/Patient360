@@ -6,12 +6,11 @@ import {
   Trash2,
   Clock,
   CheckCircle2,
-  AlertCircle,
   Filter,
-  Layers,
-  Play,
+  Eye,
   Loader2,
   Search,
+  Check,
 } from 'lucide-react';
 import { Document, DocType } from '../../types';
 import { useAuth } from '../auth/AuthContext';
@@ -27,11 +26,11 @@ interface DocumentListProps {
 }
 
 const DOC_TYPE_LABELS: Record<DocType, { label: string; color: string }> = {
-  patient_record: { label: 'Patient Record', color: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
-  lab_report: { label: 'Lab Report', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
-  discharge_summary: { label: 'Discharge Summary', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  research_paper: { label: 'Research Paper', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-  clinical_guideline: { label: 'Guideline', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  patient_record: { label: 'Patient Record', color: 'bg-teal-50 text-teal-800 border-teal-200' },
+  lab_report: { label: 'Lab Report', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  discharge_summary: { label: 'Discharge Summary', color: 'bg-amber-50 text-amber-800 border-amber-200' },
+  research_paper: { label: 'Research Paper', color: 'bg-indigo-50 text-indigo-800 border-indigo-200' },
+  clinical_guideline: { label: 'Clinical Guideline', color: 'bg-purple-50 text-purple-800 border-purple-200' },
 };
 
 export const DocumentList: React.FC<DocumentListProps> = ({
@@ -58,11 +57,11 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         },
       });
       if (!response.ok) {
-        throw new Error('Ingestion pipeline failed.');
+        throw new Error('Document processing failed.');
       }
       onRefresh();
     } catch (err) {
-      console.error('Ingestion error:', err);
+      console.error('Processing error:', err);
     } finally {
       setIsIngestingId(null);
     }
@@ -100,7 +99,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   };
 
   const handleDelete = async (docId: string) => {
-    if (!window.confirm('Are you sure you want to delete this document from the dossier?')) {
+    if (!window.confirm('Are you sure you want to remove this document from the record?')) {
       return;
     }
     setIsDeletingId(docId);
@@ -128,19 +127,19 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   };
 
   return (
-    <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 flex flex-col h-full">
+    <div className="rounded-3xl bg-white border border-slate-200 p-6 flex flex-col h-full shadow-xs">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
         <div>
-          <div className="flex items-center space-x-2">
-            <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 rounded-xl bg-teal-50 text-teal-700 border border-teal-200">
               <FileText className="w-4 h-4" />
             </div>
-            <h2 className="text-sm font-semibold text-white">Attached Clinical Documents</h2>
+            <h2 className="text-sm font-bold text-slate-900">Attached Medical Documents</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Patient Dossier: <span className="text-teal-400 font-medium">{patientName}</span> •{' '}
-            {documents.length} document{documents.length === 1 ? '' : 's'} registered
+          <p className="text-xs text-slate-500 mt-1">
+            Patient: <span className="text-teal-800 font-semibold">{patientName}</span> •{' '}
+            {documents.length} document{documents.length === 1 ? '' : 's'} available
           </p>
         </div>
 
@@ -150,35 +149,35 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs focus:outline-none focus:border-teal-500 pr-8"
+              className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs focus:outline-none focus:border-teal-600 pr-8"
             >
-              <option value="all">All Document Types</option>
-              <option value="patient_record">Patient Record / EHR</option>
-              <option value="lab_report">Lab Report</option>
+              <option value="all">All Document Categories</option>
+              <option value="patient_record">Patient Record / Clinical Note</option>
+              <option value="lab_report">Laboratory Report</option>
               <option value="discharge_summary">Discharge Summary</option>
               <option value="research_paper">Research Paper</option>
               <option value="clinical_guideline">Clinical Guideline</option>
             </select>
-            <Filter className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-2.5 pointer-events-none" />
+            <Filter className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
 
-          {/* Semantic Search Button */}
+          {/* Search Button */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-400 border border-teal-500/20 text-xs font-semibold transition-all flex items-center space-x-1.5 cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all flex items-center space-x-1.5 cursor-pointer"
           >
-            <Search className="w-3.5 h-3.5" />
-            <span>Semantic Search</span>
+            <Search className="w-3.5 h-3.5 text-teal-700" />
+            <span>Search Evidence</span>
           </button>
 
           {/* Upload Button */}
-          {user?.role !== 'demo' && (
+          {user?.role !== 'demo' && user?.role !== 'patient' && (
             <button
               onClick={() => setIsUploadOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center space-x-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Upload PDF</span>
+              <span>Add Document</span>
             </button>
           )}
         </div>
@@ -188,20 +187,20 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <div className="flex-1 overflow-y-auto mt-4 space-y-3 pr-1">
         {filteredDocs.length === 0 ? (
           <div className="py-12 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center mx-auto mb-3 text-slate-500">
+            <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400">
               <FileText className="w-6 h-6" />
             </div>
-            <p className="text-xs font-medium text-slate-300">No documents found</p>
+            <p className="text-xs font-medium text-slate-700">No medical documents found</p>
             <p className="text-[11px] text-slate-500 mt-1 max-w-sm mx-auto">
-              Upload clinical PDF reports, genomics summaries, or lab notes to begin the indexing and ingestion pipeline.
+              Add clinical PDF summaries, discharge instructions, or laboratory reports to organize patient records.
             </p>
-            {user?.role !== 'demo' && (
+            {user?.role !== 'demo' && user?.role !== 'patient' && (
               <button
                 onClick={() => setIsUploadOpen(true)}
-                className="mt-4 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-400 text-xs font-medium transition-colors border border-slate-700 inline-flex items-center space-x-1.5"
+                className="mt-4 px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-medium transition-colors border border-teal-200 inline-flex items-center space-x-1.5 cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>Upload First PDF</span>
+                <span>Add First Document</span>
               </button>
             )}
           </div>
@@ -211,15 +210,15 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             return (
               <div
                 key={doc.id}
-                className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-slate-300 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
               >
                 <div className="flex items-start space-x-3 min-w-0">
-                  <div className="p-2.5 rounded-xl bg-slate-800/80 text-teal-400 border border-slate-700/60 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-white text-teal-700 border border-slate-200 shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center space-x-2">
-                      <h4 className="text-xs font-semibold text-white truncate max-w-sm">
+                      <h4 className="text-xs font-bold text-slate-900 truncate max-w-sm">
                         {doc.title}
                       </h4>
                       <span
@@ -229,93 +228,87 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-3 text-[11px] text-slate-400 mt-1">
+                    <div className="flex items-center space-x-3 text-[11px] text-slate-500 mt-1">
                       <span>{formatFileSize(doc.file_size_bytes)}</span>
                       <span>•</span>
                       <span>Date: {doc.doc_date || 'Undated'}</span>
                       <span>•</span>
-                      <span className="font-mono text-slate-500 text-[10px]">
-                        SHA: {doc.file_hash_sha256.substring(0, 8)}...
+                      <span className="font-mono text-slate-400 text-[10px]">
+                        ID: {doc.file_hash_sha256.substring(0, 8)}...
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-3 text-[11px] text-slate-500 mt-1.5">
+                      <span className="flex items-center space-x-1">
+                        <span className="font-medium text-slate-700">v{doc.version}</span>
+                        <span>record</span>
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center space-x-1">
+                        {doc.ingestion_status === 'completed' ? (
+                          <span className="text-teal-700 font-medium flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Examined and Ready</span>
+                          </span>
+                        ) : (
+                          <span className="text-amber-700 font-medium flex items-center space-x-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>Processing Required</span>
+                          </span>
+                        )}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 shrink-0 self-end sm:self-center">
-                  {/* Status Badge */}
-                  <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-[11px]">
-                    {doc.ingestion_status === 'completed' ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
-                        <span className="text-teal-400 font-medium">Indexed</span>
-                      </>
-                    ) : doc.ingestion_status === 'failed' ? (
-                      <>
-                        <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-                        <span className="text-rose-400 font-medium">Failed</span>
-                      </>
-                    ) : (
-                      <>
-                        <Clock className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-amber-400 font-medium">Pending Parsing</span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-1">
-                    {/* Process & Ingest button if pending or failed */}
-                    {doc.ingestion_status !== 'completed' && user?.role !== 'demo' && (
-                      <button
-                        onClick={() => handleIngest(doc)}
-                        disabled={isIngestingId === doc.id}
-                        title="Process & Index Clinical Document"
-                        className="p-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 transition-all text-[11px] font-medium flex items-center space-x-1 disabled:opacity-50"
-                      >
-                        {isIngestingId === doc.id ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span className="hidden sm:inline">Processing...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Play className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Process Record</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    {/* View Passages button if completed */}
-                    {doc.ingestion_status === 'completed' && (
-                      <button
-                        onClick={() => setInspectingDocument(doc)}
-                        title="Review Extracted Clinical Passages & Sources"
-                        className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all text-[11px] font-medium flex items-center space-x-1"
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Passages</span>
-                      </button>
-                    )}
-
+                <div className="flex items-center space-x-2 shrink-0 self-end sm:self-center">
+                  {doc.ingestion_status !== 'completed' && user?.role !== 'demo' && user?.role !== 'patient' && (
                     <button
-                      onClick={() => handleDownload(doc)}
-                      title="Download Original PDF"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-teal-300 hover:bg-slate-800 transition-colors"
+                      onClick={() => handleIngest(doc)}
+                      disabled={isIngestingId === doc.id}
+                      className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-medium flex items-center space-x-1 transition-all disabled:opacity-50 cursor-pointer"
+                      title="Examine and Index Content"
                     >
-                      <Download className="w-4 h-4" />
+                      {isIngestingId === doc.id ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span>Examining...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-3 h-3 text-teal-700" />
+                          <span>Process</span>
+                        </>
+                      )}
                     </button>
-                    {user?.role === 'admin' && (
-                      <button
-                        onClick={() => handleDelete(doc.id)}
-                        disabled={isDeletingId === doc.id}
-                        title="Delete Document"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors disabled:opacity-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  )}
+
+                  <button
+                    onClick={() => setInspectingDocument(doc)}
+                    className="p-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors cursor-pointer"
+                    title="Inspect Extracted Evidence"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDownload(doc)}
+                    className="p-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors cursor-pointer"
+                    title="Download Original PDF"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+
+                  {user?.role !== 'demo' && user?.role !== 'patient' && (
+                    <button
+                      onClick={() => handleDelete(doc.id)}
+                      disabled={isDeletingId === doc.id}
+                      className="p-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
+                      title="Remove Document"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -329,19 +322,20 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         onClose={() => setIsUploadOpen(false)}
         patientId={patientId}
         patientName={patientName}
-        onDocumentUploaded={() => {
-          onRefresh();
-        }}
+        onDocumentUploaded={() => onRefresh()}
       />
 
       {/* Chunk Inspector Modal */}
-      <ChunkInspectorModal
-        isOpen={!!inspectingDocument}
-        onClose={() => setInspectingDocument(null)}
-        document={inspectingDocument}
-      />
+      {inspectingDocument && (
+        <ChunkInspectorModal
+          isOpen={!!inspectingDocument}
+          onClose={() => setInspectingDocument(null)}
+          documentId={inspectingDocument.id}
+          documentTitle={inspectingDocument.title}
+        />
+      )}
 
-      {/* Dense Vector Semantic Search Modal */}
+      {/* Search Evidence Modal */}
       <SemanticSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}

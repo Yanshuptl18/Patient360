@@ -70,7 +70,7 @@ def check_user_patient_access(
     - Administrators have platform-wide access.
     - Other users must have a matching record in user_patient_permissions.
     """
-    if user.role == "admin":
+    if user.role in ("admin", "hospital_admin"):
         return True
 
     perm = (
@@ -105,8 +105,8 @@ def list_authorized_patients(
     """
     query = db.query(Patient).filter(Patient.is_deleted.is_(False))
 
-    # Enforce isolation filter unless user is admin
-    if user.role != "admin":
+    # Enforce isolation filter unless user is admin or hospital_admin
+    if user.role not in ("admin", "hospital_admin"):
         query = query.join(
             UserPatientPermission,
             UserPatientPermission.patient_id == Patient.id,
