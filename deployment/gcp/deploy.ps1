@@ -38,8 +38,10 @@ gcloud run deploy $BACKEND_SERVICE `
     --allow-unauthenticated `
     --memory 1Gi `
     --cpu 1 `
+    --min-instances 0 `
+    --max-instances 2 `
     --timeout 60s `
-    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-flash-latest
+    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-3.5-flash-lite,LLM_FALLBACK_TO_MOCK=true
 
 $BACKEND_URL = (gcloud run services describe $BACKEND_SERVICE --region=$REGION --format="value(status.url)")
 
@@ -54,7 +56,10 @@ gcloud run deploy $FRONTEND_SERVICE `
     --platform managed `
     --allow-unauthenticated `
     --memory 512Mi `
-    --cpu 1
+    --cpu 1 `
+    --min-instances 0 `
+    --max-instances 2 `
+    --set-env-vars "BACKEND_URL=$BACKEND_URL"
 
 $FRONTEND_URL = (gcloud run services describe $FRONTEND_SERVICE --region=$REGION --format="value(status.url)")
 

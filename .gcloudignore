@@ -1,0 +1,35 @@
+.git
+.gitignore
+.gcloudignore
+.env
+.env.*
+*.env
+*.db
+*.sqlite
+*.sqlite3
+
+# Python virtual environment & cache
+.venv
+venv
+ENV
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Node & Frontend
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# Local storage and test fixtures
+storage/
+uploads/
+test_patient360.db
+patient360_dev.db

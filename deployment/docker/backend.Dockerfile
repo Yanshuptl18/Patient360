@@ -59,4 +59,4 @@ HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request, os; p = os.environ.get('PORT', '8080'); urllib.request.urlopen(f'http://127.0.0.1:{p}/health')" || exit 1
 
 # Launch ASGI production server respecting PORT environment variable
-CMD ["sh", "-c", "exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 2"]
+CMD ["sh", "-c", "python scripts/seed_demo_data.py || true; exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 1"]

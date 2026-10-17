@@ -1,8 +1,10 @@
 """SQLAlchemy engine, session management, and connectivity probes."""
 
 import logging
+import tempfile
 import time
 from collections.abc import Generator
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import create_engine, text
@@ -15,28 +17,50 @@ logger = logging.getLogger(__name__)
 # Base Declarative Model
 Base = declarative_base()
 
-# Configure SQLAlchemy Engine
-# For SQLite, check_same_thread is False; for Postgres, pool settings apply
-engine_kwargs: dict[str, Any] = {"echo": False}
-if settings.DATABASE_URL.startswith("sqlite"):
-    engine_kwargs["connect_args"] = {"check_same_thread": False}
-else:
-    engine_kwargs["pool_pre_ping"] = True
-    engine_kwargs["pool_size"] = 5
-    engine_kwargs["max_overflow"] = 10
 
-try:
-    engine = create_engine(settings.DATABASE_URL, **engine_kwargs)
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-except Exception as err:
-    if not settings.DATABASE_URL.startswith("sqlite"):
+def _create_robust_engine():
+    """Initializes a resilient SQLAlchemy engine with directory validation and fallbacks."""
+    db_url = settings.DATABASE_URL
+    engine_kwargs: dict[str, Any] = {"echo": False}
+
+    if db_url.startswith("sqlite"):
+        engine_kwargs["connect_args"] = {"check_same_thread": False}
+        if "///" in db_url and not db_url.endswith(":memory:"):
+            db_path_str = db_url.split("///")[-1]
+            try:
+                p = Path(db_path_str).resolve()
+                p.parent.mkdir(parents=True, exist_ok=True)
+            except Exception as exc:
+                logger.warning(f"Could not create database directory for {db_path_str}: {exc}")
+    else:
+        engine_kwargs["pool_pre_ping"] = True
+        engine_kwargs["pool_size"] = 5
+        engine_kwargs["max_overflow"] = 10
+
+    try:
+        eng = create_engine(db_url, **engine_kwargs)
+        with eng.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return eng
+    except Exception as err:
         logger.warning(
-            f"Configured primary database unreachable ({err}). "
-            "Falling back to local SQLite database at './patient360_dev.db'."
+            f"Configured database ({db_url}) initialization failed: {err}. "
+            "Engaging writeable local SQLite fallback."
         )
-        engine = create_engine("sqlite:///./patient360_dev.db", connect_args={"check_same_thread": False})
+        fallback_path = Path(tempfile.gettempdir()) / "patient360_runtime.db"
+        try:
+            fallback_url = f"sqlite:///{fallback_path.as_posix()}"
+            eng = create_engine(fallback_url, connect_args={"check_same_thread": False})
+            with eng.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            logger.info(f"Connected to fallback database at {fallback_url}")
+            return eng
+        except Exception as fallback_err:
+            logger.error(f"Fallback SQLite failed ({fallback_err}), using in-memory SQLite.")
+            return create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
 
+
+engine = _create_robust_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -58,8 +82,9 @@ def check_database_connection() -> tuple[bool, int, str]:
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-        latency_ms = int((time.perf_counter() - start) * 1000)
-        return True, latency_ms, "PostgreSQL connected and responsive"
+        latency_ms = max(1, int((time.perf_counter() - start) * 1000))
+        dialect_name = engine.dialect.name
+        return True, latency_ms, f"{dialect_name.capitalize()} database connected and operational"
     except Exception as exc:
         latency_ms = int((time.perf_counter() - start) * 1000)
         logger.warning(f"Database connection check failed: {exc}")

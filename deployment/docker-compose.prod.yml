@@ -79,7 +79,9 @@ services:
       context: ..
       dockerfile: deployment/docker/frontend.Dockerfile
     container_name: patient360-prod-frontend
-    restart: unless-stopped
+    environment:
+      PORT: "80"
+      BACKEND_URL: "http://backend:8000"
     ports:
       - "80:80"
     depends_on:

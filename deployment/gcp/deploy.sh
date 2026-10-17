@@ -48,8 +48,8 @@ gcloud run deploy "${BACKEND_SERVICE}" \
     --timeout 60s \
     --concurrency 80 \
     --min-instances 0 \
-    --max-instances 10 \
-    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-flash-latest
+    --max-instances 2 \
+    --set-env-vars ENVIRONMENT=production,DEBUG=false,LLM_PROVIDER=gemini,GEMINI_MODEL=gemini-3.5-flash-lite,LLM_FALLBACK_TO_MOCK=true
 
 BACKEND_URL=$(gcloud run services describe "${BACKEND_SERVICE}" --region="${REGION}" --format="value(status.url)")
 echo "Backend deployed at: ${BACKEND_URL}"
@@ -68,7 +68,8 @@ gcloud run deploy "${FRONTEND_SERVICE}" \
     --cpu 1 \
     --timeout 30s \
     --min-instances 0 \
-    --max-instances 5
+    --max-instances 2 \
+    --set-env-vars "BACKEND_URL=${BACKEND_URL}"
 
 FRONTEND_URL=$(gcloud run services describe "${FRONTEND_SERVICE}" --region="${REGION}" --format="value(status.url)")
 
