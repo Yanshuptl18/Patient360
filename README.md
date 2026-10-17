@@ -1,4 +1,4 @@
-# Patient360: Medical Evidence, Brought Together
+# Patient360 
 
 [![Live Application](https://img.shields.io/badge/Live_App-Cloud_Run_Online-00875A?style=for-the-badge&logo=googlecloud&logoColor=white)](https://patient360-frontend-442154825091.us-central1.run.app)
 [![API Status](https://img.shields.io/badge/API_Health-100%25_Operational-0052CC?style=for-the-badge&logo=fastapi&logoColor=white)](https://patient360-backend-442154825091.us-central1.run.app/health)
