@@ -4,7 +4,10 @@ import json
 import urllib.request
 import urllib.error
 
-BASE_URL = "https://patient360-frontend-442154825091.us-central1.run.app"
+import os
+import sys
+
+BASE_URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BASE_URL", "https://frontend-roan-two-11.vercel.app")
 
 def request(path, method="GET", data=None, token=None):
     url = f"{BASE_URL}{path}"

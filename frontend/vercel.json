@@ -5,20 +5,24 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/:match*",
-      "destination": "https://patient360-backend-442154825091.us-central1.run.app/api/:match*"
+      "source": "/api/(.*)",
+      "destination": "https://patient360-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/api",
+      "destination": "https://patient360-backend.onrender.com/api"
     },
     {
       "source": "/health",
-      "destination": "https://patient360-backend-442154825091.us-central1.run.app/health"
+      "destination": "https://patient360-backend.onrender.com/health"
     },
     {
       "source": "/docs",
-      "destination": "https://patient360-backend-442154825091.us-central1.run.app/docs"
+      "destination": "https://patient360-backend.onrender.com/docs"
     },
     {
       "source": "/openapi.json",
-      "destination": "https://patient360-backend-442154825091.us-central1.run.app/openapi.json"
+      "destination": "https://patient360-backend.onrender.com/openapi.json"
     },
     {
       "source": "/(.*)",
