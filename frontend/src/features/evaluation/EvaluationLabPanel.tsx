@@ -129,9 +129,9 @@ export const EvaluationLabPanel: React.FC = () => {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
-        item.query.toLowerCase().includes(q) ||
-        item.item_id.toLowerCase().includes(q) ||
-        item.generated_answer.toLowerCase().includes(q)
+        (item.query || '').toLowerCase().includes(q) ||
+        (item.item_id || '').toLowerCase().includes(q) ||
+        (item.generated_answer || '').toLowerCase().includes(q)
       );
     }
     return true;

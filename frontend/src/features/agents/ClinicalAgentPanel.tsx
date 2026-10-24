@@ -195,7 +195,7 @@ export const ClinicalAgentPanel: React.FC<ClinicalAgentPanelProps> = ({
             >
               {runs.map((r, i) => (
                 <option key={r.run_id} value={r.run_id}>
-                  #{runs.length - i}: {r.query.slice(0, 32)}... ({r.status.replace(/_/g, ' ')})
+                  #{runs.length - i}: {(r.query || '').slice(0, 32)}... ({r.status ? r.status.replace(/_/g, ' ') : 'pending'})
                 </option>
               ))}
             </select>

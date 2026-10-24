@@ -1,11 +1,10 @@
 """Complete live verification suite for deployed Patient360 Google Cloud Run instance."""
 
 import json
-import urllib.request
-import urllib.error
-
 import os
 import sys
+import urllib.error
+import urllib.request
 
 BASE_URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BASE_URL", "https://frontend-roan-two-11.vercel.app")
 

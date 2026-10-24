@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from backend.core.config import settings
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 Base = declarative_base()
 
 
-def _create_robust_engine():
+def _create_robust_engine() -> Engine:
     """Initializes a resilient SQLAlchemy engine with directory validation and fallbacks."""
     db_url = settings.DATABASE_URL
     engine_kwargs: dict[str, Any] = {"echo": False}

@@ -35,12 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
       try {
         const res = await fetch('/api/v1/auth/me', {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const profile: User = await res.json();
@@ -54,7 +59,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (err) {
         console.warn('Could not restore auth session:', err);
+        localStorage.removeItem('patient360_access_token');
+        setToken(null);
+        setUser(null);
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };

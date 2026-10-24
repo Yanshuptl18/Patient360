@@ -25,6 +25,7 @@ class DocumentResponse(BaseModel):
     id: str
     patient_id: str | None
     title: str
+    file_hash_sha256: str | None = None
     file_size_bytes: int
     mime_type: str
     doc_type: str

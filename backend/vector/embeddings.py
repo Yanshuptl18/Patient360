@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import math
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from backend.core.config import settings
 
@@ -22,7 +22,7 @@ class FastEmbedProvider:
     def __init__(self, model_name: str | None = None) -> None:
         self.model_name = model_name or settings.EMBEDDING_MODEL_NAME
         self.dimensions = settings.EMBEDDING_DIMENSIONS
-        self._embedder = None
+        self._embedder: Any = None
         self._init_attempted = False
 
     def _ensure_embedder(self) -> None:

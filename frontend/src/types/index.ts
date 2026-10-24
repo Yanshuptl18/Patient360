@@ -98,7 +98,7 @@ export interface Document {
   id: string;
   patient_id: string | null;
   title: string;
-  file_hash_sha256: string;
+  file_hash_sha256?: string | null;
   file_size_bytes: number;
   mime_type: string;
   doc_type: DocType;

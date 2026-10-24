@@ -234,7 +234,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                       <span>Date: {doc.doc_date || 'Undated'}</span>
                       <span>•</span>
                       <span className="font-mono text-slate-400 text-[10px]">
-                        ID: {doc.file_hash_sha256.substring(0, 8)}...
+                        ID: {(doc.file_hash_sha256 || doc.id || '').substring(0, 8)}...
                       </span>
                     </div>
 

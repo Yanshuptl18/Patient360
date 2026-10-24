@@ -132,7 +132,7 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
       </div>
 
       {/* Patient Tab Content */}
-      <div className="h-[650px]">
+      <div className="min-h-[640px]">
         {activeTab === 'documents' ? (
           <DocumentList
             patientId={patient.id}
