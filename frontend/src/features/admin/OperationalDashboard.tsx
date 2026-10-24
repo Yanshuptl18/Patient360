@@ -366,7 +366,7 @@ export const OperationalDashboard: React.FC = () => {
 
       {/* Evaluation Lab View Mode */}
       {activeView === 'evaluation' && (
-        <div className="h-[650px]">
+        <div className="w-full">
           <EvaluationLabPanel />
         </div>
       )}

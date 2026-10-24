@@ -405,14 +405,14 @@ const MainContent: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                      <div className="lg:col-span-1 h-[620px]">
+                      <div className="lg:col-span-1 min-h-[620px]">
                         <PatientList
                           selectedPatientId={selectedPatient?.id || null}
                           onSelectPatient={(p) => setSelectedPatient(p)}
                         />
                       </div>
 
-                      <div className="lg:col-span-2 h-[620px] flex flex-col">
+                      <div className="lg:col-span-2 min-h-[620px] flex flex-col">
                         {selectedPatient ? (
                           <div className="flex flex-col h-full">
                             <div className="flex items-center space-x-1 mb-3 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 w-fit">
@@ -475,118 +475,128 @@ const MainContent: React.FC = () => {
 
                 {/* 4. Doctor, Reviewer, Admin, and Researcher Experience */}
                 {(user.role === 'doctor' || user.role === 'reviewer' || user.role === 'admin' || user.role === 'researcher') && (
-                  <section>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <div className="p-1.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200">
-                        <FileText className="w-4 h-4" />
+                  <section className="space-y-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-3 border-b border-slate-200 gap-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-1.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h2 className="text-base font-semibold text-slate-900">
+                            {user.role === 'admin'
+                              ? 'Administrative Records and Quality Testing'
+                              : 'Clinical Patient Records and Research Workspace'}
+                          </h2>
+                          <p className="text-xs text-slate-500">
+                            Authorized medical records, evidence-grounded answers, and verified document storage
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-base font-semibold text-slate-900">
-                          {user.role === 'admin'
-                            ? 'Administrative Records and Quality Testing'
-                            : 'Clinical Patient Records and Research Workspace'}
-                        </h2>
-                        <p className="text-xs text-slate-500">
-                          Authorized medical records, evidence-grounded answers, and verified document storage
-                        </p>
+
+                      {/* Top-Level Tab Navigation */}
+                      <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 overflow-x-auto max-w-full">
+                        <button
+                          type="button"
+                          onClick={() => setActivePatientTab('documents')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                            activePatientTab === 'documents'
+                              ? 'bg-white text-teal-700 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Medical Documents ({documents.length})</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActivePatientTab('rag')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                            activePatientTab === 'rag'
+                              ? 'bg-white text-teal-700 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>Ask About Records</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActivePatientTab('timeline')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                            activePatientTab === 'timeline'
+                              ? 'bg-white text-teal-700 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Medical History Timeline</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActivePatientTab('agents')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                            activePatientTab === 'agents'
+                              ? 'bg-white text-teal-700 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <FileSearch className="w-3.5 h-3.5" />
+                          <span>Clinical Research Assistant</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActivePatientTab('research')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                            activePatientTab === 'research'
+                              ? 'bg-white text-teal-700 shadow-sm'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>Biomedical Studies</span>
+                        </button>
+
+                        {user.role === 'admin' && (
+                          <button
+                            type="button"
+                            onClick={() => setActivePatientTab('evaluation')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                              activePatientTab === 'evaluation'
+                                ? 'bg-white text-teal-700 shadow-sm'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            <Activity className="w-3.5 h-3.5" />
+                            <span>Quality Testing</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                      <div className="lg:col-span-1 h-[620px]">
-                        <PatientList
-                          selectedPatientId={selectedPatient?.id || null}
-                          onSelectPatient={(p) => setSelectedPatient(p)}
-                        />
+                    {/* Active Content: Full-width for Platform-level features, 1:2 split for Patient records */}
+                    {activePatientTab === 'research' ? (
+                      <div className="w-full min-h-[640px]">
+                        <ResearchIntelligencePanel />
                       </div>
+                    ) : activePatientTab === 'evaluation' ? (
+                      <div className="w-full min-h-[640px]">
+                        <EvaluationLabPanel />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                        <div className="lg:col-span-1 min-h-[620px]">
+                          <PatientList
+                            selectedPatientId={selectedPatient?.id || null}
+                            onSelectPatient={(p) => setSelectedPatient(p)}
+                          />
+                        </div>
 
-                      <div className="lg:col-span-2 h-[620px] flex flex-col">
-                        {selectedPatient ? (
-                          <div className="flex flex-col h-full">
-                            {/* Tab Navigation */}
-                            <div className="flex items-center space-x-1 mb-3 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 w-fit overflow-x-auto">
-                              <button
-                                type="button"
-                                onClick={() => setActivePatientTab('documents')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                  activePatientTab === 'documents'
-                                    ? 'bg-white text-teal-700 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                              >
-                                <FileText className="w-3.5 h-3.5" />
-                                <span>Medical Documents ({documents.length})</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setActivePatientTab('rag')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                  activePatientTab === 'rag'
-                                    ? 'bg-white text-teal-700 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                              >
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                <span>Ask About Records</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setActivePatientTab('timeline')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                  activePatientTab === 'timeline'
-                                    ? 'bg-white text-teal-700 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                              >
-                                <Clock className="w-3.5 h-3.5" />
-                                <span>Medical History Timeline</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setActivePatientTab('agents')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                  activePatientTab === 'agents'
-                                    ? 'bg-white text-teal-700 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                              >
-                                <FileSearch className="w-3.5 h-3.5" />
-                                <span>Clinical Research Assistant</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setActivePatientTab('research')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                  activePatientTab === 'research'
-                                    ? 'bg-white text-teal-700 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                              >
-                                <BookOpen className="w-3.5 h-3.5" />
-                                <span>Biomedical Studies</span>
-                              </button>
-
-                              {user.role === 'admin' && (
-                                <button
-                                  type="button"
-                                  onClick={() => setActivePatientTab('evaluation')}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                                    activePatientTab === 'evaluation'
-                                      ? 'bg-white text-teal-700 shadow-sm'
-                                      : 'text-slate-600 hover:text-slate-900'
-                                  }`}
-                                >
-                                  <Activity className="w-3.5 h-3.5" />
-                                  <span>Quality Testing</span>
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Active View */}
+                        <div className="lg:col-span-2 min-h-[620px] flex flex-col">
+                          {selectedPatient ? (
                             <div className="flex-1 min-h-0">
                               {activePatientTab === 'documents' ? (
                                 <DocumentList
@@ -605,29 +615,25 @@ const MainContent: React.FC = () => {
                                   patientId={selectedPatient.id}
                                   patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                                 />
-                              ) : activePatientTab === 'agents' ? (
+                              ) : (
                                 <ClinicalAgentPanel
                                   patientId={selectedPatient.id}
                                   patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
                                 />
-                              ) : activePatientTab === 'research' ? (
-                                <ResearchIntelligencePanel />
-                              ) : (
-                                <EvaluationLabPanel />
                               )}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="h-full rounded-2xl bg-white border border-slate-200 p-8 flex flex-col items-center justify-center text-center shadow-sm">
-                            <Database className="w-10 h-10 text-slate-300 mb-3" />
-                            <h3 className="text-sm font-semibold text-slate-800">Select a Patient Record</h3>
-                            <p className="text-xs text-slate-500 mt-1 max-w-sm mb-4">
-                              Select an authorized patient from the list on the left to inspect documents, ask clinical questions, or view timelines.
-                            </p>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="h-full min-h-[500px] rounded-2xl bg-white border border-slate-200 p-8 flex flex-col items-center justify-center text-center shadow-sm">
+                              <Database className="w-10 h-10 text-slate-300 mb-3" />
+                              <h3 className="text-sm font-semibold text-slate-800">Select a Patient Record</h3>
+                              <p className="text-xs text-slate-500 mt-1 max-w-sm mb-4">
+                                Select an authorized patient from the list on the left to inspect documents, ask clinical questions, or view timelines.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </section>
                 )}
               </div>

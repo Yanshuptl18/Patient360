@@ -13,6 +13,10 @@ export const HealthStatus: React.FC = () => {
     setError(null);
     try {
       const res = await fetch('/api/v1/health');
+      if (res.status === 502 || res.status === 504) {
+        setError('Cloud service is warming up from free-tier standby. Rechecking in a few seconds...');
+        return;
+      }
       if (!res.ok) {
         throw new Error(`Server returned status ${res.status}`);
       }
