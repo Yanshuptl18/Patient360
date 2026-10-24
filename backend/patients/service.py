@@ -124,7 +124,7 @@ def list_authorized_patients(
             )
         )
 
-    patients = query.order_by(Patient.created_at.desc()).offset(skip).limit(limit).all()
+    patients = query.order_by(Patient.mrn_synthetic.asc()).offset(skip).limit(limit).all()
 
     # Calculate document count for each patient
     result: list[tuple[Patient, int]] = []

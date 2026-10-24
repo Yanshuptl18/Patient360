@@ -165,7 +165,16 @@ export const DemoRoleSelector: React.FC<DemoRoleSelectorProps> = ({ onSuccess, o
           return (
             <div
               key={role.key}
-              className={`relative rounded-2xl bg-white border p-5 flex flex-col justify-between transition-all duration-200 shadow-xs hover:shadow-md ${
+              onClick={() => handleSelectRole(role.key)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelectRole(role.key);
+                }
+              }}
+              className={`relative rounded-2xl bg-white border p-5 flex flex-col justify-between transition-all duration-200 shadow-xs hover:shadow-md cursor-pointer ${
                 isCurrentlyActive
                   ? 'border-teal-600 ring-2 ring-teal-600/20'
                   : role.borderColor
@@ -221,7 +230,10 @@ export const DemoRoleSelector: React.FC<DemoRoleSelectorProps> = ({ onSuccess, o
               <button
                 type="button"
                 disabled={isLoadingThis}
-                onClick={() => handleSelectRole(role.key)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSelectRole(role.key);
+                }}
                 className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shadow-xs disabled:opacity-60 cursor-pointer ${role.buttonBg}`}
               >
                 {isLoadingThis ? (

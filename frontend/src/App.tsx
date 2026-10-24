@@ -44,37 +44,39 @@ const MainContent: React.FC = () => {
   const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents' | 'research' | 'evaluation'>('documents');
   const [nurseTab, setNurseTab] = useState<'documents' | 'timeline'>('documents');
 
-  const { user, isAuthenticated, token, logout, demoMode } = useAuth();
+  const { user, isAuthenticated, token, logout, demoMode, loading } = useAuth();
 
-  // Reset selected patient and documents on user switch
+  // Synchronize authorized patient and reset documents on user/role switch
   useEffect(() => {
     setSelectedPatient(null);
     setDocuments([]);
-  }, [user?.email, user?.role]);
 
-  // Load authorized patients on authentication
-  useEffect(() => {
+    if (!token || !user) return;
+
+    let isMounted = true;
     const loadInitialPatient = async () => {
-      if (!token) {
-        setSelectedPatient(null);
-        return;
-      }
       try {
         const res = await fetch('/api/v1/patients', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.ok) {
+        if (res.ok && isMounted) {
           const data: Patient[] = await res.json();
           if (data.length > 0) {
-            setSelectedPatient(data[0]);
+            // Default to Eleanor Vance (SYNTH-10001) for rich demonstration dossier, or first patient
+            const primary = data.find((p) => p.mrn_synthetic === 'SYNTH-10001') || data[0];
+            setSelectedPatient(primary);
           }
         }
-      } catch {
-        // Handled silently
+      } catch (err) {
+        console.warn('Could not load initial patient:', err);
       }
     };
     loadInitialPatient();
-  }, [token, user?.role]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token, user?.id, user?.role]);
 
   const fetchDocuments = useCallback(
     async (patientId: string) => {
@@ -160,6 +162,19 @@ const MainContent: React.FC = () => {
         return 'Authorized clinical information access';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="p-3 rounded-2xl bg-teal-50 text-teal-700 border border-teal-200 animate-pulse">
+            <Activity className="w-8 h-8" />
+          </div>
+          <span className="text-sm font-semibold text-slate-700">Connecting to Patient360 Workspace...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
@@ -339,9 +354,12 @@ const MainContent: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 1-Click Demo Selector */}
                 <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                  <DemoRoleSelector onRoleSelected={() => {}} />
+                  <DemoRoleSelector
+                    onRoleSelected={() => {
+                      setCurrentView('workspace');
+                    }}
+                  />
                 </div>
               </div>
             )}

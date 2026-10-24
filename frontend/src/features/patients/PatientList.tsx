@@ -30,6 +30,12 @@ export const PatientList: React.FC<PatientListProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
+  const selectedPatientIdRef = React.useRef(selectedPatientId);
+  selectedPatientIdRef.current = selectedPatientId;
+
+  const onSelectPatientRef = React.useRef(onSelectPatient);
+  onSelectPatientRef.current = onSelectPatient;
+
   const fetchPatients = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
@@ -49,9 +55,10 @@ export const PatientList: React.FC<PatientListProps> = ({
       const data: Patient[] = await response.json();
       setPatients(data);
 
-      // Auto-select first patient if none currently selected
-      if (data.length > 0 && !selectedPatientId) {
-        onSelectPatient(data[0]);
+      // Auto-select Eleanor Vance or first patient if none currently selected
+      if (data.length > 0 && !selectedPatientIdRef.current) {
+        const primary = data.find((p) => p.mrn_synthetic === 'SYNTH-10001') || data[0];
+        onSelectPatientRef.current(primary);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -62,7 +69,7 @@ export const PatientList: React.FC<PatientListProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [token, search, selectedPatientId, onSelectPatient]);
+  }, [token, search]);
 
   useEffect(() => {
     fetchPatients();
