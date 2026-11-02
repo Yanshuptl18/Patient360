@@ -74,6 +74,9 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 25
     MAX_CONTEXT_TOKENS: int = 2000
 
+    # Clinical Safety & Emergency Advisory Configuration
+    EMERGENCY_CONTACT_INFO: str = "emergency medical services (e.g., 911 in North America, 112 in the European Union, 999 in the UK / hospital rapid response team)"
+
     @property
     def is_testing(self) -> bool:
         return self.ENVIRONMENT == "testing"

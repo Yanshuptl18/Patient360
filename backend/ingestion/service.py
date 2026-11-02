@@ -162,6 +162,16 @@ def ingest_document(
 
     except Exception as err:
         logger.error(f"Failed to ingest document '{doc.title}' ({doc.id}): {err}", exc_info=True)
+        # Rollback and clean up partial state to maintain relational and vector store consistency
+        try:
+            db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
+            vector_store = get_vector_store()
+            vector_store.delete_document_chunks(doc.id)
+            if doc.patient_id:
+                get_bm25_registry().delete_document_chunks(doc.patient_id, doc.id)
+        except Exception as cleanup_err:
+            logger.warning(f"Cleanup after failed ingestion for document {doc.id} encountered error: {cleanup_err}")
+
         doc.ingestion_status = "failed"
         doc.error_message = str(err)
         db.commit()
