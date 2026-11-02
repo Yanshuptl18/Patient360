@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from backend.core.config import settings
 from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
 from backend.retrieval.bm25 import (
@@ -12,6 +13,7 @@ from backend.retrieval.bm25 import (
     PatientBM25Registry,
     get_bm25_registry,
 )
+from backend.retrieval.reranker import CrossEncoderReranker, get_reranker
 from backend.retrieval.rrf import (
     DEFAULT_RRF_K,
     HybridSearchResult,
@@ -23,15 +25,17 @@ logger = logging.getLogger(__name__)
 
 
 class HybridRetrievalService:
-    """Combines Qdrant dense vector search and in-memory BM25 with Reciprocal Rank Fusion."""
+    """Combines Qdrant dense vector search, sparse BM25, and optional Cross-Encoder reranking."""
 
     def __init__(
         self,
         vector_store: QdrantVectorStore | None = None,
         bm25_registry: PatientBM25Registry | None = None,
+        reranker: CrossEncoderReranker | None = None,
     ) -> None:
         self.vector_store = vector_store or get_vector_store()
         self.bm25_registry = bm25_registry or get_bm25_registry()
+        self.reranker = reranker or get_reranker()
 
     def sync_patient_bm25_from_db(self, db: Session, patient_id: str) -> None:
         """Hydrates or warms up the in-memory BM25 index from persistent database chunks."""
@@ -101,21 +105,41 @@ class HybridRetrievalService:
         )
 
         # 3. Reciprocal Rank Fusion
+        enable_rerank = self.reranker.enabled
+        rrf_top_k = settings.RERANKER_TOP_N if enable_rerank else top_k
+
         hybrid_results = reciprocal_rank_fusion(
             dense_results=dense_results,
             sparse_results=sparse_results,
             k=rrf_k,
-            top_k=top_k,
+            top_k=rrf_top_k,
         )
+
+        rerank_latency_ms = 0
+        rerank_applied = False
+        final_results = hybrid_results
+
+        # 4. Optional Cross-Encoder Reranking
+        if enable_rerank and hybrid_results:
+            final_results, rerank_latency_ms = self.reranker.rerank(
+                query=query,
+                candidates=hybrid_results,
+                top_k=top_k,
+            )
+            rerank_applied = True
+        else:
+            final_results = hybrid_results[:top_k]
 
         metadata = {
             "dense_candidates_count": len(dense_results),
             "sparse_candidates_count": len(sparse_results),
-            "merged_candidates_count": len(hybrid_results),
+            "merged_candidates_count": len(final_results),
             "rrf_k": rrf_k,
+            "rerank_applied": rerank_applied,
+            "rerank_latency_ms": rerank_latency_ms,
         }
 
-        return hybrid_results, metadata
+        return final_results, metadata
 
 
 _retrieval_service: HybridRetrievalService | None = None

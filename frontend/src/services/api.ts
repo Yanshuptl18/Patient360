@@ -26,6 +26,7 @@ import {
   EvaluationRunSummary,
   HealthResponse,
   VectorStatsResponse,
+  AuditLogItem,
 } from '../types';
 
 const API_BASE_URL = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || '';
@@ -174,6 +175,10 @@ export const api = {
       const { data } = await apiClient.post<IngestionResponse>(`/api/v1/documents/${docId}/ingest`);
       return data;
     },
+    async recover(docId: string): Promise<IngestionResponse> {
+      const { data } = await apiClient.post<IngestionResponse>(`/api/v1/documents/${docId}/recover`);
+      return data;
+    },
     async getChunks(docId: string): Promise<DocumentChunk[]> {
       const { data } = await apiClient.get<DocumentChunk[]>(`/api/v1/documents/${docId}/chunks`);
       return data;
@@ -304,6 +309,17 @@ export const api = {
   system: {
     async getHealth(): Promise<HealthResponse> {
       const { data } = await apiClient.get<HealthResponse>('/api/v1/health');
+      return data;
+    },
+  },
+
+  // --- Security & Audit Trail ---
+  audit: {
+    async listLogs(limit: number = 50, action?: string): Promise<AuditLogItem[]> {
+      const query = new URLSearchParams();
+      query.append('limit', String(limit));
+      if (action) query.append('action', action);
+      const { data } = await apiClient.get<AuditLogItem[]>(`/api/v1/auth/audit-logs?${query.toString()}`);
       return data;
     },
   },

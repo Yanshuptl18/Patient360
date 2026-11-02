@@ -38,6 +38,8 @@ env/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+test-results/
+frontend/test-results/
 
 # Storage & Uploads (Local Document Storage)
 storage/

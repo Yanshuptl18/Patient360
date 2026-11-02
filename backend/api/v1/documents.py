@@ -18,11 +18,20 @@ from backend.documents.service import (
 )
 from backend.documents.storage import get_storage
 from backend.ingestion.service import ingest_document, recover_document
+from backend.jobs.service import (
+    enqueue_ingestion_job,
+    get_ingestion_job,
+    retry_ingestion_job,
+)
 from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
 from backend.models.user import User
 from backend.schemas.chunk import ChunkResponse, IngestionResponse
-from backend.schemas.document import DocumentResponse, DocumentUploadResponse
+from backend.schemas.document import (
+    DocumentResponse,
+    DocumentUploadResponse,
+    IngestionJobResponse,
+)
 
 router = APIRouter()
 
@@ -87,8 +96,8 @@ def get_documents(
             db, patient_id=patient_id, current_user=current_user, doc_type=doc_type
         )
     else:
-        # If no patient_id specified and admin, return platform docs; otherwise return empty
-        if current_user.role == "admin":
+        # If no patient_id specified and admin/hospital_admin, return all facility docs; otherwise return empty
+        if current_user.role in ("admin", "hospital_admin"):
             query = db.query(Document).filter(Document.is_deleted.is_(False))
             if doc_type:
                 query = query.filter(Document.doc_type == doc_type)
@@ -177,6 +186,41 @@ def trigger_document_recovery(
     """
     storage = get_storage()
     return recover_document(db=db, storage=storage, document_id=id, current_user=current_user)
+
+
+@router.post("/{id}/ingest-async", response_model=IngestionJobResponse, status_code=status.HTTP_202_ACCEPTED)
+def trigger_document_ingestion_async(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> IngestionJobResponse:
+    """Enqueues asynchronous document ingestion job into worker queue."""
+    storage = get_storage()
+    job = enqueue_ingestion_job(db=db, storage=storage, document_id=id, current_user=current_user)
+    return IngestionJobResponse.model_validate(job)
+
+
+@router.get("/jobs/{job_id}", response_model=IngestionJobResponse)
+def get_ingestion_job_status(
+    job_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> IngestionJobResponse:
+    """Retrieves status and progress of an asynchronous document ingestion job."""
+    job = get_ingestion_job(db=db, job_id=job_id, current_user=current_user)
+    return IngestionJobResponse.model_validate(job)
+
+
+@router.post("/jobs/{job_id}/retry", response_model=IngestionJobResponse)
+def retry_failed_ingestion_job(
+    job_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> IngestionJobResponse:
+    """Retries a failed or dead-letter document ingestion job."""
+    storage = get_storage()
+    job = retry_ingestion_job(db=db, storage=storage, job_id=job_id, current_user=current_user)
+    return IngestionJobResponse.model_validate(job)
 
 
 @router.get("/{id}/chunks", response_model=list[ChunkResponse])

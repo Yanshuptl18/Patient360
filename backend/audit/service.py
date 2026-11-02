@@ -50,3 +50,22 @@ def log_audit_event(
         db.rollback()
         logger.error(f"Failed to record audit log: {exc}")
         raise
+
+
+def get_audit_logs(
+    db: Session,
+    limit: int = 50,
+    offset: int = 0,
+    action: str | None = None,
+    user_id: str | None = None,
+    patient_id: str | None = None,
+) -> list[AuditLog]:
+    """Retrieve immutable audit logs ordered chronologically descending."""
+    query = db.query(AuditLog)
+    if action:
+        query = query.filter(AuditLog.action == action)
+    if user_id:
+        query = query.filter(AuditLog.user_id == user_id)
+    if patient_id:
+        query = query.filter(AuditLog.patient_id == patient_id)
+    return query.order_by(AuditLog.created_at.desc()).offset(offset).limit(limit).all()

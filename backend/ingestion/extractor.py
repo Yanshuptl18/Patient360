@@ -7,6 +7,7 @@ from typing import Any
 import pymupdf
 
 from backend.core.exceptions import Patient360Exception
+from backend.ingestion.ocr import extract_text_with_ocr, is_page_scanned
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,9 @@ class ExtractedPage:
     text: str
     blocks: list[dict[str, Any]] = field(default_factory=list)
     is_blank: bool = False
+    is_ocr: bool = False
+    ocr_confidence: float = 1.0
+    requires_human_verification: bool = False
 
 
 def extract_pages_from_pdf(pdf_bytes: bytes) -> list[ExtractedPage]:
@@ -82,6 +86,19 @@ def extract_pages_from_pdf(pdf_bytes: bytes) -> list[ExtractedPage]:
 
             full_page_text = "\n\n".join(page_text_parts).strip()
             is_blank = len(full_page_text) < 5
+            is_ocr = False
+            ocr_conf = 1.0
+            req_human = False
+
+            # Detect scanned pages containing image layers
+            if is_page_scanned(page):
+                ocr_text, ocr_conf, req_human, ocr_blocks = extract_text_with_ocr(page, page_number)
+                if ocr_text:
+                    full_page_text = ocr_text
+                    is_ocr = True
+                    is_blank = len(full_page_text) < 5
+                    if ocr_blocks:
+                        text_blocks = ocr_blocks
 
             extracted_pages.append(
                 ExtractedPage(
@@ -89,6 +106,9 @@ def extract_pages_from_pdf(pdf_bytes: bytes) -> list[ExtractedPage]:
                     text=full_page_text,
                     blocks=text_blocks,
                     is_blank=is_blank,
+                    is_ocr=is_ocr,
+                    ocr_confidence=ocr_conf,
+                    requires_human_verification=req_human,
                 )
             )
 

@@ -47,3 +47,17 @@ class DocumentUploadResponse(BaseModel):
     message: str
     file_hash_sha256: str
     file_size_bytes: int
+
+
+class IngestionJobResponse(BaseModel):
+    id: str
+    document_id: str
+    patient_id: str | None
+    status: str
+    attempts: int
+    max_attempts: int
+    error_message: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

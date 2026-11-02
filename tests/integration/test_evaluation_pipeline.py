@@ -8,12 +8,12 @@ from backend.schemas.evaluation import EvaluationRunRequest
 
 
 def test_benchmark_runner_full_suite() -> None:
-    """Verifies that the BenchmarkRunner completes all 50 items and meets all core quality targets."""
+    """Verifies that the BenchmarkRunner completes all 150 items and meets all core quality targets."""
     runner = BenchmarkRunner()
     run_record = runner.run(request=EvaluationRunRequest(name="Full Test Suite"))
 
-    assert run_record.total_items == 50
-    assert run_record.passed_items == 50
+    assert run_record.total_items == 150
+    assert run_record.passed_items == 150
 
     # Assert primary target criteria from docs/EVALUATION_PLAN.md
     assert run_record.recall_at_5 >= 0.85
@@ -32,13 +32,23 @@ def test_benchmark_runner_full_suite() -> None:
     assert targets["abstention_accuracy"]["met"] is True
 
     categories = run_record.summary_metrics.get("categories", {})
-    assert len(categories) == 6
+    assert len(categories) == 16
     assert categories["single_doc_factual"]["total_items"] == 12
     assert categories["multi_doc_longitudinal"]["total_items"] == 10
     assert categories["contradictory_records"]["total_items"] == 8
     assert categories["unanswerable_abstention"]["total_items"] == 8
     assert categories["adversarial_injection"]["total_items"] == 6
     assert categories["research_matrix"]["total_items"] == 6
+    assert categories["medication_dosage"]["total_items"] == 10
+    assert categories["medication_contraindication"]["total_items"] == 10
+    assert categories["scanned_ocr_extraction"]["total_items"] == 10
+    assert categories["laboratory_interpretation"]["total_items"] == 10
+    assert categories["pediatric_geriatric_context"]["total_items"] == 10
+    assert categories["diagnostic_criteria"]["total_items"] == 10
+    assert categories["emergency_triage"]["total_items"] == 10
+    assert categories["procedure_history"]["total_items"] == 10
+    assert categories["allergy_conflict"]["total_items"] == 10
+    assert categories["unanswerable_missing_evidence"]["total_items"] == 10
 
 
 def test_evaluation_api_endpoints(
@@ -58,7 +68,7 @@ def test_evaluation_api_endpoints(
     )
     assert ds_resp.status_code == 200
     dataset = ds_resp.json()
-    assert len(dataset) == 50
+    assert len(dataset) == 150
     assert dataset[0]["id"] == "BENCH-FACT-01"
 
     # 3. Trigger evaluation run via API

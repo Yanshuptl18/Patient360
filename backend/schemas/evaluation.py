@@ -8,14 +8,32 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class BenchmarkCategory(StrEnum):
-    """The 6 official categories defined in the Evaluation Plan."""
+    """The categories defined for clinical evaluation benchmarks."""
 
+    # Core evaluation categories
     SINGLE_DOC_FACTUAL = "single_doc_factual"
     MULTI_DOC_LONGITUDINAL = "multi_doc_longitudinal"
     CONTRADICTORY_RECORDS = "contradictory_records"
     UNANSWERABLE_ABSTENTION = "unanswerable_abstention"
     ADVERSARIAL_INJECTION = "adversarial_injection"
     RESEARCH_MATRIX = "research_matrix"
+
+    # Expanded 15 clinical challenge categories
+    MEDICATION_DOSAGE = "medication_dosage"
+    MEDICATION_CONTRAINDICATION = "medication_contraindication"
+    TEMPORAL_TRAJECTORIES = "temporal_trajectories"
+    CROSS_DOCUMENT_CONTRADICTIONS = "cross_document_contradictions"
+    SCANNED_OCR_EXTRACTION = "scanned_ocr_extraction"
+    LABORATORY_INTERPRETATION = "laboratory_interpretation"
+    CLINICAL_ABSTENTION = "clinical_abstention"
+    ADVERSARIAL_INJECTIONS = "adversarial_injections"
+    PEDIATRIC_GERIATRIC_CONTEXT = "pediatric_geriatric_context"
+    DIAGNOSTIC_CRITERIA = "diagnostic_criteria"
+    EMERGENCY_TRIAGE = "emergency_triage"
+    PROCEDURE_HISTORY = "procedure_history"
+    ALLERGY_CONFLICT = "allergy_conflict"
+    UNANSWERABLE_MISSING_EVIDENCE = "unanswerable_missing_evidence"
+    MULTI_CONDITION_SYNTHESIS = "multi_condition_synthesis"
 
 
 class EvaluationBenchmarkItem(BaseModel):

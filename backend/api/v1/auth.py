@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
 from backend.api.deps import get_current_user, get_db, require_role
-from backend.audit.service import log_audit_event
+from backend.audit.service import get_audit_logs, log_audit_event
 from backend.auth.service import (
     DEMO_PERSONAS,
     authenticate_user,
@@ -20,6 +20,7 @@ from backend.core.config import settings
 from backend.core.exceptions import AuthenticationError, AuthorizationError
 from backend.core.security import create_access_token, create_refresh_token, decode_token
 from backend.models.user import User
+from backend.schemas.audit import AuditLogResponse
 from backend.schemas.auth import (
     DemoLoginRequest,
     DemoRoleItem,
@@ -358,4 +359,21 @@ def demo_login(
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         user=UserResponse.model_validate(user),
     )
+
+
+@router.get("/audit-logs", response_model=list[AuditLogResponse])
+def list_audit_logs(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(require_role(["admin", "hospital_admin"]))],
+    limit: int = 50,
+    offset: int = 0,
+    action: str | None = None,
+) -> list[AuditLogResponse]:
+    """
+    Retrieve paginated immutable audit logs.
+    Restricted to system administrators and hospital administrators.
+    """
+    logs = get_audit_logs(db, limit=min(limit, 200), offset=offset, action=action)
+    return [AuditLogResponse.model_validate(log) for log in logs]
+
 

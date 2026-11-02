@@ -257,7 +257,7 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
         {response && (
           <div className="space-y-4">
             {/* Abstention Banner if no facts found */}
-            {response.retrieval_metadata.is_abstention ? (
+            {response.retrieval_metadata?.is_abstention ? (
               <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
                 <div className="flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 text-amber-700" />
@@ -321,7 +321,7 @@ export const ClinicalRAGPanel: React.FC<ClinicalRAGPanelProps> = ({
 
                   <div className="flex items-center space-x-2 text-slate-400 text-[10px]">
                     <Clock className="w-3 h-3" />
-                    <span>Response Time: {response.retrieval_metadata.total_latency_ms}ms</span>
+                    <span>Response Time: {response.retrieval_metadata?.total_latency_ms ?? 0}ms</span>
                   </div>
                 </div>
               </div>

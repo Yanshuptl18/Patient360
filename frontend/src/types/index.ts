@@ -476,6 +476,20 @@ export interface EvaluationRun extends EvaluationRunSummary {
   item_results: EvaluationItemResult[];
 }
 
+export interface AuditLogItem {
+  id: string;
+  user_id: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string | null;
+  patient_id: string | null;
+  ip_address: string | null;
+  user_agent?: string | null;
+  status: string;
+  details_json?: string | null;
+  created_at: string;
+}
+
 
 
 

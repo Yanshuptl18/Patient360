@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Security & Authentication
     SECRET_KEY: str = "patient360_development_insecure_secret_key_change_in_production_32chars"
+    JWT_SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -79,9 +80,24 @@ class Settings(BaseSettings):
     # Clinical Safety & Emergency Advisory Configuration
     EMERGENCY_CONTACT_INFO: str = "emergency medical services (e.g., 911 in North America, 112 in the European Union, 999 in the UK / hospital rapid response team)"
 
+    # Retrieval & Cross-Encoder Reranking Configuration
+    ENABLE_CROSS_ENCODER_RERANKING: bool = False
+    RERANKER_MODEL: str = "BAAI/bge-reranker-base"
+    RERANKER_TOP_N: int = 15
+
     @model_validator(mode="after")
     def validate_production_safety(self) -> "Settings":
         if self.ENVIRONMENT == "production":
+            key_to_check = self.JWT_SECRET_KEY or self.SECRET_KEY
+            if len(key_to_check) < 32:
+                raise ValueError("JWT SECRET_KEY must be at least 32 characters in production mode.")
+            insecure_markers = ["insecure", "development", "change_in_production", "patient360_development"]
+            if any(marker in key_to_check.lower() for marker in insecure_markers):
+                raise ValueError(
+                    "Default development SECRET_KEY is strictly prohibited in production mode. "
+                    "Configure a cryptographically random secret with at least 32 characters."
+                )
+
             if self.LLM_PROVIDER == "mock" and not self.ALLOW_MOCK_IN_PRODUCTION:
                 raise ValueError("Mock LLM provider is strictly prohibited in production mode. Set LLM_PROVIDER to gemini or ollama.")
             if self.LLM_PROVIDER == "gemini" and not self.GEMINI_API_KEY:

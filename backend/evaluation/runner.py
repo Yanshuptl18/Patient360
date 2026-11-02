@@ -81,8 +81,13 @@ class BenchmarkRunner:
             sum(r.citation_precision_score for r in item_results) / total_items, 4
         )
 
+        abstention_categories = {
+            BenchmarkCategory.UNANSWERABLE_ABSTENTION.value,
+            BenchmarkCategory.CLINICAL_ABSTENTION.value,
+            BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE.value,
+        }
         abstention_items = [
-            r for r in item_results if r.category == BenchmarkCategory.UNANSWERABLE_ABSTENTION.value
+            r for r in item_results if r.category in abstention_categories
         ]
         abstention_accuracy = (
             round(sum(1.0 for r in abstention_items if r.abstention_correct) / len(abstention_items), 4)

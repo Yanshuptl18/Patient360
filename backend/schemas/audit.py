@@ -25,7 +25,9 @@ class AuditLogResponse(BaseModel):
     resource_id: str | None
     patient_id: str | None
     ip_address: str | None
+    user_agent: str | None = None
     status: str
+    details_json: str | None = "{}"
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

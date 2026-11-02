@@ -328,7 +328,7 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
 
           {(['diagnosis', 'medication', 'procedure', 'lab_result', 'allergy', 'encounter'] as ClinicalEventType[]).map(
             (type) => {
-              const count = timelineData?.summary.event_counts_by_type[type] || 0;
+              const count = timelineData?.summary?.event_counts_by_type?.[type] || 0;
               return (
                 <button
                   key={type}

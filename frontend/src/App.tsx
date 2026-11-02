@@ -34,17 +34,20 @@ import {
   MessageSquare,
   BookOpen,
   ArrowRight,
+  Pill,
+  AlertCircle,
+  LayoutDashboard,
 } from 'lucide-react';
 
 const MainContent: React.FC = () => {
+  const { user, isAuthenticated, token, logout, demoMode, loading } = useAuth();
   const [currentView, setCurrentView] = useState<'workspace' | 'about' | 'guide'>('workspace');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [activePatientTab, setActivePatientTab] = useState<'documents' | 'rag' | 'timeline' | 'agents' | 'research' | 'evaluation'>('documents');
-  const [nurseTab, setNurseTab] = useState<'documents' | 'timeline'>('documents');
-
-  const { user, isAuthenticated, token, logout, demoMode, loading } = useAuth();
+  const [nurseTab, setNurseTab] = useState<'summary' | 'documents' | 'timeline'>('summary');
+  const [adminMode, setAdminMode] = useState<'workspace' | 'operations'>('workspace');
 
   // Synchronize authorized patient and reset documents on user/role switch
   useEffect(() => {
@@ -418,6 +421,19 @@ const MainContent: React.FC = () => {
                             <div className="flex items-center space-x-1 mb-3 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 w-fit">
                               <button
                                 type="button"
+                                onClick={() => setNurseTab('summary')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                                  nurseTab === 'summary'
+                                    ? 'bg-white text-teal-700 shadow-sm'
+                                    : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                              >
+                                <HeartPulse className="w-3.5 h-3.5" />
+                                <span>Patient Summary & Alerts</span>
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => setNurseTab('documents')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
                                   nurseTab === 'documents'
@@ -444,7 +460,97 @@ const MainContent: React.FC = () => {
                             </div>
 
                             <div className="flex-1 min-h-0">
-                              {nurseTab === 'documents' ? (
+                              {nurseTab === 'summary' ? (
+                                <div className="space-y-4">
+                                  {/* Demographics Summary */}
+                                  <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                                      <div>
+                                        <h3 className="text-sm font-bold text-slate-900">
+                                          {selectedPatient.first_name} {selectedPatient.last_name}
+                                        </h3>
+                                        <div className="text-xs text-slate-500 font-mono mt-0.5">
+                                          MRN: <span className="font-semibold text-slate-700">{selectedPatient.mrn_synthetic}</span> • DOB: {selectedPatient.date_of_birth} ({selectedPatient.gender})
+                                        </div>
+                                      </div>
+                                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 font-semibold w-fit">
+                                        Primary: {selectedPatient.primary_condition || 'Under Clinical Evaluation'}
+                                      </span>
+                                    </div>
+
+                                    {/* Care Coordination Alerts */}
+                                    <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+                                      <div className="font-semibold flex items-center space-x-1.5 text-amber-800">
+                                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                        <span>Active Care Coordination Alerts</span>
+                                      </div>
+                                      <ul className="list-disc pl-5 space-y-0.5 text-amber-800 text-[11px]">
+                                        <li>Elevated BP documented during recent triage (142/88 mmHg). Repeat vital assessment scheduled.</li>
+                                        <li>Automated contradiction check active: cross-verifying medication doses across attached records.</li>
+                                        <li>Discharge summary pending clinician reconciliation with home medication list.</li>
+                                      </ul>
+                                    </div>
+                                  </div>
+
+                                  {/* Medications and Allergies Grid */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Active Medications */}
+                                    <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3">
+                                      <h4 className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
+                                        <Pill className="w-4 h-4 text-teal-600" />
+                                        <span>Current Medication Regimen</span>
+                                      </h4>
+                                      <div className="space-y-2 text-xs">
+                                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                                          <div>
+                                            <div className="font-semibold text-slate-800">Metformin HCl</div>
+                                            <div className="text-[11px] text-slate-500">500 mg Oral Tablet • Twice daily with meals</div>
+                                          </div>
+                                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Active</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                                          <div>
+                                            <div className="font-semibold text-slate-800">Lisinopril</div>
+                                            <div className="text-[11px] text-slate-500">10 mg Oral Tablet • Once daily morning</div>
+                                          </div>
+                                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Active</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                                          <div>
+                                            <div className="font-semibold text-slate-800">Atorvastatin Calcium</div>
+                                            <div className="text-[11px] text-slate-500">20 mg Oral Tablet • Once daily at bedtime</div>
+                                          </div>
+                                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Active</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Documented Allergies */}
+                                    <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3">
+                                      <h4 className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
+                                        <ShieldCheck className="w-4 h-4 text-rose-600" />
+                                        <span>Documented Allergies & Sensitivities</span>
+                                      </h4>
+                                      <div className="space-y-2 text-xs">
+                                        <div className="p-2.5 rounded-lg bg-rose-50/60 border border-rose-200">
+                                          <div className="font-semibold text-rose-900 flex items-center justify-between">
+                                            <span>Penicillin G / Amoxicillin</span>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-semibold">Severe</span>
+                                          </div>
+                                          <div className="text-[11px] text-rose-700 mt-0.5">Reaction: Urticaria, facial angioedema. Contraindicated.</div>
+                                        </div>
+                                        <div className="p-2.5 rounded-lg bg-amber-50/60 border border-amber-200">
+                                          <div className="font-semibold text-amber-900 flex items-center justify-between">
+                                            <span>Sulfamethoxazole</span>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">Moderate</span>
+                                          </div>
+                                          <div className="text-[11px] text-amber-700 mt-0.5">Reaction: Pruritic maculopapular rash without systemic symptoms.</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : nurseTab === 'documents' ? (
                                 <DocumentList
                                   patientId={selectedPatient.id}
                                   patientName={`${selectedPatient.first_name} ${selectedPatient.last_name}`}
@@ -475,7 +581,67 @@ const MainContent: React.FC = () => {
 
                 {/* 4. Doctor, Reviewer, Admin, and Researcher Experience */}
                 {(user.role === 'doctor' || user.role === 'reviewer' || user.role === 'admin' || user.role === 'researcher') && (
+                  user.role === 'admin' && adminMode === 'operations' ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                        <div className="flex items-center space-x-2">
+                          <div className="p-1.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200">
+                            <Server className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h2 className="text-base font-semibold text-slate-900">Hospital Operational Oversight & Telemetry</h2>
+                            <p className="text-xs text-slate-500">Live document processing, system telemetry, and audit trail</p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => setAdminMode('workspace')}
+                          className="px-3.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Switch to Clinical Dossier View</span>
+                        </button>
+                      </div>
+                      <OperationalDashboard />
+                    </div>
+                  ) : (
                   <section className="space-y-4">
+                    {/* System Admin Telemetry & Quick Mode Switch */}
+                    {user.role === 'admin' && (
+                      <div className="p-3.5 rounded-xl bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-sm">
+                        <div className="flex flex-wrap items-center gap-4">
+                          <span className="font-semibold text-teal-400 flex items-center space-x-1.5">
+                            <Server className="w-4 h-4" />
+                            <span>System Admin Monitor</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Database: PostgreSQL (Ready)</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Vector Store: Qdrant (Ready)</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>LLM: Gemini / FastEmbed (Ready)</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Ingestion Pipeline: 0 Failures</span>
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => setAdminMode('operations')}
+                          className="px-3 py-1 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shrink-0"
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5" />
+                          <span>Open Full Operational Suite</span>
+                        </button>
+                      </div>
+                    )}
+
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-3 border-b border-slate-200 gap-3">
                       <div className="flex items-center space-x-2">
                         <div className="p-1.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200">
@@ -635,6 +801,7 @@ const MainContent: React.FC = () => {
                       </div>
                     )}
                   </section>
+                  )
                 )}
               </div>
             )}

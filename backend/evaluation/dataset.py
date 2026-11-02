@@ -986,6 +986,1595 @@ BENCHMARK_ITEMS_RAW: list[dict[str, Any]] = [
             }
         ],
     },
+# -------------------------------------------------------------------------
+    # Category 7: Medication Dosage (10 items: 51-60)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-DOSAGE-01",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Renal Adjusted Enoxaparin Dosage in Severe Impairment",
+        "query": "What is the adjusted therapeutic dose of Enoxaparin for a patient with severe renal impairment (CrCl < 30 mL/min)?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-01"],
+        "expected_answer_keywords": ["1 mg/kg", "once daily", "crcl < 30", "enoxaparin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-01",
+                "doc_title": "Anticoagulation Dosing Protocol 2026",
+                "page_number": 3,
+                "content": "For therapeutic anticoagulation in severe renal failure (CrCl < 30 mL/min), Enoxaparin should be dosage-reduced to 1 mg/kg subcutaneously once daily (from standard 1 mg/kg BID).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-02",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Pediatric Weight-Based Amoxicillin Dosing for AOM",
+        "query": "What weight-based dosage of Amoxicillin was recommended for acute otitis media in the pediatric guidance note?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-02"],
+        "expected_answer_keywords": ["80-90 mg/kg/day", "amoxicillin", "divided"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-02",
+                "doc_title": "Pediatric Infectious Disease Guidelines 2025",
+                "page_number": 2,
+                "content": "First-line antimicrobial therapy for Acute Otitis Media in children: Amoxicillin at high dose of 80-90 mg/kg/day orally divided into two doses for 10 days.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-03",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Prednisone Taper Schedule for Severe Asthma Exacerbation",
+        "query": "What was the oral prednisone tapering schedule prescribed on discharge?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-03"],
+        "expected_answer_keywords": ["40 mg", "30 mg", "20 mg", "prednisone", "taper"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-03",
+                "doc_title": "Pulmonary Discharge Summary 2025-11-04",
+                "page_number": 2,
+                "content": "Discharge Steroid Taper: Prednisone 40 mg daily for 3 days, followed by 30 mg daily for 3 days, 20 mg daily for 3 days, and 10 mg daily for 3 days, then discontinue.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-04",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Continuous Intravenous Heparin Infusion Rate",
+        "query": "What was the initial heparin bolus and maintenance infusion rate ordered for acute DVT?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-04"],
+        "expected_answer_keywords": ["80 units/kg", "18 units/kg/hr", "heparin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-04",
+                "doc_title": "ICU Anticoagulation Order Set 2025-08-12",
+                "page_number": 1,
+                "content": "Unfractionated Heparin Protocol for Acute DVT: Administer IV bolus of 80 units/kg, followed by continuous maintenance infusion of 18 units/kg/hr targeted to anti-Xa 0.3-0.7 IU/mL.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-05",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Gabapentin Titration Regimen for Diabetic Neuropathy",
+        "query": "How was Gabapentin titrated over the initial three days of treatment?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-05"],
+        "expected_answer_keywords": ["300 mg", "nightly", "tid", "gabapentin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-05",
+                "doc_title": "Neurology Consultation Note 2024-03-22",
+                "page_number": 1,
+                "content": "Gabapentin titration schedule: Day 1: 300 mg PO at bedtime; Day 2: 300 mg PO BID; Day 3: 300 mg PO TID; then titrate upward weekly as tolerated to 600 mg TID.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-06",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Vancomycin Trough Dosing for MRSA Bacteremia",
+        "query": "What target vancomycin trough concentration or AUC/MIC is documented in the pharmacy note?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-06"],
+        "expected_answer_keywords": ["15-20 mcg/ml", "400-600", "vancomycin", "trough"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-06",
+                "doc_title": "Clinical Pharmacy Pharmacokinetic Consult 2025-04-10",
+                "page_number": 1,
+                "content": "For MRSA bacteremia, target Vancomycin AUC24/MIC ratio is 400-600 (surrogate serum trough concentration 15-20 mcg/mL) with frequent serum creatinine monitoring.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-07",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Levothyroxine Replacement Dosage Calculation",
+        "query": "What total daily dose of levothyroxine was ordered following total thyroidectomy?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-07"],
+        "expected_answer_keywords": ["125 mcg", "levothyroxine", "thyroidectomy"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-07",
+                "doc_title": "Endocrine Surgery Postoperative Orders 2024-09-18",
+                "page_number": 1,
+                "content": "Post-thyroidectomy full replacement therapy: Levothyroxine 125 mcg PO daily taken on an empty stomach with a full glass of water 30 minutes before breakfast.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-08",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Amiodarone Loading and Maintenance Dosing",
+        "query": "What was the oral loading regimen for amiodarone for recurrent ventricular tachycardia?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-08"],
+        "expected_answer_keywords": ["400 mg tid", "amiodarone", "loading"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-08",
+                "doc_title": "Electrophysiology Inpatient Note 2025-02-14",
+                "page_number": 2,
+                "content": "Oral Amiodarone Loading: 400 mg PO TID for 7 days (total 8.4 g), then 400 mg PO daily for 7 days, transitioning to maintenance 200 mg PO daily.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-09",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Methotrexate Weekly Dosing for Severe Psoriasis",
+        "query": "What frequency and dosage of methotrexate was prescribed in the dermatology clinic?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-09"],
+        "expected_answer_keywords": ["15 mg", "once weekly", "methotrexate", "folic acid"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-09",
+                "doc_title": "Dermatology Clinic Note 2025-06-30",
+                "page_number": 1,
+                "content": "Prescribed Methotrexate 15 mg orally ONCE WEEKLY on Sundays only. Folic acid 1 mg orally daily except Sundays to minimize toxicity.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DOSAGE-10",
+        "category": BenchmarkCategory.MEDICATION_DOSAGE,
+        "title": "Digoxin Maintenance Dose in Moderate Renal Insufficiency",
+        "query": "What maintenance dose of Digoxin was ordered for heart failure given baseline eGFR 42?",
+        "expected_golden_chunk_ids": ["CHUNK-DOSAGE-10"],
+        "expected_answer_keywords": ["0.125 mg", "every other day", "digoxin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DOSAGE-10",
+                "doc_title": "Heart Failure Clinic Note 2025-10-05",
+                "page_number": 1,
+                "content": "Given eGFR 42 mL/min and advanced age, Digoxin adjusted to 0.125 mg PO every other day with target therapeutic level 0.5-0.9 ng/mL.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 8: Medication Contraindications (10 items: 61-70)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-MCONTRA-01",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Absolute Contraindication of Metformin in Severe CKD",
+        "query": "Why is Metformin contraindicated in patients with an eGFR less than 30 mL/min?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-01"],
+        "expected_answer_keywords": ["lactic acidosis", "egfr < 30", "contraindicated", "metformin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-01",
+                "doc_title": "FDA Drug Safety Communication - Metformin",
+                "page_number": 1,
+                "content": "Metformin is strictly contraindicated in patients with severe renal impairment (eGFR < 30 mL/min/1.73m2) due to marked risk of drug accumulation and fatal metformin-associated lactic acidosis (MALA).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-02",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Phosphodiesterase-5 Inhibitors and Organic Nitrates",
+        "query": "What life-threatening interaction occurs if Sildenafil is administered with sublingual nitroglycerin?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-02"],
+        "expected_answer_keywords": ["severe hypotension", "nitrates", "sildenafil", "contraindicated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-02",
+                "doc_title": "Cardiology Clinical Safety Alert 2025",
+                "page_number": 1,
+                "content": "Coadministration of PDE-5 inhibitors (e.g. Sildenafil) with organic nitrates (Nitroglycerin, Isosorbide mononitrate) is contraindicated due to synergistic cGMP elevation precipitating profound, refractory hypotension and cardiovascular collapse.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-03",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "ACE Inhibitors in Bilateral Renal Artery Stenosis",
+        "query": "Why are ACE inhibitors such as Lisinopril contraindicated in severe bilateral renal artery stenosis?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-03"],
+        "expected_answer_keywords": ["efferent arteriole", "acute renal failure", "bilateral renal artery stenosis"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-03",
+                "doc_title": "Nephrology Guideline on Renovascular Disease",
+                "page_number": 4,
+                "content": "In bilateral renal artery stenosis, glomerular filtration relies upon angiotensin II-mediated efferent arteriolar constriction. ACE inhibitors ablate this autoregulatory mechanism, triggering acute ischemic renal failure.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-04",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Linezolid and Selective Serotonin Reuptake Inhibitors",
+        "query": "What serious adverse syndrome can occur when Linezolid is coadministered with Escitalopram?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-04"],
+        "expected_answer_keywords": ["serotonin syndrome", "linezolid", "ssri", "maoi"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-04",
+                "doc_title": "Pharmacology Toxic Interactions Review 2025",
+                "page_number": 2,
+                "content": "Linezolid exhibits nonselective reversible monoamine oxidase inhibition (MAOI). Coadministration with SSRIs like Escitalopram may precipitate Serotonin Syndrome manifested by hyperthermia, clonus, autonomic instability, and delirium.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-05",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Non-Dihydropyridine CCBs in Heart Failure with Reduced Ejection Fraction",
+        "query": "Why are Diltiazem and Verapamil contraindicated in HFrEF with LVEF < 40%?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-05"],
+        "expected_answer_keywords": ["negative inotropic", "hfref", "worsening heart failure", "contraindicated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-05",
+                "doc_title": "AHA/ACC Heart Failure Guideline 2024",
+                "page_number": 15,
+                "content": "Non-dihydropyridine calcium channel blockers (Diltiazem, Verapamil) have potent negative inotropic properties and are contraindicated in HFrEF (LVEF < 40%) due to increased risk of acute decompensation and cardiogenic shock.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-06",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "St. John's Wort and Calcineurin Inhibitors",
+        "query": "What pharmacokinetic interaction makes St. John's Wort dangerous in renal transplant recipients taking Tacrolimus?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-06"],
+        "expected_answer_keywords": ["cyp3a4", "rejection", "tacrolimus", "subtherapeutic"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-06",
+                "doc_title": "Solid Organ Transplant Medication Safety 2025",
+                "page_number": 3,
+                "content": "St. John's Wort is a potent inducer of hepatic CYP3A4 and P-glycoprotein, dramatically accelerating Tacrolimus clearance and causing severe subtherapeutic levels and acute allograft rejection.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-07",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Beta-Blockers in Decompensated Acute Pulmonary Edema",
+        "query": "Why should beta-blocker initiation be avoided during active acute cardiogenic pulmonary edema?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-07"],
+        "expected_answer_keywords": ["cardiogenic shock", "inotropic", "pulmonary edema", "hemodynamic"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-07",
+                "doc_title": "Critical Care Cardiology Protocol 2025",
+                "page_number": 2,
+                "content": "Beta-blocker initiation or up-titration is contraindicated during active hemodynamic instability or acute decompensated pulmonary edema due to acute negative inotropic effects worsening cardiogenic shock.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-08",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "NSAIDs in Third Trimester Pregnancy",
+        "query": "What fetal complication contraindicates NSAID use such as Ibuprofen in the third trimester of pregnancy?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-08"],
+        "expected_answer_keywords": ["ductus arteriosus", "oligohydramnios", "third trimester", "nsaids"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-08",
+                "doc_title": "Obstetrical Pharmacology Manual 2025",
+                "page_number": 1,
+                "content": "Systemic NSAIDs are contraindicated at or beyond 20 weeks of gestation due to risk of premature constriction of fetal ductus arteriosus, persistent pulmonary hypertension, and oligohydramnios secondary to fetal renal dysfunction.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-09",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Dual RAAS Blockade with ACEI and ARB",
+        "query": "Why is combined therapy with an ACE inhibitor and an ARB avoided in diabetic nephropathy?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-09"],
+        "expected_answer_keywords": ["hyperkalemia", "acute kidney injury", "dual raas"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-09",
+                "doc_title": "KDIGO Clinical Practice Guideline for Diabetes Management in CKD",
+                "page_number": 12,
+                "content": "Dual blockade of the renin-angiotensin system using combinations of ACE inhibitors, ARBs, or direct renin inhibitors is contraindicated due to substantially increased risk of hyperkalemia, syncope, and acute kidney injury without cardiovascular benefit.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-MCONTRA-10",
+        "category": BenchmarkCategory.MEDICATION_CONTRAINDICATION,
+        "title": "Live Vaccines in Immunosuppressed Patients on Biologics",
+        "query": "Why are live attenuated vaccines contraindicated in patients on TNF-alpha inhibitors like Infliximab?",
+        "expected_golden_chunk_ids": ["CHUNK-MCONTRA-10"],
+        "expected_answer_keywords": ["disseminated infection", "live vaccine", "tnf inhibitor", "contraindicated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-MCONTRA-010",
+                "doc_title": "Rheumatology Immunization Safety Consensus",
+                "page_number": 2,
+                "content": "Live attenuated vaccines (e.g., MMR, varicella, yellow fever) are strictly contraindicated during immunosuppressive therapy with biologic agents such as Infliximab or Adalimumab due to risk of uninhibited vaccine viral replication and fatal disseminated infection.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 9: Scanned PDF OCR Extraction (10 items: 71-80)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-OCR-01",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Emergency Transport Run Sheet Blood Pressure",
+        "query": "What initial blood pressure and heart rate were recorded on the scanned paramedic transport run sheet?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-01"],
+        "expected_answer_keywords": ["88/54", "118", "paramedic", "transport"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-01",
+                "doc_title": "Scanned EMS Transport Sheet 2026-01-04",
+                "page_number": 1,
+                "content": "[OCR Conf: 91%] EMS RUN REPORT: 2026-01-04 14:12 - Patient located in residence. Initial Vitals: BP 88/54 mmHg, HR 118 bpm regular, SpO2 93% on room air. Infused 500 mL normal saline IV.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-02",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Historical Scanned Yellow Card Tetanus Vaccination",
+        "query": "When was the last documented tetanus toxoid booster administered according to the scanned immunization yellow card?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-02"],
+        "expected_answer_keywords": ["2016-05-18", "tetanus", "tdap"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-02",
+                "doc_title": "Scanned International Certificate of Vaccination 2016",
+                "page_number": 1,
+                "content": "[OCR Conf: 87%] RECORD OF IMMUNIZATION: Tetanus/Diphtheria/Acellular Pertussis (Tdap) administered 2016-05-18. Manufacturer: Sanofi Pasteur Lot #C4419AB. Provider signature verified.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-03",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Handwritten Scanned Preoperative Anesthesia Clearance",
+        "query": "What Mallampati airway classification was recorded on the handwritten scanned pre-op sheet?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-03"],
+        "expected_answer_keywords": ["mallampati class iii", "airway", "anesthesia"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-03",
+                "doc_title": "Scanned Anesthesia Preoperative Assessment 2024-11-20",
+                "page_number": 1,
+                "content": "[OCR Conf: 82%] AIRWAY EVALUATION: Thyromental distance > 6 cm, mouth opening 4 cm. Oropharynx: Mallampati Class III visualized (soft palate, base of uvula visible). Plan for video laryngoscopy.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-04",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Faxed Outside Hospital Operative Note",
+        "query": "What estimated blood loss was documented in the scanned outside operative note for laparoscopic cholecystectomy?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-04"],
+        "expected_answer_keywords": ["50 ml", "blood loss", "cholecystectomy"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-04",
+                "doc_title": "Scanned Fax Operative Report - Outside General Hospital",
+                "page_number": 2,
+                "content": "[OCR Conf: 94%] PROCEDURE: Laparoscopic cholecystectomy. Operative findings: Chronically inflamed gallbladder with multiple calculi. Estimated Blood Loss: 50 mL. Sponge and needle counts correct x2.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-05",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Legacy Dot-Matrix Laboratory Printout Potassium",
+        "query": "What was the serum potassium level from the scanned dot-matrix legacy lab report dated 2018-02-11?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-05"],
+        "expected_answer_keywords": ["5.8", "potassium", "high"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-05",
+                "doc_title": "Scanned Legacy Lab Printout 2018-02-11",
+                "page_number": 1,
+                "content": "[OCR Conf: 88%] CLINICAL CHEM: NA: 139 | K: 5.8 [HIGH] | CL: 104 | CO2: 24 | GLU: 112 | BUN: 22 | CR: 1.1. Sample non-hemolyzed.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-06",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Paper Prescription Dispense History",
+        "query": "What quantity and number of refills were authorized on the scanned handwritten paper prescription for Atorvastatin?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-06"],
+        "expected_answer_keywords": ["#90", "3 refills", "atorvastatin 40mg"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-06",
+                "doc_title": "Scanned Prescription Pad Copy 2023-07-15",
+                "page_number": 1,
+                "content": "[OCR Conf: 85%] Rx: Atorvastatin 40mg tabs. Sig: 1 tab PO qHS. Qty: #90 (ninety). Refills: 3 (three). DEA: BR1234567. NPI: 1982736450.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-07",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Dialysis Flowsheet Ultrafiltration Target",
+        "query": "What total ultrafiltration volume was achieved on the scanned hemodialysis treatment sheet?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-07"],
+        "expected_answer_keywords": ["2.5 liters", "ultrafiltration", "hemodialysis"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-07",
+                "doc_title": "Scanned Outpatient Dialysis Run Sheet 2025-12-03",
+                "page_number": 1,
+                "content": "[OCR Conf: 93%] HEMODIALYSIS LOG: Pre-weight 78.2 kg, Post-weight 75.7 kg. Goal UF: 2.5 L. Total UF Removed: 2.5 L. Access: Left forearm AVF. Heparin: 1000 units bolus. No cramping or hypotension noted.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-08",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Cardiac Stress ECG Summary Report",
+        "query": "What peak METs and percentage of target heart rate were attained on the scanned treadmill stress test?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-08"],
+        "expected_answer_keywords": ["8.5 mets", "88%", "exercise stress test"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-08",
+                "doc_title": "Scanned Bruce Protocol Exercise Report 2024-05-19",
+                "page_number": 1,
+                "content": "[OCR Conf: 90%] EXERCISE TREADMILL REPORT: Bruce protocol Stage 3 (7:14 min). Peak HR: 148 bpm (88% predicted max). Workload: 8.5 METs. No diagnostic ST-segment depressions (> 1mm). Hemodynamically stable.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-09",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Physical Therapy Initial Evaluation Range of Motion",
+        "query": "What right shoulder active abduction was measured in the scanned physical therapy intake form?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-09"],
+        "expected_answer_keywords": ["95 degrees", "right shoulder", "abduction"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-09",
+                "doc_title": "Scanned Outpatient Physical Therapy Intake 2025-01-20",
+                "page_number": 1,
+                "content": "[OCR Conf: 86%] GONIOMETRIC ASSESSMENT: Right shoulder active flexion: 110 deg. Right shoulder active abduction: 95 degrees (limited by pain at subacromial arch). Passive abduction: 130 deg.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-OCR-10",
+        "category": BenchmarkCategory.SCANNED_OCR_EXTRACTION,
+        "title": "Scanned Pathology Consultation Slide Addendum",
+        "query": "What HER2 immunohistochemical score was determined in the scanned paper addendum?",
+        "expected_golden_chunk_ids": ["CHUNK-OCR-10"],
+        "expected_answer_keywords": ["her2 2+", "equivocal", "fish"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-OCR-10",
+                "doc_title": "Scanned Pathology Addendum Sheet 2023-10-14",
+                "page_number": 1,
+                "content": "[OCR Conf: 89%] IMMUNOHISTOCHEMISTRY ADDENDUM: HER2/neu: Score 2+ (Equivocal - circumferential membrane staining that is incomplete and/or weak/moderate in > 10% of tumor cells). Reflex Dual-probe ISH / FISH ordered.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 10: Laboratory Interpretation (10 items: 81-90)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-LAB-01",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Serum Anion Gap and Delta Gap Interpretation",
+        "query": "What is the serum anion gap calculated from the morning chemistry panel and does it indicate an elevated anion gap acidosis?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-01"],
+        "expected_answer_keywords": ["20", "anion gap", "elevated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-01",
+                "doc_title": "Metabolic Chemistry Panel 2026-01-08",
+                "page_number": 1,
+                "content": "Serum Electrolytes: Sodium 138 mEq/L, Chloride 102 mEq/L, Bicarbonate 16 mEq/L. Calculated Anion Gap = Na - (Cl + HCO3) = 138 - (102 + 16) = 20 mEq/L (Normal 8-12), indicating high anion gap metabolic acidosis.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-02",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Iron Deficiency Anemia vs Anemia of Chronic Disease",
+        "query": "What iron studies support a true absolute iron deficiency anemia rather than anemia of chronic inflammation?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-02"],
+        "expected_answer_keywords": ["ferritin 12", "transferrin saturation 9%", "tibc elevated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-02",
+                "doc_title": "Hematology Workup 2025-07-22",
+                "page_number": 1,
+                "content": "Iron Studies: Serum Ferritin 12 ng/mL (low), Serum Iron 28 mcg/dL, TIBC 440 mcg/dL (elevated), Transferrin Saturation 9% (critically low < 15%), diagnostic of absolute microcytic iron deficiency anemia.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-03",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "High-Sensitivity Cardiac Troponin-I Dynamic Delta",
+        "query": "What was the dynamic delta between the zero-hour and two-hour high-sensitivity troponin values?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-03"],
+        "expected_answer_keywords": ["18 ng/l", "84 ng/l", "delta > 50", "myocardial infarction"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-03",
+                "doc_title": "Emergency Department Serial Biomarkers 2026-02-01",
+                "page_number": 1,
+                "content": "Serial hs-cTnI: 0-hour: 18 ng/L; 2-hour: 84 ng/L (delta change +66 ng/L, exceeding the European Society of Cardiology significant diagnostic delta threshold of > 10 ng/L), diagnostic of Non-ST-elevation myocardial infarction.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-04",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Spontaneous Bacterial Peritonitis Ascitic Fluid Polymorphonuclear Count",
+        "query": "Did the paracentesis peritoneal fluid analysis meet diagnostic criteria for Spontaneous Bacterial Peritonitis (SBP)?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-04"],
+        "expected_answer_keywords": ["pmn > 250", "420 cells/mm3", "sbp"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-04",
+                "doc_title": "Diagnostic Paracentesis Analysis 2025-11-19",
+                "page_number": 1,
+                "content": "Ascitic Fluid Cell Count: Total WBC 580 /mm3 with 72% neutrophils. Absolute polymorphonuclear neutrophil (PMN) count = 417 /mm3, exceeding diagnostic cutoff of >= 250 /mm3 for Spontaneous Bacterial Peritonitis; cefotaxime started.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-05",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Serum Osmolality and Hyponatremia Tonicity Categorization",
+        "query": "Was the severe hyponatremia classified as hypotonic, isotonic, or hypertonic based on measured serum osmolality?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-05"],
+        "expected_answer_keywords": ["262 mosm/kg", "hypotonic hyponatremia"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-05",
+                "doc_title": "Hyponatremia Diagnostic Investigation 2025-09-02",
+                "page_number": 1,
+                "content": "Serum Sodium: 122 mEq/L. Measured Serum Osmolality: 262 mOsm/kg H2O (normal 275-295), confirming true hypotonic hyponatremia. Urine osmolality 480 mOsm/kg, urine sodium 42 mEq/L indicating SIADH etiology.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-06",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Hepatocellular vs Cholestatic Pattern of Liver Injury (R-factor)",
+        "query": "What was the calculated R-factor and injury pattern for the acute transaminitis panel?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-06"],
+        "expected_answer_keywords": ["r-ratio > 5", "hepatocellular", "alt 1240"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-06",
+                "doc_title": "Hepatology Consultation Note 2025-03-14",
+                "page_number": 2,
+                "content": "Hepatic Enzyme Panel: ALT 1240 U/L (ULN 35), Alk Phos 142 U/L (ULN 120). Calculated R-factor = (ALT/ULN)/(AP/ULN) = 35.4 / 1.18 = 30.0 (R > 5), establishing an acute severe hepatocellular pattern of liver injury.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-07",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Synovial Fluid Analysis in Acute Gouty Arthritis",
+        "query": "What crystal microscopy findings were documented from the right knee arthrocentesis?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-07"],
+        "expected_answer_keywords": ["negatively birefringent", "needle-shaped", "monosodium urate"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-07",
+                "doc_title": "Synovial Fluid Crystal Analysis 2024-12-08",
+                "page_number": 1,
+                "content": "Polarized Light Microscopy of Right Knee Aspirate: Strongly negatively birefringent, needle-shaped intracellular crystals consistent with monosodium urate (gout). Gram stain negative; WBC 34,000/mcL with 88% neutrophils.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-08",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Cerebrospinal Fluid Albuminocytologic Dissociation",
+        "query": "What CSF findings supported the clinical diagnosis of Guillain-Barre syndrome?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-08"],
+        "expected_answer_keywords": ["albuminocytologic dissociation", "elevated protein", "normal wbc"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-08",
+                "doc_title": "Lumbar Puncture Analysis 2025-05-04",
+                "page_number": 1,
+                "content": "CSF Analysis: Total Protein 145 mg/dL (markedly elevated; ref 15-45), WBC 2 /mcL (normal 0-5), RBC 0 /mcL, Glucose 62 mg/dL. The classic albuminocytologic dissociation strongly supports acute inflammatory demyelinating polyneuropathy (GBS).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-09",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Light's Criteria for Exudative Pleural Effusion",
+        "query": "How did the pleural fluid analysis meet Light's criteria for an exudate?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-09"],
+        "expected_answer_keywords": ["light's criteria", "exudative", "pleural protein / serum protein > 0.5"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-09",
+                "doc_title": "Thoracentesis Laboratory Analysis 2025-08-30",
+                "page_number": 1,
+                "content": "Thoracentesis: Pleural Protein 4.2 g/dL (Serum Protein 6.8 g/dL; ratio 0.62 > 0.5); Pleural LDH 310 U/L (Serum LDH 420 U/L; ratio 0.74 > 0.6). Meeting 2 of 3 Light's criteria, confirming an exudative effusion.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-LAB-10",
+        "category": BenchmarkCategory.LABORATORY_INTERPRETATION,
+        "title": "Urinary Albumin-to-Creatinine Ratio (UACR) Progression",
+        "query": "What was the urine albumin-to-creatinine ratio (UACR) and CKD KDIGO risk staging?",
+        "expected_golden_chunk_ids": ["CHUNK-LAB-10"],
+        "expected_answer_keywords": ["340 mg/g", "uacr", "severely increased albuminuria", "a3"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-LAB-10",
+                "doc_title": "Nephrology Renal Panel 2026-01-20",
+                "page_number": 1,
+                "content": "Spot Urine Albumin/Creatinine: Albumin 34 mg/dL, Creatinine 100 mg/dL. Calculated UACR = 340 mg/g (A3 stage: severely increased albuminuria / macroalbuminuria > 300 mg/g). Initiated SGLT2 inhibitor dapagliflozin 10 mg daily.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 11: Pediatric and Geriatric Context (10 items: 91-100)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-PEDI-GERI-01",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Beers Criteria Anticholinergic Medication Warning in Octogenarian",
+        "query": "Why was diphenhydramine flagged as potentially inappropriate under the Beers Criteria for this 84-year-old patient?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-01"],
+        "expected_answer_keywords": ["beers criteria", "delirium", "anticholinergic", "falls"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-01",
+                "doc_title": "Geriatric Pharmacotherapy Review 2025-10-12",
+                "page_number": 1,
+                "content": "Diphenhydramine 50 mg nightly is flagged per AGS Beers Criteria: Highly anticholinergic first-generation antihistamine strongly associated with acute confusion, delirium, urinary retention, and catastrophic falls in elderly patients >= 65 years.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-02",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Fried Frailty Phenotype Score Calculation",
+        "query": "What was the patient's Fried Frailty Phenotype score and classification?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-02"],
+        "expected_answer_keywords": ["frail", "score 4 of 5", "fried phenotype"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-02",
+                "doc_title": "Comprehensive Geriatric Assessment 2025-06-18",
+                "page_number": 3,
+                "content": "Fried Frailty Assessment: 1) Unintentional weight loss (12 lbs) [YES]; 2) Self-reported exhaustion [YES]; 3) Low grip strength (14 kg) [YES]; 4) Slow walking speed (0.65 m/s) [YES]; 5) Low physical activity [NO]. Score 4/5: Classified as severely Frail.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-03",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Pediatric Febrile Seizure Criteria and Management",
+        "query": "Was the 2-year-old patient's seizure classified as simple or complex febrile seizure?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-03"],
+        "expected_answer_keywords": ["simple febrile seizure", "generalized", "< 15 minutes"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-03",
+                "doc_title": "Pediatric Emergency Physician Note 2025-02-09",
+                "page_number": 1,
+                "content": "A 22-month-old presents following a single generalized tonic-clonic convulsion lasting 3 minutes associated with a 39.4C fever. Classified as a Simple Febrile Seizure (generalized, duration < 15 min, single episode within 24 hr). Reassuring examination.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-04",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Neonatal Hyperbilirubinemia Bhutani Nomogram Risk",
+        "query": "What risk zone did the 48-hour total serum bilirubin fall into on the Bhutani nomogram?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-04"],
+        "expected_answer_keywords": ["high-risk zone", "14.2 mg/dl", "phototherapy"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-04",
+                "doc_title": "Neonatology Nursery Summary 2025-08-25",
+                "page_number": 2,
+                "content": "At 48 hours of life, term infant serum total bilirubin is 14.2 mg/dL. Plotted above the 95th percentile on the Bhutani Nomogram, placing the infant in the High-Risk Zone. Intensive double phototherapy initiated immediately.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-05",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Confusion Assessment Method (CAM) Delirium Screening",
+        "query": "Did the post-operative delirium screening using the Confusion Assessment Method (CAM) yield a positive result?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-05"],
+        "expected_answer_keywords": ["cam positive", "acute onset", "inattention", "delirium"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-05",
+                "doc_title": "Inpatient Geriatric Delirium Evaluation 2025-11-01",
+                "page_number": 1,
+                "content": "CAM Delirium Assessment: 1) Acute change in mental status with fluctuating course: PRESENT; 2) Inattention (digit span test): PRESENT; 3) Disorganized thinking: PRESENT. Meets criteria 1 and 2 plus 3; CAM POSITIVE for hyperactive delirium.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-06",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Pediatric Dehydration Severity Classification",
+        "query": "What degree of dehydration was diagnosed in the 14-month-old presenting with acute gastroenteritis?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-06"],
+        "expected_answer_keywords": ["moderate dehydration", "capillary refill 3 seconds", "oral rehydration"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-06",
+                "doc_title": "Pediatric Urgent Care Note 2025-04-14",
+                "page_number": 1,
+                "content": "Clinical Dehydration Score: Sunken fontanelle, dry oral mucosa, delayed capillary refill 3 seconds, tachycardia 144 bpm, estimated 6-8% volume deficit. Diagnosed with Moderate Dehydration; initiated oral rehydration solution (Pedialyte 50 mL/kg over 4 hours).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-07",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Cockcroft-Gault CrCl Overestimation in Sarcopenic Elderly",
+        "query": "How did sarcopenia affect the calculated Cockcroft-Gault creatinine clearance in this 88-year-old female?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-07"],
+        "expected_answer_keywords": ["overestimated", "sarcopenia", "low muscle mass"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-07",
+                "doc_title": "Clinical Pharmacy Geriatric Note 2025-12-14",
+                "page_number": 1,
+                "content": "Serum creatinine 0.5 mg/dL produces calculated CrCl 54 mL/min via Cockcroft-Gault. However, severe sarcopenia and muscle wasting falsely suppress serum creatinine, severely overestimating true glomerular filtration. Cystatin C ordered.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-08",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Pediatric Croup Severity Assessment (Westley Croup Score)",
+        "query": "What was the Westley Croup Score and recommended initial emergency therapy?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-08"],
+        "expected_answer_keywords": ["score 6", "moderate croup", "dexamethasone", "racemic epinephrine"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-08",
+                "doc_title": "Pediatric Emergency Airway Note 2025-01-11",
+                "page_number": 1,
+                "content": "Westley Croup Score: Stridor at rest (2), moderate intercostal retractions (2), air entry normal (0), cyanosis none (0), level of consciousness normal (0); Total = 4. Administered oral Dexamethasone 0.6 mg/kg and nebulized racemic epinephrine.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-09",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "STOPP/START Criteria Polypharmacy Deprescribing",
+        "query": "Which medication was recommended for deprescribing under STOPP criteria due to prolonged use without clear indication?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-09"],
+        "expected_answer_keywords": ["pantoprazole", "ppi", "stopp criteria", "c. difficile"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-09",
+                "doc_title": "Geriatric Polypharmacy Clinic Note 2025-07-09",
+                "page_number": 2,
+                "content": "STOPP Criteria Review: Pantoprazole 40 mg daily prescribed continuously for 4 years without documented peptic ulcer disease or severe reflux. Deprescribing recommended due to elevated risk of C. difficile colitis, bone fractures, and hypomagnesemia.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PEDI-GERI-10",
+        "category": BenchmarkCategory.PEDIATRIC_GERIATRIC_CONTEXT,
+        "title": "Pediatric Kawasaki Disease Diagnostic Criteria",
+        "query": "Did the 3-year-old patient satisfy the American Heart Association criteria for Classic Kawasaki Disease?",
+        "expected_golden_chunk_ids": ["CHUNK-PEDI-GERI-10"],
+        "expected_answer_keywords": ["fever >= 5 days", "strawberry tongue", "kawasaki disease", "ivig"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PEDI-GERI-10",
+                "doc_title": "Pediatric Rheumatology Assessment 2025-03-29",
+                "page_number": 2,
+                "content": "Diagnostic criteria for Classic Kawasaki Disease satisfied: Fever for 6 consecutive days PLUS: 1) Bilateral nonexudative conjunctivitis; 2) Strawberry tongue and fissured lips; 3) Polymorphous macular rash; 4) Unilateral cervical lymph node 1.8 cm. Admitted for IVIG 2 g/kg and high-dose aspirin.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 12: Diagnostic Criteria Scoring (10 items: 101-110)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-DIAG-01",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Wells Score for Pulmonary Embolism Probability",
+        "query": "What was the calculated Wells score and clinical probability category for pulmonary embolism?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-01"],
+        "expected_answer_keywords": ["wells score 6.0", "high probability", "ct pulmonary angiogram"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-01",
+                "doc_title": "Emergency Medicine Triage Note 2026-01-18",
+                "page_number": 1,
+                "content": "Wells PE Score: Clinical signs of DVT (+3.0), PE most likely diagnosis (+3.0), HR > 100 (+1.5): Total Wells Score = 7.5 (High probability / PE likely). D-dimer bypassed; stat CT Pulmonary Angiography (CTPA) ordered immediately.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-02",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Modified Duke Criteria for Infective Endocarditis",
+        "query": "How did the patient fulfill the Modified Duke Criteria for definitive infective endocarditis?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-02"],
+        "expected_answer_keywords": ["2 major criteria", "blood cultures", "vegetation", "duke criteria"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-02",
+                "doc_title": "Infectious Disease Consultation 2025-09-14",
+                "page_number": 2,
+                "content": "Modified Duke Criteria: 1) Major: 3 of 3 independent blood cultures positive for Streptococcus gallolyticus; 2) Major: Transesophageal echocardiogram demonstrating oscillating 9mm mitral valve vegetation with new severe regurgitation. Meets 2 Major criteria: DEFINITE INFECTIVE ENDOCARDITIS.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-03",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "CURB-65 Pneumonia Severity Score",
+        "query": "What was the CURB-65 score and recommended disposition for community-acquired pneumonia?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-03"],
+        "expected_answer_keywords": ["curb-65 score 3", "inpatient", "icu", "mortality"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-03",
+                "doc_title": "Pulmonary Admission Note 2025-11-28",
+                "page_number": 1,
+                "content": "CURB-65 Score Calculation: Confusion: Yes (+1), Urea > 19 mg/dL (BUN 28): Yes (+1), Respiratory rate >= 30 (RR 34): Yes (+1), BP < 90/60 (118/74): No (0), Age >= 65 (71 yo): Yes (+1). Total = 4. High risk of mortality; admitted to Inpatient Monitored Unit.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-04",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Centor Criteria for Streptococcal Pharyngitis",
+        "query": "What was the modified Centor score for pharyngitis and did it warrant rapid antigen testing?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-04"],
+        "expected_answer_keywords": ["centor score 4", "rapid strep", "tonsillar exudate"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-04",
+                "doc_title": "Ambulatory Primary Care Note 2025-04-03",
+                "page_number": 1,
+                "content": "Modified Centor Criteria: Absence of cough (+1), Tonsillar exudates (+1), Tender anterior cervical adenopathy (+1), History of fever 38.6C (+1), Age 24 (0). Total = 4. High probability of Group A Strep; rapid antigen test performed and positive.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-05",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "ACR/EULAR Classification Criteria for Rheumatoid Arthritis",
+        "query": "What total point score was calculated under the 2010 ACR/EULAR Rheumatoid Arthritis criteria?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-05"],
+        "expected_answer_keywords": ["score 8", "definite rheumatoid arthritis", "acr/eular"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-05",
+                "doc_title": "Rheumatology Evaluation Note 2024-10-17",
+                "page_number": 2,
+                "content": "2010 ACR/EULAR RA Classification: 1) Joint involvement: 6 small joints (MCP/PIP bilateral) = 3 pts; 2) Serology: High-positive anti-CCP > 3x ULN = 3 pts; 3) Acute phase: Elevated CRP 24 mg/L = 1 pt; 4) Duration: 12 weeks >= 6 wks = 1 pt. Total = 8/10 (>= 6 required); Definite RA confirmed.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-06",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Maddrey Discriminant Function in Alcoholic Hepatitis",
+        "query": "What was the calculated Maddrey's Discriminant Function (DF) score and indication for corticosteroid therapy?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-06"],
+        "expected_answer_keywords": ["maddrey df 42", "severe alcoholic hepatitis", "prednisolone"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-06",
+                "doc_title": "Gastroenterology Inpatient Consultation 2025-08-01",
+                "page_number": 1,
+                "content": "Maddrey Discriminant Function: 4.6 x (PT patient 24s - PT control 13s) + Total Bilirubin 18 mg/dL = 4.6(11) + 18 = 68.6 (DF > 32 indicates severe disease with high 30-day mortality). Initiated Prednisolone 40 mg daily following exclusion of active infection.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-07",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Ranson's Criteria on Admission for Acute Pancreatitis",
+        "query": "How many Ranson criteria were present at admission for acute pancreatitis?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-07"],
+        "expected_answer_keywords": ["ranson score 3", "admission criteria", "acute pancreatitis"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-07",
+                "doc_title": "Surgical ICU Admission Note 2025-03-05",
+                "page_number": 1,
+                "content": "Ranson Criteria at Admission: 1) Age 62 (> 55) [YES]; 2) WBC 18,400 (> 16,000) [YES]; 3) Blood glucose 240 mg/dL (> 200) [YES]; 4) Serum AST 180 U/L (< 250) [NO]; 5) Serum LDH 290 U/L (< 350) [NO]. 3 criteria present, indicating severe acute pancreatitis.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-08",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Glasgow-Blatchford Bleeding Score (GBS)",
+        "query": "What was the Glasgow-Blatchford Bleeding Score for upper GI hemorrhage triage?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-08"],
+        "expected_answer_keywords": ["gbs score 11", "high risk", "urgent endoscopy"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-08",
+                "doc_title": "Gastrointestinal Bleed Triage 2025-06-21",
+                "page_number": 1,
+                "content": "Glasgow-Blatchford Bleeding Score: BUN 32 mg/dL (3 pts), Hemoglobin 8.8 g/dL (6 pts), Systolic BP 96 mmHg (1 pt), Melena present (1 pt): Total GBS = 11 (Score > 1 high risk requiring inpatient intervention). Stat IV pantoprazole bolus and urgent upper endoscopy scheduled.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-09",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "Alvarado Score for Acute Appendicitis",
+        "query": "What was the Alvarado score calculated for suspected acute appendicitis?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-09"],
+        "expected_answer_keywords": ["alvarado score 8", "appendicitis likely", "surgical consult"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-09",
+                "doc_title": "Emergency Surgical Intake Note 2024-12-19",
+                "page_number": 1,
+                "content": "Alvarado Score: Migratory pain to RLQ (1), Anorexia (1), Nausea (1), RLQ tenderness (2), Rebound tenderness (1), Fever 38.2C (1), Leukocytosis 14,200 (2): Total Score = 9/10 (Score >= 7 appendicitis highly probable). General surgery consult obtained.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-DIAG-10",
+        "category": BenchmarkCategory.DIAGNOSTIC_CRITERIA,
+        "title": "qSOFA Sepsis Screening Score",
+        "query": "What was the quick Sepsis-related Organ Failure Assessment (qSOFA) score on triage?",
+        "expected_golden_chunk_ids": ["CHUNK-DIAG-10"],
+        "expected_answer_keywords": ["qsofa score 2", "sepsis alert", "respiratory rate >= 22"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-DIAG-010",
+                "doc_title": "Rapid Response Clinical Assessment 2025-02-24",
+                "page_number": 1,
+                "content": "qSOFA Screening: Respiratory rate 26 breaths/min (>= 22) [1 pt]; Altered mentation with GCS 13 (< 15) [1 pt]; Systolic BP 108 mmHg (<= 100) [0 pts]. Total qSOFA = 2. Positive sepsis screen triggered; lactate drawn and blood cultures sent x2.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 13: Emergency Triage and Critical Care (10 items: 111-120)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-TRIAGE-01",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Emergency Severity Index (ESI) Level 1 Resuscitation Criteria",
+        "query": "Why was the incoming trauma patient assigned an Emergency Severity Index (ESI) Level 1 triage classification?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-01"],
+        "expected_answer_keywords": ["esi level 1", "immediate life-saving intervention", "intubated"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-01",
+                "doc_title": "Trauma Bay Resuscitation Record 2026-01-22",
+                "page_number": 1,
+                "content": "TRIAGE ASSESSMENT: ESI Level 1 (Requires immediate life-saving intervention). Patient unresponsive (GCS 5), agonal respirations, flail chest deformity. Stat RSI performed with etomidate and rocuronium; emergent bilateral thoracostomies placed.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-02",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Anaphylaxis Emergency Epinephrine Administration",
+        "query": "What was the route, dose, and concentration of epinephrine administered for acute anaphylactic shock?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-02"],
+        "expected_answer_keywords": ["0.3 mg", "intramuscular", "anterolateral thigh", "epinephrine 1:1000"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-02",
+                "doc_title": "Emergency Department Code Record 2025-10-30",
+                "page_number": 1,
+                "content": "Immediate Anaphylaxis Protocol: Epinephrine 0.3 mg IM (1 mg/mL / 1:1000 concentration) injected into mid-anterolateral thigh. Repeated in 5 minutes for persistent laryngeal edema and refractory hypotension 82/46.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-03",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Acute Tension Pneumothorax Immediate Needle Decompression",
+        "query": "What anatomical landmark was utilized for emergent needle decompression of the left tension pneumothorax?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-03"],
+        "expected_answer_keywords": ["2nd intercostal space", "mid-clavicular line", "needle decompression"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-03",
+                "doc_title": "Trauma Emergency Procedure Note 2025-07-04",
+                "page_number": 1,
+                "content": "Patient developed acute tracheal deviation to right, absent left breath sounds, severe hypoxia 78%, and shock. Immediate needle decompression performed with 14-gauge angiocatheter at 2nd intercostal space, mid-clavicular line over superior rib margin with immediate rush of air.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-04",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "STEMI Door-to-Balloon PCI Target Time",
+        "query": "What was the door-to-balloon time achieved for the acute anterior STEMI presentation?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-04"],
+        "expected_answer_keywords": ["48 minutes", "door-to-balloon", "pci", "lad"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-04",
+                "doc_title": "Cardiac Catheterization STEMI Log 2025-12-01",
+                "page_number": 1,
+                "content": "STEMI Quality Metrics: ED Arrival 02:14, ECG confirmed anterolateral STEMI 02:20, Cath lab activation 02:22, First intracoronary balloon inflation 03:02. Total Door-to-Balloon Time = 48 minutes (well under ACC/AHA national benchmark < 90 min). 100% LAD occlusion stented.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-05",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Severe Acute Hyperkalemia Membrane Stabilization with Calcium",
+        "query": "What emergent drug was administered first to stabilize cardiac membranes in the setting of potassium 7.2 mEq/L with sine-wave ECG?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-05"],
+        "expected_answer_keywords": ["calcium gluconate", "membrane stabilization", "sine wave"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-05",
+                "doc_title": "Medical ICU Resuscitation Note 2025-05-18",
+                "page_number": 1,
+                "content": "Stat ECG showed peaked T-waves merging into QRS widening (sine-wave appearance) with potassium 7.2 mEq/L. Immediately administered Calcium Gluconate 10% 10 mL IV over 3 minutes to stabilize cardiac myocyte membranes, followed by regular insulin 10 units IV with 50 mL D50W.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-06",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Acute Stroke Thrombolysis Alteplase Exclusion Criteria",
+        "query": "What was the absolute contraindication that precluded IV thrombolysis (Alteplase) for acute ischemic stroke?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-06"],
+        "expected_answer_keywords": ["major surgery within 14 days", "contraindication", "thrombolysis"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-06",
+                "doc_title": "Comprehensive Stroke Team Note 2025-08-16",
+                "page_number": 1,
+                "content": "Neurologic evaluation confirms right middle cerebral artery syndrome (NIHSS 16) within 2.5 hours of symptom onset. However, IV Alteplase is contraindicated due to major open abdominal surgery (partial colectomy) 8 days prior. Patient referred for emergency endovascular mechanical thrombectomy.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-07",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Septic Shock 1-Hour Bundle Protocol Execution",
+        "query": "What crystalloid fluid resuscitation volume was administered under the Surviving Sepsis Campaign 1-hour bundle?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-07"],
+        "expected_answer_keywords": ["30 ml/kg", "lactated ringer", "septic shock bundle"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-07",
+                "doc_title": "Sepsis Quality Protocol Log 2025-03-12",
+                "page_number": 1,
+                "content": "Sepsis-3 Shock Protocol: Blood cultures obtained x2, serum lactate 4.4 mmol/L, initiated IV Vancomycin and Cefepime. Administered rapid IV Lactated Ringer infusion at 30 mL/kg (2400 mL total) within 60 minutes for MAP < 65 and hyperlactatemia.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-08",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Status Epilepticus First-Line Benzodiazepine Protocol",
+        "query": "What first-line benzodiazepine dose was administered for ongoing generalized convulsive status epilepticus?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-08"],
+        "expected_answer_keywords": ["lorazepam 4 mg iv", "status epilepticus", "seizure"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-08",
+                "doc_title": "Emergency Neurology Critical Care Flowsheet 2024-11-25",
+                "page_number": 1,
+                "content": "Status Epilepticus Protocol: Continuous tonic-clonic seizure exceeding 6 minutes. Administered Lorazepam 4 mg IV push over 2 minutes. Seizure ceased at 8 minutes post-presentation; IV Levetiracetam 60 mg/kg loading dose initiated.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-09",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Severe Traumatic Brain Injury Target CPP and ICP",
+        "query": "What target cerebral perfusion pressure (CPP) and intracranial pressure (ICP) limits were established in the neuro-trauma ICU?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-09"],
+        "expected_answer_keywords": ["cpp 60-70 mmhg", "icp < 20-22 mmhg", "traumatic brain injury"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-09",
+                "doc_title": "Neurotrauma ICU Protocol Orders 2025-06-08",
+                "page_number": 1,
+                "content": "TBI Management Goals: Maintain ICP < 20-22 mmHg using head elevation 30 deg, sedation, and hypertonic saline 3% as needed. Target Cerebral Perfusion Pressure (CPP = MAP - ICP) between 60-70 mmHg utilizing norepinephrine infusion.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-TRIAGE-10",
+        "category": BenchmarkCategory.EMERGENCY_TRIAGE,
+        "title": "Massive Transfusion Protocol (MTP) Activation Ratio",
+        "query": "What component blood product ratio was released upon activation of the Massive Transfusion Protocol?",
+        "expected_golden_chunk_ids": ["CHUNK-TRIAGE-10"],
+        "expected_answer_keywords": ["1:1:1 ratio", "prbc", "ffp", "platelets", "massive transfusion"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-TRIAGE-010",
+                "doc_title": "Blood Bank Massive Transfusion Audit 2025-09-29",
+                "page_number": 1,
+                "content": "MTP Activated for ex-sanguinating pelvic fracture. Blood bank released Cooler Pack 1 adhering to balanced 1:1:1 resuscitation protocol: 6 units uncrossed O-negative pRBCs, 6 units Fresh Frozen Plasma (FFP), and 1 apheresis unit of Platelets.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 14: Procedure History and Surgical Pathology (10 items: 121-130)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-PROC-01",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Colonoscopy Polyp Pathology and Surveillance Interval",
+        "query": "What histologic type of polyp was excised from the ascending colon and what surveillance interval was recommended?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-01"],
+        "expected_answer_keywords": ["tubulovillous adenoma", "high-grade dysplasia", "3 years"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-01",
+                "doc_title": "Gastroenterology Endoscopy & Pathology Report 2024-04-12",
+                "page_number": 2,
+                "content": "Pathology: Ascending colon 14mm sessile polyp: Tubulovillous adenoma with focal high-grade dysplasia; margins negative. Per multi-society post-polypectomy guidelines, recommended repeat surveillance colonoscopy in 3 years.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-02",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Coronary Artery Bypass Graft (CABG) Conduit Vessels",
+        "query": "Which arterial and venous conduits were utilized in the triple CABG surgery?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-02"],
+        "expected_answer_keywords": ["lima to lad", "saphenous vein graft", "cabg"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-02",
+                "doc_title": "Cardiothoracic Operative Note 2023-11-08",
+                "page_number": 2,
+                "content": "Operative Procedure: Coronary Artery Bypass Grafting x3. Conduits: 1) Left Internal Mammary Artery (LIMA) anastomosed to Left Anterior Descending (LAD); 2) Reversed Greater Saphenous Vein Graft (SVG) to Diagonal 1; 3) SVG to Posterior Descending Artery (PDA).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-03",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Surgical Pathology Margin Status in Breast Lumpectomy",
+        "query": "What were the microscopic surgical margins reported for the invasive ductal carcinoma lumpectomy?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-03"],
+        "expected_answer_keywords": ["clear margins", "no ink on tumor", "invasive ductal carcinoma"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-03",
+                "doc_title": "Surgical Pathology Report - Breast 2024-02-17",
+                "page_number": 3,
+                "content": "Final Diagnosis: Invasive ductal carcinoma, Nottingham Grade 2, size 1.6 cm. Margins: All surgical margins are negative for invasive carcinoma and DCIS. Closest margin is anterior at 3.5 mm (satisfies 'no ink on tumor' standard).",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-04",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Total Hip Arthroplasty Implant Specifications",
+        "query": "What fixation method and bearing surface components were used in the right total hip arthroplasty?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-04"],
+        "expected_answer_keywords": ["press-fit", "uncemented", "ceramic on cross-linked polyethylene"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-04",
+                "doc_title": "Orthopedic Surgery Operative Note 2024-06-05",
+                "page_number": 1,
+                "content": "Implant Details: Uncemented press-fit Pinnacle 54mm acetabular cup with Marathon cross-linked polyethylene liner; Corail size 12 porous-coated titanium femoral stem; 36mm Delta ceramic femoral head (+1.5 neck length). Stability verified through full ROM.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-05",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Carotid Endarterectomy Shunt and Patch Details",
+        "query": "Was a temporary indwelling shunt or patch angioplasty used during the left carotid endarterectomy?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-05"],
+        "expected_answer_keywords": ["javid shunt", "bovine pericardial patch", "carotid endarterectomy"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-05",
+                "doc_title": "Vascular Surgery Operative Summary 2025-01-28",
+                "page_number": 2,
+                "content": "Carotid endarterectomy procedure: Left internal carotid artery clamped; EEG showed acute ischemic slowing, prompting placement of a Javid indwelling shunt. Atherosclerotic plaque meticulously excised. Arteriotomy closed using bovine pericardial patch angioplasty.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-06",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Transcatheter Aortic Valve Replacement (TAVR) Device",
+        "query": "What bioprosthetic valve model and size was deployed in the TAVR procedure?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-06"],
+        "expected_answer_keywords": ["26 mm", "edwards sapien 3", "tavr"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-06",
+                "doc_title": "Interventional Cardiology TAVR Log 2024-08-19",
+                "page_number": 1,
+                "content": "Procedure: Transfemoral TAVR. A 26 mm Edwards SAPIEN 3 Ultra balloon-expandable bioprosthetic valve was successfully positioned across the native calcified annulus under rapid ventricular pacing at 180 bpm. Post-deployment echo: Mean gradient 7 mmHg, trace paravalvular leak.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-07",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Renal Transplant Anastomosis and Cold Ischemia Time",
+        "query": "What cold ischemia time was recorded for the deceased donor renal transplantation?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-07"],
+        "expected_answer_keywords": ["14 hours 20 minutes", "cold ischemia time", "renal transplant"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-07",
+                "doc_title": "Transplant Surgery Operative Report 2023-09-02",
+                "page_number": 2,
+                "content": "Kidney Transplantation: Left donor kidney placed in right iliac fossa. Total Cold Ischemia Time: 14 hours 20 minutes. Warm Ischemia Time: 32 minutes. Renal artery anastomosed end-to-side to external iliac artery. Excellent immediate capillary flush and brisk urine output on clamp release.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-08",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Laparoscopic Nissen Fundoplication Wrap Measurement",
+        "query": "What circumference and length of wrap was constructed during the antireflux surgery?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-08"],
+        "expected_answer_keywords": ["360 degree", "2 cm", "nissen fundoplication"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-08",
+                "doc_title": "Minimally Invasive Surgery Note 2024-11-14",
+                "page_number": 1,
+                "content": "Procedure: Laparoscopic Nissen Fundoplication. Crural defect reapproximated with two interrupted nonabsorbable sutures. A floppy 360-degree fundic wrap measuring 2.0 cm in length was constructed over a 56-French Maloney dilator.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-09",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Stereotactic Brain Biopsy Histopathological Diagnosis",
+        "query": "What World Health Organization grade and molecular status were reported on the stereotactic brain biopsy?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-09"],
+        "expected_answer_keywords": ["glioblastoma", "who grade 4", "idh-wildtype"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-09",
+                "doc_title": "Neuropathology Surgical Report 2025-05-12",
+                "page_number": 1,
+                "content": "Surgical Pathology: Right temporal lobe needle biopsy: Diffuse astrocytic glioma with microvascular proliferation and pseudopalisading necrosis. Molecular testing: IDH1/2 wildtype, H3F3A wildtype, MGMT promoter unmethylated. Diagnosis: Glioblastoma, WHO Grade 4.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-PROC-10",
+        "category": BenchmarkCategory.PROCEDURE_HISTORY,
+        "title": "Diagnostic Hysteroscopy and Endometrial Curettage",
+        "query": "What were the histopathology findings from the endometrial curettage performed for postmenopausal bleeding?",
+        "expected_golden_chunk_ids": ["CHUNK-PROC-10"],
+        "expected_answer_keywords": ["endometrioid adenocarcinoma", "figo grade 1", "curettage"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-PROC-010",
+                "doc_title": "Gynecologic Pathology Report 2024-03-08",
+                "page_number": 1,
+                "content": "Specimen: Endometrial fractional curettage. Microscopic: Proliferating neoplastic glands forming crowded confluent cribriform architecture without intervening stroma. Diagnosis: Endometrioid Adenocarcinoma, FIGO Grade 1 (Well-differentiated). Staging MRI requested.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 15: Allergy Conflicts and Adverse Reactions (10 items: 131-140)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-ALLERGY-01",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Severe Cephalosporin Cross-Reactivity with Penicillin Anaphylaxis",
+        "query": "Why was Cefazolin prescribed with caution despite the patient's documented penicillin anaphylaxis history?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-01"],
+        "expected_answer_keywords": ["r1 side-chain", "penicillin anaphylaxis", "cefazolin"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-01",
+                "doc_title": "Allergy & Clinical Immunology Consultation 2025-10-19",
+                "page_number": 1,
+                "content": "Patient has history of IgE-mediated anaphylaxis to Amoxicillin. Cefazolin does not share identical R1 side-chains with amino-penicillins; clinical cross-reactivity is under 1%. Administered supervised test dose of Cefazolin without adverse event.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-02",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Aspirin-Exacerbated Respiratory Disease (AERD / Samter's Triad)",
+        "query": "What triad of clinical conditions constitutes Aspirin-Exacerbated Respiratory Disease (AERD)?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-02"],
+        "expected_answer_keywords": ["asthma", "nasal polyps", "aspirin sensitivity", "samter's triad"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-02",
+                "doc_title": "Pulmonary & Allergy Evaluation 2024-07-16",
+                "page_number": 1,
+                "content": "Confirmed diagnosis of AERD (Samter's Triad): 1) Severe chronic persistent asthma; 2) Recurrent nasal polyposis status-post sinus surgery; 3) Acute severe bronchospasm and facial angioedema within 45 minutes of taking Aspirin or Ibuprofen.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-03",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Heparin-Induced Thrombocytopenia (HIT) 4T Score",
+        "query": "What 4T score was calculated for suspected Heparin-Induced Thrombocytopenia and what alternative anticoagulant was initiated?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-03"],
+        "expected_answer_keywords": ["4t score 7", "argatroban", "heparin-induced thrombocytopenia"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-03",
+                "doc_title": "Hematology Inpatient Consult 2025-06-22",
+                "page_number": 2,
+                "content": "4T Score: Thrombocytopenia > 50% drop (2 pts), Timing day 6 (2 pts), New thrombosis right internal jugular (2 pts), Other causes unlikely (1 pt): Total = 7 (High probability). Heparin discontinued immediately; initiated Argatroban direct thrombin inhibitor.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-04",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Sulfa Antibiotic vs Non-Antibiotic Sulfonamide Cross-Reactivity",
+        "query": "Can a patient with severe rash from Trimethoprim-Sulfamethoxazole safely receive Hydrochlorothiazide or Furosemide?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-04"],
+        "expected_answer_keywords": ["arylamine", "sulfamethoxazole", "non-antibiotic", "low cross-reactivity"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-04",
+                "doc_title": "Pharmacy Drug Safety Review 2025-02-17",
+                "page_number": 1,
+                "content": "Sulfonamide Allergy Clarification: Sulfamethoxazole allergy is driven by an arylamine group at the N4 position. Non-antibiotic sulfonamides (Hydrochlorothiazide, Furosemide, Celecoxib) lack this arylamine; cross-reactivity is clinically negligible.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-05",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Radiocontrast Media Non-Allergic Anaphylactoid Premedication",
+        "query": "What premedication protocol was ordered prior to contrast CT for a history of moderate contrast reaction?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-05"],
+        "expected_answer_keywords": ["prednisone 50 mg", "diphenhydramine", "premedication"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-05",
+                "doc_title": "Radiology Contrast Protocol Sheet 2025-09-08",
+                "page_number": 1,
+                "content": "Contrast Allergy Premedication (Lasser Protocol): Prednisone 50 mg PO at 13 hours, 7 hours, and 1 hour prior to IV iodinated contrast injection, plus Diphenhydramine 50 mg PO 1 hour before scanning.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-06",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Stevens-Johnson Syndrome (SJS) Causative Agent",
+        "query": "Which newly initiated medication was identified as the causative agent for the Stevens-Johnson syndrome presentation?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-06"],
+        "expected_answer_keywords": ["allopurinol", "sjs", "mucosal involvement", "scorten"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-06",
+                "doc_title": "Dermatology Burn Unit Inpatient Note 2025-04-20",
+                "page_number": 1,
+                "content": "Diagnosed Stevens-Johnson Syndrome with 8% BSA epidermal detachment and oral/genital mucosal ulceration. History reveals Allopurinol 300 mg daily was initiated 3 weeks prior without HLA-B*5801 screening. Allopurinol stopped; SCORTEN calculated at 2.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-07",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Red Man Syndrome vs True Vancomycin IgE Anaphylaxis",
+        "query": "How was the patient's flushing reaction to IV vancomycin managed to distinguish non-IgE mast cell degranulation from anaphylaxis?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-07"],
+        "expected_answer_keywords": ["slow infusion rate", "red man syndrome", "histamine release"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-07",
+                "doc_title": "Infectious Disease Pharmacy Note 2024-12-03",
+                "page_number": 1,
+                "content": "Patient developed erythematous flushing of face and neck during rapid Vancomycin infusion. Diagnosed with Vancomycin Infusion Reaction (Red Man Syndrome), caused by direct histamine release rather than IgE-mediated allergy. Resolved with Diphenhydramine and slowing infusion to 2 hours.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-08",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "ACE Inhibitor-Induced Bradykinin Angioedema",
+        "query": "Why does epinephrine have limited efficacy in Lisinopril-induced oropharyngeal angioedema?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-08"],
+        "expected_answer_keywords": ["bradykinin", "non-histaminergic", "angioedema", "lisinopril"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-08",
+                "doc_title": "Emergency Medicine Airway Consult 2025-01-30",
+                "page_number": 1,
+                "content": "Lisinopril-induced angioedema is mediated by local bradykinin accumulation due to ACE inhibition, not histamine. Thus, epinephrine, antihistamines, and corticosteroids have minimal efficacy; primary focus is airway protection and discontinuation of ACE inhibitors.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-09",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Local Anesthetic Ester vs Amide Allergy",
+        "query": "Can a patient with a confirmed contact dermatitis to procaine safely receive lidocaine for dental procedures?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-09"],
+        "expected_answer_keywords": ["amide anesthetic", "lidocaine", "paba", "procaine ester"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-09",
+                "doc_title": "Oral & Maxillofacial Surgery Allergy Clearance 2024-05-14",
+                "page_number": 1,
+                "content": "Procaine is an amino ester metabolized to para-aminobenzoic acid (PABA), a potent sensitizer. Lidocaine is an amino amide (has two 'i's in name) with distinct metabolism and zero allergic cross-reactivity with esters. Preservative-free Lidocaine approved.",
+            }
+        ],
+    },
+    {
+        "id": "BENCH-ALLERGY-10",
+        "category": BenchmarkCategory.ALLERGY_CONFLICT,
+        "title": "Egg Allergy and Modern Influenza Vaccines",
+        "query": "What is the CDC recommendation regarding influenza vaccination in persons with documented severe egg allergy?",
+        "expected_golden_chunk_ids": ["CHUNK-ALLERGY-10"],
+        "expected_answer_keywords": ["any influenza vaccine", "egg allergy", "cdc acip"],
+        "mock_context": [
+            {
+                "chunk_id": "CHUNK-ALLERGY-010",
+                "doc_title": "Infection Prevention & Vaccine Policy 2025-09-12",
+                "page_number": 1,
+                "content": "CDC ACIP Guidelines: Persons with a history of severe egg allergy may receive any age-appropriate influenza vaccine (egg-based or non-egg-based) in standard clinical settings without specialized post-vaccination observation periods.",
+            }
+        ],
+    },
+
+    # -------------------------------------------------------------------------
+    # Category 16: Unanswerable Missing Evidence (10 items: 141-150)
+    # -------------------------------------------------------------------------
+    {
+        "id": "BENCH-MISSING-01",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unrecorded Pre-Admission Baseline Creatinine",
+        "query": "What was the patient's baseline serum creatinine five years ago prior to their first hospital admission?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["0.8", "0.9", "1.0", "baseline was"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-02",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unperformed Screening Mammogram Date",
+        "query": "On what date was the patient's most recent screening mammogram performed and what was the BI-RADS score?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["bi-rads", "mammogram performed on"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-03",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Undocumented Sibling Cause of Death",
+        "query": "At what age and from what specific cause did the patient's older brother pass away?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["myocardial infarction", "cancer", "died at age"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-04",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unrecorded Childhood Varicella Infection Date",
+        "query": "What month and year did the patient have wild-type chickenpox as a child?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["contracted chickenpox in", "varicella in"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-05",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Absent Genetic Testing for BRCA Mutations",
+        "query": "What were the results of the patient's comprehensive germline BRCA1 and BRCA2 genetic sequence panel?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["positive for brca1", "negative for brca2", "pathogenic variant"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-06",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unrecorded Brand Name of Overseas Vaccine",
+        "query": "What was the proprietary brand name of the yellow fever vaccine received while traveling in 2012?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["yf-vax", "stamaril"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-07",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Undocumented Occupational Asbestos Exposure Duration",
+        "query": "How many total months of occupational asbestos exposure occurred during the patient's shipyard employment in 1985?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["months of exposure", "worked for 24 months"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-08",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unmeasured Intraoperative Central Venous Pressure",
+        "query": "What was the lowest central venous pressure (CVP) recorded during the second hour of surgery?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["cvp was", "lowest cvp was 4"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-09",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Undocumented Prior Outpatient Dermatology Clinic Name",
+        "query": "What was the clinic name and physical street address of the private dermatologist seen in 2017?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["located at", "dermatology associates"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
+    {
+        "id": "BENCH-MISSING-10",
+        "category": BenchmarkCategory.UNANSWERABLE_MISSING_EVIDENCE,
+        "title": "Unperformed Coronary Calcium Agatston Score",
+        "query": "What numerical Agatston coronary artery calcium score was measured on the non-contrast chest CT?",
+        "expected_golden_chunk_ids": [],
+        "expected_answer_keywords": [],
+        "forbidden_keywords": ["agatston score of", "cac score was"],
+        "should_abstain": True,
+        "mock_context": [],
+    },
 ]
 
 

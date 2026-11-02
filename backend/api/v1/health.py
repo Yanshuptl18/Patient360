@@ -112,6 +112,32 @@ def check_llm_health() -> tuple[bool, int, str]:
         return False, 0, f"LLM provider error: {exc}"
 
 
+def check_ingestion_queue_health() -> tuple[bool, int, str]:
+    """Checks the background ingestion jobs queue and dead letter count."""
+    start = time.perf_counter()
+    try:
+        from backend.core.database import SessionLocal
+        from backend.models.job import IngestionJob
+
+        db = SessionLocal()
+        try:
+            pending_count = (
+                db.query(IngestionJob).filter(IngestionJob.status.in_(["queued", "processing"])).count()
+            )
+            dead_letter_count = (
+                db.query(IngestionJob).filter(IngestionJob.status == "dead_letter").count()
+            )
+            latency_ms = max(1, int((time.perf_counter() - start) * 1000))
+            if dead_letter_count > 0:
+                return True, latency_ms, f"Queue active ({pending_count} in flight, {dead_letter_count} dead-lettered)"
+            return True, latency_ms, f"Queue healthy ({pending_count} in flight, 0 dead-letter)"
+        finally:
+            db.close()
+    except Exception as exc:
+        latency_ms = int((time.perf_counter() - start) * 1000)
+        return False, latency_ms, f"Ingestion queue check failed: {str(exc)[:80]}"
+
+
 @router.get("", response_model=HealthResponse)
 def get_health() -> HealthResponse:
     """
@@ -120,11 +146,13 @@ def get_health() -> HealthResponse:
     - Qdrant vector database liveness
     - Local document storage filesystem writeability
     - Configured LLM provider connectivity
+    - Background ingestion job queue status
     """
     db_ok, db_lat, db_msg = check_database_connection()
     qd_ok, qd_lat, qd_msg = check_qdrant_health()
     st_ok, st_lat, st_msg = check_storage_health()
     llm_ok, llm_lat, llm_msg = check_llm_health()
+    iq_ok, iq_lat, iq_msg = check_ingestion_queue_health()
 
     components = {
         "database": ComponentHealth(
@@ -147,9 +175,14 @@ def get_health() -> HealthResponse:
             latency_ms=llm_lat,
             message=llm_msg,
         ),
+        "ingestion_queue": ComponentHealth(
+            status="UP" if iq_ok else "DOWN",
+            latency_ms=iq_lat,
+            message=iq_msg,
+        ),
     }
 
-    core_healthy = db_ok and qd_ok and st_ok
+    core_healthy = db_ok and qd_ok and st_ok and iq_ok
     if core_healthy and llm_ok:
         overall_status = "HEALTHY"
     elif db_ok or qd_ok or st_ok:
