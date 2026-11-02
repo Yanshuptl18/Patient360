@@ -37,7 +37,7 @@ class Document(Base):
     doc_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     ingestion_status: Mapped[str] = mapped_column(
         String(30), nullable=False, default="pending", index=True
-    )  # pending, processing, completed, failed
+    )  # pending, processing, indexing, completed, failed, recovery_required
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

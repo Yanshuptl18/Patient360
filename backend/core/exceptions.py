@@ -61,6 +61,30 @@ class DatabaseConnectionError(Patient360Exception):
         )
 
 
+class LLMProviderUnavailableError(Patient360Exception, RuntimeError):
+    def __init__(
+        self,
+        message: str = "Clinical AI service is temporarily unavailable due to upstream provider rate limits, quota exhaustion, or connectivity failure.",
+        details: dict[str, Any] | None = None,
+    ):
+        Patient360Exception.__init__(
+            self,
+            message=message,
+            code="LLM_PROVIDER_UNAVAILABLE",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            details=details,
+        )
+
+
+class ConfigurationError(Patient360Exception):
+    def __init__(self, message: str = "System configuration error."):
+        super().__init__(
+            message=message,
+            code="CONFIGURATION_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Registers standard JSON exception handlers on the FastAPI application."""
 

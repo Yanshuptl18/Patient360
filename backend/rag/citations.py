@@ -20,6 +20,27 @@ ABSTENTION_PHRASES = [
     "not documented in available records",
 ]
 
+NEGATION_PATTERNS = [
+    r"\bno\b",
+    r"\bnot\b",
+    r"\bnever\b",
+    r"\bdenies\b",
+    r"\bdenied\b",
+    r"\bnegative\b",
+    r"\bnegative for\b",
+    r"\bwithout\b",
+    r"\bresolved\b",
+    r"\bdiscontinued\b",
+    r"\babsent\b",
+    r"\brules out\b",
+    r"\bruled out\b",
+    r"\bfree of\b",
+    r"\bunremarkable\b",
+]
+NEGATION_REGEX = re.compile("|".join(NEGATION_PATTERNS), re.IGNORECASE)
+
+NUMERIC_TOKEN_REGEX = re.compile(r"\d+(?:\.\d+)?")
+
 
 class CitationVerifier:
     """Parses citation markers and verifies them against retrieved source chunks."""
@@ -82,14 +103,6 @@ class CitationVerifier:
                     overlap = len(claim_words.intersection(chunk_words))
                     overlap_ratio = overlap / max(1, len(claim_words))
 
-                    status: Literal["supported", "partially_supported", "unsupported"]
-                    if overlap_ratio >= 0.35:
-                        status = "supported"
-                    elif overlap_ratio >= 0.15:
-                        status = "partially_supported"
-                    else:
-                        status = "unsupported"
-
                     # Extract representative excerpt as exact quote matching claim tokens
                     raw_content = best_chunk.raw_content.strip()
                     sentences = [
@@ -111,6 +124,29 @@ class CitationVerifier:
                         if best_matching_sentence
                         else (raw_content.split("\n")[0] if raw_content else best_chunk.content)
                     )[:200].strip()
+
+                    # Check polarity / negation conflict
+                    claim_has_neg = bool(NEGATION_REGEX.search(claim_text))
+                    target_passage = best_matching_sentence if best_matching_sentence else raw_content
+                    passage_has_neg = bool(NEGATION_REGEX.search(target_passage))
+                    polarity_conflict = (claim_has_neg != passage_has_neg)
+
+                    # Check numeric and dosage consistency
+                    claim_numbers = set(NUMERIC_TOKEN_REGEX.findall(claim_text))
+                    chunk_numbers = set(NUMERIC_TOKEN_REGEX.findall(raw_content))
+                    missing_numbers = claim_numbers - chunk_numbers - {str(page_no)}
+
+                    status: Literal["supported", "partially_supported", "unsupported"]
+                    if polarity_conflict:
+                        status = "unsupported"
+                    elif missing_numbers and overlap_ratio >= 0.35:
+                        status = "partially_supported"
+                    elif overlap_ratio >= 0.35:
+                        status = "supported"
+                    elif overlap_ratio >= 0.15:
+                        status = "partially_supported"
+                    else:
+                        status = "unsupported"
                 else:
                     doc_title = f"Document {doc_id[:8]}"
                     exact_quote = "Passage not present in active retrieval candidates."

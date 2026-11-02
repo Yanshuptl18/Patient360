@@ -104,6 +104,8 @@ class RAGService:
                     generation_latency_ms=0,
                     total_latency_ms=total_latency_ms,
                     is_abstention=True,
+                    provider=getattr(self.llm_provider, "provider_name", "mock"),
+                    execution_mode="offline" if getattr(self.llm_provider, "provider_name", "mock") == "mock" else "online",
                 ),
             )
 
@@ -187,6 +189,8 @@ class RAGService:
                 generation_latency_ms=generation_latency_ms,
                 total_latency_ms=total_latency_ms,
                 is_abstention=is_abstention,
+                provider=llm_response.provider,
+                execution_mode="offline" if llm_response.provider == "mock" else "online",
             ),
         )
 

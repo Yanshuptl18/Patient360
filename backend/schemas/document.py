@@ -17,8 +17,10 @@ class DocTypeEnum(StrEnum):
 class IngestionStatusEnum(StrEnum):
     PENDING = "pending"
     PROCESSING = "processing"
+    INDEXING = "indexing"
     COMPLETED = "completed"
     FAILED = "failed"
+    RECOVERY_REQUIRED = "recovery_required"
 
 
 class DocumentResponse(BaseModel):

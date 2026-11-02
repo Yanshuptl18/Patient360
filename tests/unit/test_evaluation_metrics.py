@@ -2,10 +2,12 @@
 
 from backend.evaluation.metrics import (
     calculate_citation_precision,
+    calculate_citation_recall,
     calculate_faithfulness,
     calculate_mrr,
     calculate_percentile,
     calculate_recall_at_k,
+    calculate_unsupported_claim_rate,
     evaluate_abstention,
 )
 
@@ -85,6 +87,34 @@ def test_citation_precision() -> None:
 
     # Empty citations on abstention returns 1.0
     assert calculate_citation_precision([]) == 1.0
+
+
+def test_citation_recall() -> None:
+    citations = [
+        {"document_id": "Doc1", "verification_status": "supported"},
+        {"document_id": "Doc2", "verification_status": "supported"},
+    ]
+    # Both golden docs cited
+    assert calculate_citation_recall(citations, ["Doc1", "Doc2"]) == 1.0
+    # One of two cited
+    assert calculate_citation_recall(citations, ["Doc1", "Doc3"]) == 0.5
+    # Empty golden returns 1.0
+    assert calculate_citation_recall(citations, []) == 1.0
+    # Empty citations returns 0.0 when golden exists
+    assert calculate_citation_recall([], ["Doc1"]) == 0.0
+
+
+def test_unsupported_claim_rate() -> None:
+    # No citations -> 0.0
+    assert calculate_unsupported_claim_rate([]) == 0.0
+    # All supported -> 0.0
+    assert calculate_unsupported_claim_rate([{"verification_status": "supported"}]) == 0.0
+    # 1 of 2 unsupported -> 0.5
+    mixed = [
+        {"verification_status": "supported"},
+        {"verification_status": "unsupported"},
+    ]
+    assert calculate_unsupported_claim_rate(mixed) == 0.5
 
 
 def test_faithfulness() -> None:

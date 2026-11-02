@@ -11,6 +11,7 @@ from typing import Any
 import httpx
 
 from backend.core.config import settings
+from backend.core.exceptions import ConfigurationError, LLMProviderUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,13 @@ class LLMResponse:
     prompt_tokens: int
     completion_tokens: int
     latency_ms: int
+    provider: str = "mock"
 
 
 class BaseLLMProvider(ABC):
     """Abstract base contract for multi-provider LLM generation."""
+
+    provider_name: str = "base"
 
     @abstractmethod
     def generate_answer(
@@ -84,6 +88,8 @@ class MockLLMProvider(BaseLLMProvider):
     Deterministic clinical LLM provider for tests, CI, and offline zero-cost development.
     Synthesizes findings directly from context passages with [Doc: {id}, Page: {no}] tags.
     """
+
+    provider_name: str = "mock"
 
     def __init__(self, model_name: str = "mock-clinical-grounded-v1") -> None:
         self.model_name = model_name
@@ -172,6 +178,7 @@ class MockLLMProvider(BaseLLMProvider):
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             latency_ms=latency_ms,
+            provider="mock",
         )
 
     def generate_structured(
@@ -214,6 +221,8 @@ class GeminiLLMProvider(BaseLLMProvider):
     Free tier eligible (e.g. gemini-3.5-flash-lite).
     """
 
+    provider_name: str = "gemini"
+
     def __init__(
         self,
         api_key: str | None = None,
@@ -232,7 +241,10 @@ class GeminiLLMProvider(BaseLLMProvider):
         temperature: float = 0.0,
     ) -> LLMResponse:
         if not self.api_key:
-            raise ValueError("GEMINI_API_KEY is not configured in environment.")
+            raise LLMProviderUnavailableError(
+                "GEMINI_API_KEY is not configured in environment.",
+                details={"provider": "gemini", "reason": "unconfigured_key"},
+            )
 
         start_time = time.perf_counter()
         url = f"{self.base_url}/models/{self.model_name}:generateContent?key={self.api_key}"
@@ -260,7 +272,10 @@ class GeminiLLMProvider(BaseLLMProvider):
                     data = res.json()
                     candidates = data.get("candidates", [])
                     if not candidates:
-                        raise RuntimeError("Gemini returned zero candidates.")
+                        raise LLMProviderUnavailableError(
+                            "Gemini returned zero candidates.",
+                            details={"provider": "gemini", "reason": "empty_candidates"},
+                        )
 
                     parts = candidates[0].get("content", {}).get("parts", [])
                     content_text = "".join(p.get("text", "") for p in parts)
@@ -276,17 +291,31 @@ class GeminiLLMProvider(BaseLLMProvider):
                         prompt_tokens=prompt_tokens,
                         completion_tokens=completion_tokens,
                         latency_ms=latency_ms,
+                        provider="gemini",
                     )
 
                 if res.status_code == 429:
                     if attempt < max_retries:
                         time.sleep(1.5 * (attempt + 1))
                         continue
-                    raise RuntimeError("Gemini API rate limit exceeded (HTTP 429). Please retry shortly.")
+                    raise LLMProviderUnavailableError(
+                        "Gemini API rate limit or quota exceeded (HTTP 429). Please retry shortly.",
+                        details={"provider": "gemini", "status_code": 429},
+                    )
+
+                if res.status_code in (400, 401, 403):
+                    err_msg = res.json().get("error", {}).get("message", res.text)
+                    raise LLMProviderUnavailableError(
+                        f"Gemini API authentication failed (HTTP {res.status_code}): {err_msg}",
+                        details={"provider": "gemini", "status_code": res.status_code},
+                    )
 
                 if res.status_code == 404:
                     err_msg = res.json().get("error", {}).get("message", res.text)
-                    raise RuntimeError(f"Gemini model '{self.model_name}' unavailable (HTTP 404): {err_msg}")
+                    raise LLMProviderUnavailableError(
+                        f"Gemini model '{self.model_name}' unavailable (HTTP 404): {err_msg}",
+                        details={"provider": "gemini", "status_code": 404},
+                    )
 
                 res.raise_for_status()
 
@@ -295,13 +324,30 @@ class GeminiLLMProvider(BaseLLMProvider):
                 if attempt < max_retries:
                     time.sleep(1.0)
                     continue
-                raise RuntimeError(f"Gemini request timed out after {self.timeout_seconds}s.") from exc
+                raise LLMProviderUnavailableError(
+                    f"Gemini request timed out after {self.timeout_seconds}s.",
+                    details={"provider": "gemini", "reason": "timeout"},
+                ) from exc
+            except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+                last_error = exc
+                if attempt < max_retries:
+                    time.sleep(1.0)
+                    continue
+                raise LLMProviderUnavailableError(
+                    f"Gemini connection failed: {exc}",
+                    details={"provider": "gemini", "reason": "network_error"},
+                ) from exc
+            except LLMProviderUnavailableError:
+                raise
             except Exception as exc:
                 last_error = exc
                 if attempt >= max_retries:
                     break
 
-        raise RuntimeError(f"Gemini generation failed: {last_error}")
+        raise LLMProviderUnavailableError(
+            f"Gemini generation failed: {last_error}",
+            details={"provider": "gemini", "reason": "generation_failure"},
+        )
 
     def generate_structured(
         self,
@@ -358,6 +404,8 @@ class OllamaLLMProvider(BaseLLMProvider):
     Runs on http://localhost:11434 with CPU or GPU inference.
     """
 
+    provider_name: str = "ollama"
+
     def __init__(
         self,
         base_url: str | None = None,
@@ -404,6 +452,7 @@ class OllamaLLMProvider(BaseLLMProvider):
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
                     latency_ms=latency_ms,
+                    provider="ollama",
                 )
 
             if res.status_code == 404:
@@ -430,6 +479,7 @@ class OllamaLLMProvider(BaseLLMProvider):
             prompt_tokens=0,
             completion_tokens=0,
             latency_ms=1,
+            provider="ollama",
         )
 
     def generate_structured(
@@ -506,6 +556,10 @@ def get_llm_provider() -> BaseLLMProvider:
             if settings.GEMINI_API_KEY:
                 logger.info("Initializing GeminiLLMProvider with model '%s'", settings.GEMINI_MODEL)
                 _llm_provider = GeminiLLMProvider()
+            elif settings.ENVIRONMENT == "production" and not settings.ALLOW_MOCK_IN_PRODUCTION:
+                raise ConfigurationError(
+                    "GEMINI_API_KEY is not configured in production environment. Mock fallback is strictly prohibited."
+                )
             elif settings.LLM_FALLBACK_TO_MOCK:
                 logger.warning("GEMINI_API_KEY is not set. Falling back to MockLLMProvider.")
                 _llm_provider = MockLLMProvider()
@@ -516,8 +570,20 @@ def get_llm_provider() -> BaseLLMProvider:
             logger.info("Initializing OllamaLLMProvider at %s with model '%s'", settings.OLLAMA_BASE_URL, settings.OLLAMA_MODEL)
             _llm_provider = OllamaLLMProvider()
 
-        else:
+        elif provider_name == "mock":
+            if settings.ENVIRONMENT == "production" and not settings.ALLOW_MOCK_IN_PRODUCTION:
+                raise ConfigurationError(
+                    "MockLLMProvider is strictly prohibited when ENVIRONMENT=production."
+                )
             logger.info("Using default MockLLMProvider.")
+            _llm_provider = MockLLMProvider()
+
+        else:
+            if settings.ENVIRONMENT == "production" and not settings.ALLOW_MOCK_IN_PRODUCTION:
+                raise ConfigurationError(
+                    f"Unsupported LLM provider '{provider_name}' in production environment."
+                )
+            logger.info("Using default MockLLMProvider for unknown provider '%s'.", provider_name)
             _llm_provider = MockLLMProvider()
 
     return _llm_provider

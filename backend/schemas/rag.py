@@ -34,6 +34,8 @@ class RetrievalMetadata(BaseModel):
     generation_latency_ms: int
     total_latency_ms: int
     is_abstention: bool
+    provider: str = "mock"
+    execution_mode: str = "offline"
 
 
 class RAGQueryResponse(BaseModel):

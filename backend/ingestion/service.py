@@ -1,6 +1,7 @@
 """Document ingestion service coordinating extraction, normalization, and semantic chunking."""
 
 import logging
+import uuid
 
 from sqlalchemy.orm import Session
 
@@ -68,6 +69,10 @@ def ingest_document(
         )
 
         # 6. Idempotently clear existing chunks for this document in SQL, Vector Store, and BM25 Index
+        doc.ingestion_status = "indexing"
+        db.commit()
+        db.refresh(doc)
+
         db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
         vector_store = get_vector_store()
         vector_store.delete_document_chunks(doc.id)
@@ -75,11 +80,13 @@ def ingest_document(
             bm25_registry = get_bm25_registry()
             bm25_registry.delete_document_chunks(doc.patient_id, doc.id)
 
-        # 7. Insert new chunks in SQL
+        # 7. Insert new chunks in SQL with deterministic chunk IDs
         total_tokens = 0
         inserted_chunks: list[DocumentChunk] = []
         for gen in generated_chunks:
+            chunk_id = str(uuid.uuid5(uuid.NAMESPACE_OID, f"{doc.id}_p{gen.page_number}_c{gen.chunk_index}"))
             chunk_rec = DocumentChunk(
+                id=chunk_id,
                 document_id=doc.id,
                 chunk_index=gen.chunk_index,
                 page_number=gen.page_number,
@@ -163,6 +170,7 @@ def ingest_document(
     except Exception as err:
         logger.error(f"Failed to ingest document '{doc.title}' ({doc.id}): {err}", exc_info=True)
         # Rollback and clean up partial state to maintain relational and vector store consistency
+        cleanup_succeeded = True
         try:
             db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
             vector_store = get_vector_store()
@@ -170,9 +178,10 @@ def ingest_document(
             if doc.patient_id:
                 get_bm25_registry().delete_document_chunks(doc.patient_id, doc.id)
         except Exception as cleanup_err:
+            cleanup_succeeded = False
             logger.warning(f"Cleanup after failed ingestion for document {doc.id} encountered error: {cleanup_err}")
 
-        doc.ingestion_status = "failed"
+        doc.ingestion_status = "failed" if cleanup_succeeded else "recovery_required"
         doc.error_message = str(err)
         db.commit()
 
@@ -192,3 +201,52 @@ def ingest_document(
             code="INGESTION_FAILED",
             status_code=500,
         ) from err
+
+
+def recover_document(
+    db: Session,
+    storage: DocumentStorage,
+    document_id: str,
+    current_user: User,
+) -> IngestionResponse:
+    """
+    Recovers a failed, corrupted, or recovery-required document:
+    1. Verifies authorization for the document.
+    2. Purges any orphaned chunks from SQL, Vector Store, and BM25 index.
+    3. Resets status to 'pending'.
+    4. Re-triggers ingest_document.
+    5. Logs audit event DOCUMENT_RECOVERED.
+    """
+    doc = get_document(db, document_id=document_id, current_user=current_user)
+
+    # Purge any partial indices
+    db.query(DocumentChunk).filter(DocumentChunk.document_id == doc.id).delete()
+    vector_store = get_vector_store()
+    vector_store.delete_document_chunks(doc.id)
+    if doc.patient_id:
+        get_bm25_registry().delete_document_chunks(doc.patient_id, doc.id)
+
+    doc.ingestion_status = "pending"
+    doc.error_message = None
+    db.commit()
+    db.refresh(doc)
+
+    result = ingest_document(
+        db=db,
+        storage=storage,
+        document_id=document_id,
+        current_user=current_user,
+    )
+
+    log_audit_event(
+        db,
+        action="DOCUMENT_RECOVERED",
+        resource_type="documents",
+        user_id=current_user.id,
+        resource_id=doc.id,
+        patient_id=doc.patient_id,
+        status="SUCCESS",
+        details={"re_ingested_chunks": result.chunk_count},
+    )
+
+    return result

@@ -17,7 +17,7 @@ from backend.documents.service import (
     upload_document,
 )
 from backend.documents.storage import get_storage
-from backend.ingestion.service import ingest_document
+from backend.ingestion.service import ingest_document, recover_document
 from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
 from backend.models.user import User
@@ -159,10 +159,24 @@ def trigger_document_ingestion(
 ) -> IngestionResponse:
     """
     Triggers PyMuPDF extraction, clinical normalization, and semantic chunking.
-    Transitions status: pending -> processing -> completed.
+    Transitions status: pending -> processing -> indexing -> completed.
     """
     storage = get_storage()
     return ingest_document(db=db, storage=storage, document_id=id, current_user=current_user)
+
+
+@router.post("/{id}/recover", response_model=IngestionResponse, status_code=status.HTTP_200_OK)
+def trigger_document_recovery(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> IngestionResponse:
+    """
+    Administrative and clinician recovery endpoint for failed or incomplete document ingestion.
+    Purges orphaned chunks from SQL, Vector, and BM25 and re-executes ingestion cleanly.
+    """
+    storage = get_storage()
+    return recover_document(db=db, storage=storage, document_id=id, current_user=current_user)
 
 
 @router.get("/{id}/chunks", response_model=list[ChunkResponse])

@@ -1,5 +1,6 @@
 """SQLAlchemy Database Models Package."""
 
+from backend.models.agent import AgentWorkflowRun
 from backend.models.audit import AuditLog
 from backend.models.chunk import DocumentChunk
 from backend.models.document import Document
@@ -19,5 +20,6 @@ __all__ = [
     "ClinicalEvent",
     "ResearchStudy",
     "EvaluationRun",
+    "AgentWorkflowRun",
 ]
 

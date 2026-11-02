@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "qwen3:4b"
     OLLAMA_TIMEOUT_SECONDS: int = 60
     LLM_FALLBACK_TO_MOCK: bool = True
+    ALLOW_MOCK_IN_PRODUCTION: bool = False
+    STRICT_PRODUCTION_LLM: bool = True
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
 
@@ -76,6 +78,17 @@ class Settings(BaseSettings):
 
     # Clinical Safety & Emergency Advisory Configuration
     EMERGENCY_CONTACT_INFO: str = "emergency medical services (e.g., 911 in North America, 112 in the European Union, 999 in the UK / hospital rapid response team)"
+
+    @model_validator(mode="after")
+    def validate_production_safety(self) -> "Settings":
+        if self.ENVIRONMENT == "production":
+            if self.LLM_PROVIDER == "mock" and not self.ALLOW_MOCK_IN_PRODUCTION:
+                raise ValueError("Mock LLM provider is strictly prohibited in production mode. Set LLM_PROVIDER to gemini or ollama.")
+            if self.LLM_PROVIDER == "gemini" and not self.GEMINI_API_KEY:
+                raise ValueError("GEMINI_API_KEY must be configured when LLM_PROVIDER=gemini in production.")
+            if self.LLM_FALLBACK_TO_MOCK and not self.ALLOW_MOCK_IN_PRODUCTION:
+                self.LLM_FALLBACK_TO_MOCK = False
+        return self
 
     @property
     def is_testing(self) -> bool:

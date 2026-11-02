@@ -85,3 +85,14 @@ def researcher_headers(db: Session) -> dict[str, str]:
     assert user is not None
     token = create_access_token(subject=user.id, role=user.role)
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def patient_headers(db: Session) -> dict[str, str]:
+    """Headers for authenticated patient user (Robert Chen)."""
+    from backend.auth.service import get_user_by_email
+
+    user = get_user_by_email(db, "patient@patient360.org")
+    assert user is not None
+    token = create_access_token(subject=user.id, role=user.role)
+    return {"Authorization": f"Bearer {token}"}

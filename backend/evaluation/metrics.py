@@ -84,6 +84,43 @@ def calculate_citation_precision(
     return round(valid_count / len(citations), 4)
 
 
+def calculate_citation_recall(
+    citations: Sequence[dict[str, Any]],
+    golden_doc_ids: Sequence[str],
+) -> float:
+    """
+    Computes Citation Recall: ratio of expected golden documents cited in the answer.
+    If golden_doc_ids is empty, returns 1.0.
+    """
+    if not golden_doc_ids:
+        return 1.0
+    if not citations:
+        return 0.0
+
+    cited_docs = {
+        c.get("document_id") or c.get("doc_id")
+        for c in citations
+        if c.get("verification_status") in ("supported", "partially_supported")
+    }
+    hits = sum(1 for g in golden_doc_ids if any(g in d or d in g for d in cited_docs if d))
+    return round(hits / len(golden_doc_ids), 4)
+
+
+def calculate_unsupported_claim_rate(
+    citations: Sequence[dict[str, Any]],
+) -> float:
+    """
+    Computes Unsupported Claim Rate: ratio of citations flagged as 'unsupported' over total citations.
+    Returns 0.0 if there are no citations.
+    """
+    if not citations:
+        return 0.0
+    unsupported = sum(
+        1 for c in citations if c.get("verification_status") == "unsupported"
+    )
+    return round(unsupported / len(citations), 4)
+
+
 META_FRAMING_PHRASES = [
     "conflicting",
     "discrepancy",
